@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      // Users can read and write their own data
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Coaches can read all competitor data
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
+    }
+  }
+}

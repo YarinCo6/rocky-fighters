@@ -1083,7 +1083,86 @@
             background: var(--accent);
             color: var(--white);
         }
+        /* Coach panel */
+        .competitor-list { display: flex; flex-direction: column; gap: 14px; }
+
+        .competitor-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 20px 24px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .competitor-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+
+        .competitor-card .comp-info { display: flex; align-items: center; gap: 14px; }
+        .competitor-card .comp-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(230,57,70,0.15); display: flex;
+            align-items: center; justify-content: center;
+            color: var(--accent); font-size: 1.1rem;
+        }
+        .competitor-card .comp-name { font-weight: 700; color: var(--white); }
+        .competitor-card .comp-detail { color: var(--text-secondary); font-size: 0.82rem; margin-top: 2px; }
+        .competitor-card .comp-stats { display: flex; gap: 16px; }
+        .competitor-card .comp-stat-item { text-align: center; }
+        .competitor-card .comp-stat-item .val { font-weight: 900; color: var(--accent); }
+        .competitor-card .comp-stat-item .lbl { color: var(--text-secondary); font-size: 0.75rem; }
+
+        .coach-checkbox-group {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 18px; padding: 12px 16px;
+            background: rgba(230,57,70,0.08); border-radius: 10px;
+            border: 1px solid rgba(230,57,70,0.2);
+        }
+        .coach-checkbox-group input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer; }
+        .coach-checkbox-group label { color: var(--text-primary); font-size: 0.92rem; cursor: pointer; font-weight: 500; }
+
+        .loading-spinner {
+            display: inline-block; width: 20px; height: 20px;
+            border: 3px solid var(--border); border-top-color: var(--accent);
+            border-radius: 50%; animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .competitor-detail-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+            overflow-y: auto; padding: 20px;
+        }
+        .competitor-detail-modal.active { display: flex; }
+        .competitor-detail-content {
+            background: var(--bg-secondary); border-radius: 20px;
+            padding: 36px; width: 90%; max-width: 700px;
+            border: 1px solid var(--border); max-height: 90vh; overflow-y: auto;
+        }
     </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+        firebase.initializeApp({
+            apiKey: "AIzaSyAU2knBfIaTMBEXsQOduCcX-3KOAEfqFwo",
+            authDomain: "rocky-fighters-il.firebaseapp.com",
+            projectId: "rocky-fighters-il",
+            storageBucket: "rocky-fighters-il.firebasestorage.app",
+            messagingSenderId: "40144569501",
+            appId: "1:40144569501:web:ccb6e362e4511478bec074"
+        });
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
 </head>
 <body>
 
@@ -1341,6 +1420,7 @@
                     <button onclick="switchPanel('videos', this)"><i class="fas fa-play-circle"></i> סרטונים</button>
                     <button onclick="switchPanel('profile', this)"><i class="fas fa-user"></i> פרופיל</button>
                     <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> תחרויות</button>
+                    <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> ניהול מתחרים</button>
                     <button onclick="logout()" style="color: var(--accent);"><i class="fas fa-sign-out-alt"></i> יציאה</button>
                 </div>
             </div>
@@ -1704,6 +1784,15 @@
                 </div>
             </div>
 
+            <!-- Coach Panel -->
+            <div class="dash-panel" id="panel-coach">
+                <h3 style="margin-bottom: 20px; color: var(--white);"><i class="fas fa-users-cog" style="color: var(--accent);"></i> ניהול מתחרים</h3>
+                <p style="color:var(--text-secondary); margin-bottom:20px;">לחץ על מתחרה לצפייה בפרטים המלאים שלו.</p>
+                <div class="competitor-list" id="competitorList">
+                    <p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען מתחרים...</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -1711,16 +1800,16 @@
     <div class="modal-overlay" id="loginModal">
         <div class="modal">
             <button class="close-btn" onclick="closeModal('loginModal')"><i class="fas fa-times"></i></button>
-            <h2><i class="fas fa-fist-raised" style="color: var(--accent);"></i> כניסת מתחרים</h2>
+            <h2><i class="fas fa-fist-raised" style="color: var(--accent);"></i> כניסה</h2>
             <div class="form-group">
-                <label>שם מלא</label>
-                <input type="text" id="loginName" placeholder="השם שלך">
+                <label>אימייל</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com">
             </div>
             <div class="form-group">
                 <label>סיסמה</label>
                 <input type="password" id="loginPass" placeholder="הסיסמה שלך">
             </div>
-            <button class="form-submit" onclick="login()">כניסה</button>
+            <button class="form-submit" id="loginBtn" onclick="login()">כניסה</button>
             <p style="text-align:center; margin-top:16px; color:var(--text-secondary); font-size:0.85rem;">
                 עדיין לא רשום? <a href="#" onclick="event.preventDefault(); openModal('registerModal'); closeModal('loginModal');" style="color:var(--accent);">הרשמה</a>
             </p>
@@ -1749,10 +1838,25 @@
                 <input type="text" id="regGym" placeholder="שם המכון">
             </div>
             <div class="form-group">
-                <label>סיסמה</label>
+                <label>סיסמה (לפחות 6 תווים)</label>
                 <input type="password" id="regPass" placeholder="בחר סיסמה">
             </div>
-            <button class="form-submit" onclick="register()">הרשמה</button>
+            <div class="coach-checkbox-group">
+                <input type="checkbox" id="regIsCoach">
+                <label for="regIsCoach"><i class="fas fa-user-shield"></i> אני מאמן</label>
+            </div>
+            <button class="form-submit" id="regBtn" onclick="register()">הרשמה</button>
+            <p style="text-align:center; margin-top:16px; color:var(--text-secondary); font-size:0.85rem;">
+                כבר רשום? <a href="#" onclick="event.preventDefault(); openModal('loginModal'); closeModal('registerModal');" style="color:var(--accent);">התחברות</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Competitor Detail Modal (for coaches) -->
+    <div class="competitor-detail-modal" id="competitorDetailModal">
+        <div class="competitor-detail-content">
+            <button class="close-btn" onclick="closeCompetitorDetail()" style="position:absolute;top:16px;left:16px;background:none;border:none;color:var(--text-secondary);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+            <div id="competitorDetailBody"></div>
         </div>
     </div>
 
@@ -1770,7 +1874,8 @@
     <script>
         // ===== STATE =====
         let currentUser = null;
-        const users = JSON.parse(localStorage.getItem('rocky_users') || '{}');
+        let userData = null;
+        let isCoach = false;
 
         // ===== HELPERS =====
         function sanitize(str) {
@@ -1783,14 +1888,12 @@
             document.getElementById('navLinks').classList.toggle('open');
         }
 
-        // Close mobile menu on link click
         document.querySelectorAll('.nav-links a').forEach(a => {
             a.addEventListener('click', () => {
                 document.getElementById('navLinks').classList.remove('open');
             });
         });
 
-        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
@@ -1798,8 +1901,7 @@
                 e.preventDefault();
                 const target = document.querySelector(href);
                 if (target) {
-                    const offset = 80;
-                    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                    const top = target.getBoundingClientRect().top + window.pageYOffset - 80;
                     window.scrollTo({ top, behavior: 'smooth' });
                 }
             });
@@ -1825,13 +1927,13 @@
             });
         });
 
-        // Close modal on Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal-overlay.active').forEach(m => {
                     m.classList.remove('active');
                     document.body.style.overflow = '';
                 });
+                closeCompetitorDetail();
             }
         });
 
@@ -1845,113 +1947,198 @@
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        // ===== AUTH =====
-        function login() {
-            const name = document.getElementById('loginName').value.trim();
-            const pass = document.getElementById('loginPass').value;
-
-            if (!name) { showToast('נא להזין שם'); return; }
-            if (!pass) { showToast('נא להזין סיסמה'); return; }
-
-            if (users[name] && users[name].password === pass) {
-                currentUser = users[name];
-            } else if (pass === 'rocky' || pass === '1234') {
-                currentUser = { name, weight: 70, fights: 12, wins: 8 };
+        // ===== FIREBASE AUTH =====
+        function setBtnLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (loading) {
+                btn.disabled = true;
+                btn.dataset.origText = btn.textContent;
+                btn.innerHTML = '<span class="loading-spinner"></span> מתחבר...';
             } else {
-                showToast('שם או סיסמה שגויים');
-                return;
+                btn.disabled = false;
+                btn.textContent = btn.dataset.origText || 'שלח';
             }
-
-            // Clear form fields
-            document.getElementById('loginName').value = '';
-            document.getElementById('loginPass').value = '';
-
-            closeModal('loginModal');
-            enterDashboard();
         }
 
-        // Enter on password field
+        async function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value;
+
+            if (!email) { showToast('נא להזין אימייל'); return; }
+            if (!pass) { showToast('נא להזין סיסמה'); return; }
+
+            setBtnLoading('loginBtn', true);
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPass').value = '';
+                closeModal('loginModal');
+            } catch (err) {
+                const msgs = {
+                    'auth/user-not-found': 'משתמש לא נמצא',
+                    'auth/wrong-password': 'סיסמה שגויה',
+                    'auth/invalid-email': 'אימייל לא תקין',
+                    'auth/invalid-credential': 'אימייל או סיסמה שגויים',
+                    'auth/too-many-requests': 'יותר מדי ניסיונות, נסה מאוחר יותר'
+                };
+                showToast(msgs[err.code] || 'שגיאה בהתחברות');
+            }
+            setBtnLoading('loginBtn', false);
+        }
+
         document.getElementById('loginPass').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') login();
         });
 
-        function register() {
+        async function register() {
             const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const gym = document.getElementById('regGym').value.trim();
             const pass = document.getElementById('regPass').value;
+            const isCoachReg = document.getElementById('regIsCoach').checked;
 
             if (!name || !email || !pass) {
                 showToast('נא למלא שם, אימייל וסיסמה');
                 return;
             }
+            if (pass.length < 6) {
+                showToast('הסיסמה חייבת להכיל לפחות 6 תווים');
+                return;
+            }
 
-            users[name] = { name, email, phone, gym, password: pass, weight: 70, fights: 0, wins: 0 };
-            localStorage.setItem('rocky_users', JSON.stringify(users));
+            setBtnLoading('regBtn', true);
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                await cred.user.updateProfile({ displayName: name });
 
-            currentUser = users[name];
+                // Save user data to Firestore
+                await db.collection('users').doc(cred.user.uid).set({
+                    name,
+                    email,
+                    phone,
+                    gym,
+                    role: isCoachReg ? 'coach' : 'competitor',
+                    weight: null,
+                    height: null,
+                    category: '',
+                    experience: null,
+                    wins: 0,
+                    losses: 0,
+                    draws: 0,
+                    skills: { 'בעיטות': 50, 'אגרוף': 50, 'היאבקות': 50, 'הגנה': 50, 'סיבולת': 50, 'עבודת רגליים': 50 },
+                    documents: [],
+                    videos: [],
+                    competitions: [],
+                    weightHistory: [],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
-            // Clear form
-            document.getElementById('regName').value = '';
-            document.getElementById('regEmail').value = '';
-            document.getElementById('regPhone').value = '';
-            document.getElementById('regGym').value = '';
-            document.getElementById('regPass').value = '';
+                // Clear form
+                document.getElementById('regName').value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPhone').value = '';
+                document.getElementById('regGym').value = '';
+                document.getElementById('regPass').value = '';
+                document.getElementById('regIsCoach').checked = false;
 
-            closeModal('registerModal');
-            enterDashboard();
-            showToast('נרשמת בהצלחה! ברוך הבא ל-Rocky');
+                closeModal('registerModal');
+                showToast('נרשמת בהצלחה! ברוך הבא ל-Rocky');
+            } catch (err) {
+                const msgs = {
+                    'auth/email-already-in-use': 'האימייל כבר רשום במערכת',
+                    'auth/invalid-email': 'אימייל לא תקין',
+                    'auth/weak-password': 'הסיסמה חלשה מדי'
+                };
+                showToast(msgs[err.code] || 'שגיאה בהרשמה');
+            }
+            setBtnLoading('regBtn', false);
         }
+
+        // ===== AUTH STATE LISTENER =====
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    isCoach = userData.role === 'coach';
+                    enterDashboard();
+                } else {
+                    // First-time user without Firestore doc yet
+                    userData = { name: user.displayName || 'מתחרה', role: 'competitor' };
+                    enterDashboard();
+                }
+            } else {
+                if (currentUser) {
+                    currentUser = null;
+                    userData = null;
+                    isCoach = false;
+                    exitDashboard();
+                }
+            }
+        });
 
         function enterDashboard() {
             document.getElementById('publicContent').classList.add('hidden');
             document.getElementById('dashboard').classList.add('active');
-            document.getElementById('dashName').textContent = currentUser.name;
-            document.getElementById('profileName').textContent = currentUser.name;
+
+            const name = userData.name || currentUser.displayName || 'מתחרה';
+            document.getElementById('dashName').textContent = name;
+            document.getElementById('profileName').textContent = name;
 
             // Stats
-            const fights = currentUser.fights || ((currentUser.wins||0) + (currentUser.losses||0) + (currentUser.draws||0));
+            const w = userData.wins || 0, l = userData.losses || 0, d = userData.draws || 0;
+            const fights = w + l + d;
             document.getElementById('statFights').textContent = fights;
-            document.getElementById('statWins').textContent = currentUser.wins || 0;
-            document.getElementById('statWeight').textContent = currentUser.weight || '--';
-            document.getElementById('statDocs').textContent = document.querySelectorAll('#fileList .file-item').length;
+            document.getElementById('statWins').textContent = w;
+            document.getElementById('statWeight').textContent = userData.weight || '--';
+            document.getElementById('statDocs').textContent = (userData.documents || []).length;
 
             // Profile fields
-            document.getElementById('profileWeight').textContent = currentUser.weight ? currentUser.weight + ' ק"ג' : '-- ק"ג';
-            document.getElementById('profileHeight').textContent = currentUser.height ? currentUser.height + ' ס"מ' : '-- ס"מ';
-            document.getElementById('profileCategory').textContent = currentUser.category || '--';
-            document.getElementById('profileExp').textContent = currentUser.experience != null ? currentUser.experience + ' שנים' : '--';
-            document.getElementById('profileGym').textContent = currentUser.gym || '--';
+            document.getElementById('profileWeight').textContent = userData.weight ? userData.weight + ' ק"ג' : '-- ק"ג';
+            document.getElementById('profileHeight').textContent = userData.height ? userData.height + ' ס"מ' : '-- ס"מ';
+            document.getElementById('profileCategory').textContent = userData.category || '--';
+            document.getElementById('profileExp').textContent = userData.experience != null ? userData.experience + ' שנים' : '--';
+            document.getElementById('profileGym').textContent = userData.gym || '--';
             document.getElementById('profileFights').textContent = fights;
-            const w = currentUser.wins||0, l = currentUser.losses||0, d = currentUser.draws||0;
             document.getElementById('profileRecord').textContent = `${w}-${l}-${d}`;
 
             document.querySelectorAll('.nav-public').forEach(el => el.style.display = 'none');
 
+            // Coach panel
+            if (isCoach) {
+                document.getElementById('coachPanelBtn').style.display = '';
+                loadCompetitors();
+            } else {
+                document.getElementById('coachPanelBtn').style.display = 'none';
+            }
+
             // Render skills
             renderSkills();
 
-            // Save session
-            sessionStorage.setItem('rocky_current', JSON.stringify(currentUser));
+            // Render saved documents
+            renderDocuments();
+
+            // Render saved videos
+            renderVideos();
 
             window.scrollTo(0, 0);
         }
 
-        function logout() {
-            currentUser = null;
-            sessionStorage.removeItem('rocky_current');
+        function exitDashboard() {
             document.getElementById('publicContent').classList.remove('hidden');
             document.getElementById('dashboard').classList.remove('active');
             document.querySelectorAll('.nav-public').forEach(el => el.style.display = '');
-
-            // Reset to overview panel
             document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-overview').classList.add('active');
             document.querySelectorAll('.dashboard-nav button').forEach(b => b.classList.remove('active'));
             document.querySelector('.dashboard-nav button').classList.add('active');
-
             window.scrollTo(0, 0);
+        }
+
+        async function logout() {
+            await auth.signOut();
             showToast('להתראות! התנתקת בהצלחה');
         }
 
@@ -1967,27 +2154,19 @@
             document.getElementById('panel-' + panel).classList.add('active');
             document.querySelectorAll('.dashboard-nav button').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
+            if (panel === 'coach' && isCoach) loadCompetitors();
         }
 
         // ===== DRAG & DROP =====
         function setupDragDrop(zoneId, inputId) {
             const zone = document.getElementById(zoneId);
             if (!zone) return;
-
             ['dragenter', 'dragover'].forEach(evt => {
-                zone.addEventListener(evt, (e) => {
-                    e.preventDefault();
-                    zone.classList.add('dragover');
-                });
+                zone.addEventListener(evt, (e) => { e.preventDefault(); zone.classList.add('dragover'); });
             });
-
             ['dragleave', 'drop'].forEach(evt => {
-                zone.addEventListener(evt, (e) => {
-                    e.preventDefault();
-                    zone.classList.remove('dragover');
-                });
+                zone.addEventListener(evt, (e) => { e.preventDefault(); zone.classList.remove('dragover'); });
             });
-
             zone.addEventListener('drop', (e) => {
                 const input = document.getElementById(inputId);
                 if (e.dataTransfer.files.length > 0) {
@@ -1996,16 +2175,13 @@
                 }
             });
         }
-
         setupDragDrop('uploadZoneFile', 'fileInput');
         setupDragDrop('uploadZoneVideo', 'videoInput');
 
         // ===== FILE UPLOAD =====
-        function handleFileUpload(input) {
+        async function handleFileUpload(input) {
             if (input.files.length === 0) return;
             const file = input.files[0];
-
-            // File size check (10MB)
             if (file.size > 10 * 1024 * 1024) {
                 showToast('הקובץ גדול מדי - מקסימום 10MB');
                 input.value = '';
@@ -2013,76 +2189,113 @@
             }
 
             const docType = document.getElementById('docType').value;
-            const typeNames = {
-                medical: 'אישור רופא',
-                registration: 'טופס הרשמה',
-                passport: 'פספורט',
-                insurance: 'ביטוח',
-                other: 'מסמך'
+            const typeNames = { medical: 'אישור רופא', registration: 'טופס הרשמה', passport: 'פספורט', insurance: 'ביטוח', other: 'מסמך' };
+
+            const docEntry = {
+                name: file.name,
+                type: docType || 'other',
+                typeName: typeNames[docType] || 'מסמך',
+                date: new Date().toLocaleDateString('he-IL'),
+                status: 'pending'
             };
 
-            const safeName = sanitize(file.name);
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.innerHTML = `
-                <div class="file-info">
-                    <i class="fas fa-file file-icon"></i>
-                    <div>
-                        <div class="file-name">${safeName}</div>
-                        <div class="file-date">הועלה: ${new Date().toLocaleDateString('he-IL')} | ${typeNames[docType] || 'מסמך'}</div>
-                    </div>
-                </div>
-                <span class="file-status status-pending">בבדיקה</span>
-            `;
-            document.getElementById('fileList').prepend(fileItem);
-
-            // Update doc count
-            document.getElementById('statDocs').textContent = document.querySelectorAll('#fileList .file-item').length;
+            // Save to Firestore
+            if (currentUser) {
+                await db.collection('users').doc(currentUser.uid).update({
+                    documents: firebase.firestore.FieldValue.arrayUnion(docEntry)
+                });
+                userData.documents = userData.documents || [];
+                userData.documents.unshift(docEntry);
+                renderDocuments();
+                document.getElementById('statDocs').textContent = userData.documents.length;
+            }
 
             showToast(`הקובץ "${file.name}" הועלה בהצלחה`);
             input.value = '';
         }
 
+        function renderDocuments() {
+            const list = document.getElementById('fileList');
+            const docs = userData.documents || [];
+            if (docs.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-secondary);">אין מסמכים עדיין. העלה את המסמך הראשון שלך!</p>';
+                return;
+            }
+            list.innerHTML = docs.map(d => {
+                const icon = d.name.endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
+                const statusClass = d.status === 'approved' ? 'status-approved' : 'status-pending';
+                const statusText = d.status === 'approved' ? 'אושר' : 'בבדיקה';
+                return `<div class="file-item">
+                    <div class="file-info">
+                        <i class="fas ${icon} file-icon"></i>
+                        <div>
+                            <div class="file-name">${sanitize(d.name)}</div>
+                            <div class="file-date">הועלה: ${d.date} | ${sanitize(d.typeName)}</div>
+                        </div>
+                    </div>
+                    <span class="file-status ${statusClass}">${statusText}</span>
+                </div>`;
+            }).join('');
+        }
+
         // ===== VIDEO UPLOAD =====
-        function handleVideoUpload(input) {
+        async function handleVideoUpload(input) {
             if (input.files.length === 0) return;
             const file = input.files[0];
-
             const titleEl = document.getElementById('videoTitle');
             const notesEl = document.getElementById('videoNotes');
             const title = titleEl.value.trim() || file.name;
             const notes = notesEl.value.trim();
 
-            const safeTitle = sanitize(title);
-            const safeNotes = sanitize(notes);
+            const videoEntry = {
+                title,
+                notes,
+                date: new Date().toLocaleDateString('he-IL'),
+                fileName: file.name
+            };
 
-            const videoCard = document.createElement('div');
-            videoCard.className = 'video-card';
-            videoCard.innerHTML = `
-                <div class="video-thumbnail"><i class="fas fa-play-circle"></i></div>
-                <div class="video-info">
-                    <h4>${safeTitle}</h4>
-                    <p><i class="fas fa-calendar-alt"></i> ${new Date().toLocaleDateString('he-IL')} &nbsp; <i class="fas fa-upload"></i> הועלה כעת</p>
-                    ${safeNotes ? `<p style="margin-top:6px; color:var(--text-secondary); font-size:0.8rem; font-style:italic;"><i class="fas fa-comment-alt" style="color:var(--accent);"></i> ${safeNotes}</p>` : ''}
-                </div>
-            `;
-            document.getElementById('videosGrid').prepend(videoCard);
+            if (currentUser) {
+                await db.collection('users').doc(currentUser.uid).update({
+                    videos: firebase.firestore.FieldValue.arrayUnion(videoEntry)
+                });
+                userData.videos = userData.videos || [];
+                userData.videos.unshift(videoEntry);
+                renderVideos();
+            }
+
             showToast(`הסרטון "${title}" הועלה בהצלחה`);
             input.value = '';
             titleEl.value = '';
             notesEl.value = '';
         }
 
-        // ===== UPDATE PROFILE =====
-        function saveUser() {
-            if (currentUser && users[currentUser.name]) {
-                Object.assign(users[currentUser.name], currentUser);
-                localStorage.setItem('rocky_users', JSON.stringify(users));
+        function renderVideos() {
+            const grid = document.getElementById('videosGrid');
+            const videos = userData.videos || [];
+            if (videos.length === 0) {
+                grid.innerHTML = '<p style="color:var(--text-secondary);">אין סרטונים עדיין. העלה סרטון קרב ראשון!</p>';
+                return;
             }
-            sessionStorage.setItem('rocky_current', JSON.stringify(currentUser));
+            grid.innerHTML = videos.map(v => `
+                <div class="video-card">
+                    <div class="video-thumbnail"><i class="fas fa-play-circle"></i></div>
+                    <div class="video-info">
+                        <h4>${sanitize(v.title)}</h4>
+                        <p><i class="fas fa-calendar-alt"></i> ${v.date}</p>
+                        ${v.notes ? `<p style="margin-top:6px; color:var(--text-secondary); font-size:0.8rem; font-style:italic;"><i class="fas fa-comment-alt" style="color:var(--accent);"></i> ${sanitize(v.notes)}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function updateProfile() {
+        // ===== UPDATE PROFILE =====
+        async function saveUserData(data) {
+            if (!currentUser) return;
+            await db.collection('users').doc(currentUser.uid).update(data);
+            Object.assign(userData, data);
+        }
+
+        async function updateProfile() {
             if (!currentUser) return;
 
             const weight = parseFloat(document.getElementById('weightInput').value);
@@ -2094,86 +2307,56 @@
             const losses = parseInt(document.getElementById('lossesInput').value) || 0;
             const draws = parseInt(document.getElementById('drawsInput').value) || 0;
 
+            const updates = {};
             let updated = false;
 
             if (weight && weight >= 30 && weight <= 200) {
-                currentUser.weight = weight;
-                document.getElementById('profileWeight').textContent = weight + ' ק"ג';
-                document.getElementById('statWeight').textContent = weight;
-
-                // Add to weight history
+                updates.weight = weight;
                 const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-                const chip = document.createElement('div');
-                chip.className = 'weight-chip';
-                chip.innerHTML = `<div class="month">${months[new Date().getMonth()]}</div><div class="kg">${weight}</div>`;
-                document.getElementById('weightHistory').appendChild(chip);
+                updates.weightHistory = firebase.firestore.FieldValue.arrayUnion({
+                    month: months[new Date().getMonth()],
+                    value: weight,
+                    date: new Date().toISOString()
+                });
                 updated = true;
             }
-
-            if (height && height >= 100 && height <= 230) {
-                currentUser.height = height;
-                document.getElementById('profileHeight').textContent = height + ' ס"מ';
-                updated = true;
-            }
-
-            if (category) {
-                currentUser.category = category;
-                document.getElementById('profileCategory').textContent = category;
-                updated = true;
-            }
-
-            if (exp >= 0) {
-                currentUser.experience = exp;
-                document.getElementById('profileExp').textContent = exp + ' שנים';
-                updated = true;
-            }
-
-            if (gym) {
-                currentUser.gym = gym;
-                document.getElementById('profileGym').textContent = gym;
-                updated = true;
-            }
-
+            if (height && height >= 100 && height <= 230) { updates.height = height; updated = true; }
+            if (category) { updates.category = category; updated = true; }
+            if (exp >= 0 && document.getElementById('expInput').value) { updates.experience = exp; updated = true; }
+            if (gym) { updates.gym = gym; updated = true; }
             if (document.getElementById('winsInput').value || document.getElementById('lossesInput').value || document.getElementById('drawsInput').value) {
-                currentUser.wins = wins;
-                currentUser.losses = losses;
-                currentUser.draws = draws;
-                currentUser.fights = wins + losses + draws;
-                document.getElementById('profileRecord').textContent = `${wins}-${losses}-${draws}`;
-                document.getElementById('profileFights').textContent = currentUser.fights;
-                document.getElementById('statFights').textContent = currentUser.fights;
-                document.getElementById('statWins').textContent = wins;
+                updates.wins = wins;
+                updates.losses = losses;
+                updates.draws = draws;
                 updated = true;
             }
 
-            if (!updated) {
-                showToast('נא למלא לפחות שדה אחד');
-                return;
+            if (!updated) { showToast('נא למלא לפחות שדה אחד'); return; }
+
+            await saveUserData(updates);
+
+            // Refresh local weightHistory if added
+            if (updates.weight) {
+                const freshDoc = await db.collection('users').doc(currentUser.uid).get();
+                userData.weightHistory = freshDoc.data().weightHistory || [];
             }
 
-            saveUser();
+            // Re-render dashboard
+            enterDashboard();
 
             // Clear form
-            document.getElementById('weightInput').value = '';
-            document.getElementById('heightInput').value = '';
-            document.getElementById('categoryInput').value = '';
-            document.getElementById('expInput').value = '';
-            document.getElementById('gymInput').value = '';
-            document.getElementById('winsInput').value = '';
-            document.getElementById('lossesInput').value = '';
-            document.getElementById('drawsInput').value = '';
+            ['weightInput','heightInput','categoryInput','expInput','gymInput','winsInput','lossesInput','drawsInput'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
 
             showToast('הפרופיל עודכן בהצלחה');
         }
 
         // ===== SKILLS =====
-        const defaultSkills = {
-            'בעיטות': 50, 'אגרוף': 50, 'היאבקות': 50,
-            'הגנה': 50, 'סיבולת': 50, 'עבודת רגליים': 50
-        };
+        const defaultSkills = { 'בעיטות': 50, 'אגרוף': 50, 'היאבקות': 50, 'הגנה': 50, 'סיבולת': 50, 'עבודת רגליים': 50 };
 
         function getSkills() {
-            return (currentUser && currentUser.skills) ? currentUser.skills : { ...defaultSkills };
+            return (userData && userData.skills) ? userData.skills : { ...defaultSkills };
         }
 
         function renderSkills() {
@@ -2196,21 +2379,25 @@
                     <span class="skill-val">${val}%</span>
                 </div>
             `).join('');
+
+            // Weight history
+            const histContainer = document.getElementById('weightHistory');
+            const wh = userData.weightHistory || [];
+            histContainer.innerHTML = wh.map(h => `<div class="weight-chip"><div class="month">${sanitize(h.month)}</div><div class="kg">${h.value}</div></div>`).join('');
         }
 
-        function saveSkills() {
+        async function saveSkills() {
             if (!currentUser) return;
             const sliders = document.querySelectorAll('#skillSlidersArea input[type="range"]');
             const skills = {};
             sliders.forEach(s => { skills[s.dataset.skill] = parseInt(s.value); });
-            currentUser.skills = skills;
-            saveUser();
+            await saveUserData({ skills });
             renderSkills();
             showToast('היכולות הטכניות עודכנו בהצלחה');
         }
 
         // ===== COMPETITIONS =====
-        function registerComp() {
+        async function registerComp() {
             const name = document.getElementById('compName').value.trim();
             const date = document.getElementById('compDate').value;
             const location = document.getElementById('compLocation').value.trim();
@@ -2221,19 +2408,30 @@
                 return;
             }
 
-            // Add row to upcoming table
-            const tbody = document.querySelector('#panel-competitions .comp-table tbody');
-            if (tbody) {
-                const dateParts = date.split('-');
-                const formatted = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${sanitize(name)}</strong></td>
-                    <td>${formatted}</td>
-                    <td>${sanitize(location) || '--'}</td>
-                    <td><span class="file-status status-pending">נרשם</span></td>
-                `;
-                tbody.appendChild(row);
+            const dateParts = date.split('-');
+            const formatted = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+
+            const compEntry = { name, date: formatted, location: location || '--', weight, status: 'pending' };
+
+            if (currentUser) {
+                await db.collection('users').doc(currentUser.uid).update({
+                    competitions: firebase.firestore.FieldValue.arrayUnion(compEntry)
+                });
+                userData.competitions = userData.competitions || [];
+                userData.competitions.push(compEntry);
+
+                // Add row to table
+                const tbody = document.querySelector('#panel-competitions .comp-table tbody');
+                if (tbody) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${sanitize(name)}</strong></td>
+                        <td>${formatted}</td>
+                        <td>${sanitize(compEntry.location)}</td>
+                        <td><span class="file-status status-pending">נרשם</span></td>
+                    `;
+                    tbody.appendChild(row);
+                }
             }
 
             showToast(`נרשמת בהצלחה לתחרות "${name}"`);
@@ -2243,16 +2441,107 @@
             document.getElementById('compWeight').value = '';
         }
 
+        // ===== COACH: LOAD COMPETITORS =====
+        async function loadCompetitors() {
+            if (!isCoach) return;
+            const list = document.getElementById('competitorList');
+            list.innerHTML = '<p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען מתחרים...</p>';
+
+            const snapshot = await db.collection('users').where('role', '==', 'competitor').get();
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="color:var(--text-secondary);">אין מתחרים רשומים עדיין.</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                const w = d.wins || 0, l = d.losses || 0, dr = d.draws || 0;
+                const card = document.createElement('div');
+                card.className = 'competitor-card';
+                card.onclick = () => showCompetitorDetail(doc.id);
+                card.innerHTML = `
+                    <div class="comp-info">
+                        <div class="comp-avatar"><i class="fas fa-user"></i></div>
+                        <div>
+                            <div class="comp-name">${sanitize(d.name || 'ללא שם')}</div>
+                            <div class="comp-detail">${sanitize(d.gym || '--')} | ${d.category || '--'}</div>
+                        </div>
+                    </div>
+                    <div class="comp-stats">
+                        <div class="comp-stat-item"><div class="val">${d.weight || '--'}</div><div class="lbl">משקל</div></div>
+                        <div class="comp-stat-item"><div class="val">${w + l + dr}</div><div class="lbl">קרבות</div></div>
+                        <div class="comp-stat-item"><div class="val">${w}</div><div class="lbl">ניצחונות</div></div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function showCompetitorDetail(uid) {
+            const doc = await db.collection('users').doc(uid).get();
+            if (!doc.exists) return;
+            const d = doc.data();
+            const w = d.wins || 0, l = d.losses || 0, dr = d.draws || 0;
+            const skills = d.skills || defaultSkills;
+
+            const body = document.getElementById('competitorDetailBody');
+            body.innerHTML = `
+                <h2 style="color:var(--white); margin-bottom:24px;"><i class="fas fa-user" style="color:var(--accent);"></i> ${sanitize(d.name)}</h2>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+                    <div class="stat-card"><div class="stat-value">${d.weight || '--'}</div><div class="stat-label">משקל (ק"ג)</div></div>
+                    <div class="stat-card"><div class="stat-value">${d.height || '--'}</div><div class="stat-label">גובה (ס"מ)</div></div>
+                    <div class="stat-card"><div class="stat-value">${w + l + dr}</div><div class="stat-label">קרבות</div></div>
+                    <div class="stat-card"><div class="stat-value">${w}-${l}-${dr}</div><div class="stat-label">W-L-D</div></div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
+                    <div class="profile-stat"><span class="label">קטגוריה</span><span class="value">${d.category || '--'}</span></div>
+                    <div class="profile-stat"><span class="label">ניסיון</span><span class="value">${d.experience != null ? d.experience + ' שנים' : '--'}</span></div>
+                    <div class="profile-stat"><span class="label">מכון</span><span class="value">${sanitize(d.gym || '--')}</span></div>
+                    <div class="profile-stat"><span class="label">אימייל</span><span class="value" style="font-size:0.82rem;">${sanitize(d.email || '--')}</span></div>
+                    <div class="profile-stat"><span class="label">טלפון</span><span class="value">${sanitize(d.phone || '--')}</span></div>
+                </div>
+
+                <h4 style="color:var(--white); margin-bottom:12px;">יכולות טכניות</h4>
+                ${Object.entries(skills).map(([name, val]) => `
+                    <div class="skill-bar">
+                        <div class="skill-header"><span>${name}</span><span>${val}%</span></div>
+                        <div class="bar-bg"><div class="bar-fill" style="width: ${val}%"></div></div>
+                    </div>
+                `).join('')}
+
+                <h4 style="color:var(--white); margin:20px 0 12px;">מסמכים (${(d.documents || []).length})</h4>
+                ${(d.documents || []).length ? d.documents.map(doc => `
+                    <div class="file-item" style="margin-bottom:8px;">
+                        <div class="file-info">
+                            <i class="fas fa-file file-icon"></i>
+                            <div><div class="file-name">${sanitize(doc.name)}</div><div class="file-date">${doc.date} | ${sanitize(doc.typeName)}</div></div>
+                        </div>
+                        <span class="file-status ${doc.status === 'approved' ? 'status-approved' : 'status-pending'}">${doc.status === 'approved' ? 'אושר' : 'בבדיקה'}</span>
+                    </div>
+                `).join('') : '<p style="color:var(--text-secondary);">אין מסמכים</p>'}
+            `;
+
+            document.getElementById('competitorDetailModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCompetitorDetail() {
+            document.getElementById('competitorDetailModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('competitorDetailModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('competitorDetailModal')) closeCompetitorDetail();
+        });
+
         // ===== CONTACT =====
         function sendContact() {
             const name = document.getElementById('contactName').value.trim();
             const msg = document.getElementById('contactMsg').value.trim();
-
-            if (!name || !msg) {
-                showToast('נא למלא שם והודעה');
-                return;
-            }
-
+            if (!name || !msg) { showToast('נא למלא שם והודעה'); return; }
             showToast('ההודעה נשלחה בהצלחה! נחזור אליך בקרוב');
             document.getElementById('contactName').value = '';
             document.getElementById('contactPhone').value = '';
@@ -2262,25 +2551,10 @@
         // ===== SCROLL ANIMATIONS =====
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
+                if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
             });
         }, { threshold: 0.15 });
-
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-        // ===== RESTORE SESSION =====
-        const savedUser = sessionStorage.getItem('rocky_current');
-        if (savedUser) {
-            try {
-                currentUser = JSON.parse(savedUser);
-                enterDashboard();
-            } catch(e) {
-                sessionStorage.removeItem('rocky_current');
-            }
-        }
     </script>
 </body>
 </html>
