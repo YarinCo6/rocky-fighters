@@ -164,6 +164,21 @@
             color: var(--accent);
         }
 
+        .hero-logo {
+            width: 260px;
+            max-width: 70vw;
+            height: auto;
+            margin: 0 auto 16px;
+            display: block;
+            filter: drop-shadow(0 0 60px var(--accent-glow));
+            animation: heroLogoFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes heroLogoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
         .hero .subtitle {
             font-size: 1.7rem;
             font-weight: 300;
@@ -1054,10 +1069,10 @@
                 <i class="fas fa-bars"></i>
             </button>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#" class="btn-login" onclick="event.preventDefault(); openModal('loginModal')">כניסת מתחרים</a></li>
-                <li><a href="#contact" class="nav-public">צור קשר</a></li>
-                <li><a href="#features" class="nav-public">שירותים</a></li>
                 <li><a href="#about" class="nav-public">אודות</a></li>
+                <li><a href="#features" class="nav-public">שירותים</a></li>
+                <li><a href="#contact" class="nav-public">צור קשר</a></li>
+                <li><a href="#" class="btn-login" onclick="event.preventDefault(); openModal('loginModal')">כניסת מתחרים</a></li>
             </ul>
         </div>
     </nav>
@@ -1068,7 +1083,7 @@
         <!-- Hero -->
         <section class="hero" id="hero">
             <div class="hero-content">
-                <h1>ROCKY</h1>
+                <img src="images/rocky-icon.png" alt="Rocky" class="hero-logo">
                 <p class="subtitle">קבוצת מתחרים</p>
                 <p class="description">
                     מסגרת אימונים מקצועית למתחרים בענף הלחימה.
