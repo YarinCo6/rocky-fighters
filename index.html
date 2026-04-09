@@ -297,10 +297,12 @@
         .about-card {
             background: var(--bg-card);
             border-radius: 16px;
-            padding: 40px 28px;
+            overflow: hidden;
             text-align: center;
             border: 1px solid var(--border-light);
             transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
         .about-card:hover {
@@ -309,10 +311,23 @@
             box-shadow: 0 12px 40px rgba(0,0,0,0.3);
         }
 
+        .about-card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .about-card-body {
+            padding: 28px 24px 32px;
+            flex: 1;
+        }
+
         .about-card .icon {
             font-size: 2.4rem;
             color: var(--accent);
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
 
         .about-card h3 {
@@ -913,6 +928,12 @@
             .nav-links .btn-login { margin-inline-end: 0; text-align: center; width: 100%; }
             .nav-links li { width: 100%; }
             .nav-links li a { display: block; }
+            .mobile-menu-btn {
+                position: absolute;
+                left: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
             .mobile-menu-btn { display: block; }
 
             .about-grid,
@@ -1119,19 +1140,28 @@
                 </div>
                 <div class="about-grid">
                     <div class="about-card fade-in">
-                        <div class="icon"><i class="fas fa-globe-americas"></i></div>
-                        <h3>פתוח לכולם</h3>
-                        <p>הקבוצה נגישה לכל מתחרה מכל מכון ומכל איגוד בארץ. אנחנו מאמינים שלחימה מאחדת מעבר לגבולות ארגוניים.</p>
+                        <img src="images/open.jpg" alt="פתוח לכולם" class="about-card-img">
+                        <div class="about-card-body">
+                            <div class="icon"><i class="fas fa-globe-americas"></i></div>
+                            <h3>פתוח לכולם</h3>
+                            <p>הקבוצה נגישה לכל מתחרה מכל מכון ומכל איגוד בארץ. אנחנו מאמינים שלחימה מאחדת מעבר לגבולות ארגוניים.</p>
+                        </div>
                     </div>
                     <div class="about-card fade-in">
-                        <div class="icon"><i class="fas fa-trophy"></i></div>
-                        <h3>מקצועיות</h3>
-                        <p>מסגרת אימונים מקצועית ונוחה למתחרים, עם ליווי אישי, ניתוח קרבות, ותכנון אסטרטגי לכל תחרות.</p>
+                        <img src="images/professional.jpg" alt="מקצועיות" class="about-card-img">
+                        <div class="about-card-body">
+                            <div class="icon"><i class="fas fa-trophy"></i></div>
+                            <h3>מקצועיות</h3>
+                            <p>מסגרת אימונים מקצועית ונוחה למתחרים, עם ליווי אישי, ניתוח קרבות, ותכנון אסטרטגי לכל תחרות.</p>
+                        </div>
                     </div>
                     <div class="about-card fade-in">
-                        <div class="icon"><i class="fas fa-lightbulb"></i></div>
-                        <h3>חזית הידע</h3>
-                        <p>שואפים להיות בחזית הידע בתחום הלחימה, מרכז ללימוד מעמיק, תמיכה והשראה ללוחמים ולוחמות בישראל.</p>
+                        <img src="images/knowledge.jpg" alt="חזית הידע" class="about-card-img">
+                        <div class="about-card-body">
+                            <div class="icon"><i class="fas fa-lightbulb"></i></div>
+                            <h3>חזית הידע</h3>
+                            <p>שואפים להיות בחזית הידע בתחום הלחימה, מרכז ללימוד מעמיק, תמיכה והשראה ללוחמים ולוחמות בישראל.</p>
+                        </div>
                     </div>
                 </div>
             </div>
