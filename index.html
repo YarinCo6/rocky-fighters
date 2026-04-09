@@ -50,9 +50,9 @@
         }
 
         .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
+            width: 100%;
+            margin: 0;
+            padding: 0 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -63,12 +63,15 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--accent);
             text-decoration: none;
-            letter-spacing: 3px;
             user-select: none;
+        }
+
+        .logo img {
+            height: 52px;
+            width: auto;
+            display: block;
+            object-fit: contain;
         }
 
         .nav-links {
@@ -99,7 +102,7 @@
             padding: 8px 22px;
             border-radius: 8px;
             font-weight: 700;
-            margin-right: 8px;
+            margin-inline-end: 8px;
         }
 
         .nav-links .btn-login:hover {
@@ -1045,17 +1048,16 @@
     <nav>
         <div class="nav-container">
             <a href="#" class="logo" onclick="goHome(event)">
-                <i class="fas fa-fist-raised"></i>
-                ROCKY
+                <img src="images/rocky-icon.png" alt="Rocky">
             </a>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="תפריט">
                 <i class="fas fa-bars"></i>
             </button>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#about" class="nav-public">אודות</a></li>
-                <li><a href="#features" class="nav-public">שירותים</a></li>
-                <li><a href="#contact" class="nav-public">צור קשר</a></li>
                 <li><a href="#" class="btn-login" onclick="event.preventDefault(); openModal('loginModal')">כניסת מתחרים</a></li>
+                <li><a href="#contact" class="nav-public">צור קשר</a></li>
+                <li><a href="#features" class="nav-public">שירותים</a></li>
+                <li><a href="#about" class="nav-public">אודות</a></li>
             </ul>
         </div>
     </nav>
