@@ -933,9 +933,9 @@
         /* Coaches */
         .coaches-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 30px;
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -998,6 +998,9 @@
 
         @media (max-width: 768px) {
             .coaches-grid { grid-template-columns: 1fr; max-width: 400px; }
+        }
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .coaches-grid { grid-template-columns: repeat(2, 1fr); max-width: 900px;
         }
 
         /* Skill Slider */
@@ -1119,13 +1122,25 @@
             </div>
             <div class="coaches-grid">
                 <div class="coach-card fade-in">
-                    <div class="coach-img-placeholder">
+                    <img src="images/gadi-shor.jpg" alt="גדי שור" class="coach-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="coach-img-placeholder" style="display:none;">
                         <i class="fas fa-user-tie"></i>
                     </div>
                     <div class="coach-info">
                         <h3>גדי שור</h3>
                         <div class="coach-role">מאמן ראשי - לחימה</div>
                         <p>מאמן ומנהל קבוצת Rocky. מוביל את המתחרים לתוצאות ברמה הגבוהה ביותר.</p>
+                    </div>
+                </div>
+                <div class="coach-card fade-in">
+                    <img src="images/omer-emanueli.jpg" alt="עומר עמנואלי" class="coach-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="coach-img-placeholder" style="display:none;">
+                        <i class="fas fa-user-ninja"></i>
+                    </div>
+                    <div class="coach-info">
+                        <h3>עומר עמנואלי</h3>
+                        <div class="coach-role">מאמן בכיר ומתחרה פעיל</div>
+                        <p>מייסד קבוצת Rocky בשיתוף עם גדי, המאמן הראשי. מאמן בכיר ומתחרה פעיל שמוביל בדוגמה אישית.</p>
                     </div>
                 </div>
                 <div class="coach-card fade-in">
