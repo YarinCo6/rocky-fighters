@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Rocky - קבוצת מתחרים ישראלית בענף הלחימה. מסגרת אימונים מקצועית, פתוחה לכל מתחרה מכל מכון ואיגוד בישראל.">
     <title>Rocky - קבוצת מתחרים</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
             --accent-dark: #c62b38;
             --accent-glow: rgba(230, 57, 70, 0.3);
             --text-primary: #f1f1f1;
-            --text-secondary: #a0a0b0;
+            --text-secondary: #d4d4e0;
             --white: #ffffff;
             --border: #2a2a3e;
             --border-light: rgba(255,255,255,0.08);
@@ -32,6 +32,7 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
+            min-height: 100dvh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
@@ -47,6 +48,7 @@
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             transition: background 0.3s;
+            padding-top: env(safe-area-inset-top);
         }
 
         .nav-container {
@@ -93,7 +95,7 @@
             border-radius: 8px;
             transition: all 0.25s;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
         }
 
         .nav-links a:hover {
@@ -119,7 +121,7 @@
             background: none;
             border: none;
             color: var(--text-primary);
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             cursor: pointer;
             padding: 8px;
         }
@@ -127,6 +129,8 @@
         /* ===== HERO ===== */
         .hero {
             min-height: 100vh;
+            min-height: 100dvh;
+            min-height: -webkit-fill-available;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -134,6 +138,8 @@
             position: relative;
             background: linear-gradient(160deg, var(--bg-primary) 0%, #1a0a10 50%, var(--bg-primary) 100%);
             overflow: hidden;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .hero::before {
@@ -161,7 +167,7 @@
         }
 
         .hero h1 {
-            font-size: 5rem;
+            font-size: 5.4rem;
             font-weight: 900;
             margin-bottom: 8px;
             letter-spacing: 10px;
@@ -185,14 +191,14 @@
         }
 
         .hero .subtitle {
-            font-size: 1.7rem;
+            font-size: 1.85rem;
             font-weight: 300;
             margin-bottom: 24px;
             color: var(--white);
         }
 
         .hero .description {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             color: var(--text-secondary);
             max-width: 560px;
             margin: 0 auto 40px;
@@ -210,7 +216,7 @@
         .btn {
             padding: 13px 30px;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             font-family: 'Heebo', sans-serif;
             cursor: pointer;
@@ -258,7 +264,7 @@
         }
 
         .section-header h2 {
-            font-size: 2.4rem;
+            font-size: 2.6rem;
             font-weight: 900;
             margin-bottom: 10px;
             color: var(--white);
@@ -266,7 +272,7 @@
 
         .section-header p {
             color: var(--text-secondary);
-            font-size: 1.05rem;
+            font-size: 1.15rem;
         }
 
         .section-header .line {
@@ -325,13 +331,13 @@
         }
 
         .about-card .icon {
-            font-size: 2.4rem;
+            font-size: 2.6rem;
             color: var(--accent);
             margin-bottom: 14px;
         }
 
         .about-card h3 {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             margin-bottom: 12px;
             color: var(--white);
         }
@@ -339,7 +345,7 @@
         .about-card p {
             color: var(--text-secondary);
             line-height: 1.7;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
         }
 
         /* ===== FEATURES ===== */
@@ -375,18 +381,18 @@
             align-items: center;
             justify-content: center;
             color: var(--accent);
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
         .feature-card h3 {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             margin-bottom: 6px;
             color: var(--white);
         }
 
         .feature-card p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 1rem;
             line-height: 1.6;
         }
 
@@ -425,7 +431,7 @@
         .modal h2 {
             text-align: center;
             margin-bottom: 28px;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             color: var(--white);
         }
 
@@ -436,7 +442,7 @@
             background: none;
             border: none;
             color: var(--text-secondary);
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             cursor: pointer;
             padding: 4px;
             transition: color 0.2s;
@@ -450,7 +456,7 @@
             display: block;
             margin-bottom: 6px;
             color: var(--text-secondary);
-            font-size: 0.88rem;
+            font-size: 0.98rem;
             font-weight: 500;
         }
 
@@ -464,7 +470,7 @@
             background: var(--bg-secondary);
             color: var(--text-primary);
             font-family: 'Heebo', sans-serif;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             transition: border-color 0.25s;
         }
 
@@ -477,7 +483,7 @@
 
         .form-group input::placeholder,
         .form-group textarea::placeholder {
-            color: #555;
+            color: #888;
         }
 
         .form-submit {
@@ -487,7 +493,7 @@
             color: var(--white);
             border: none;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             font-family: 'Heebo', sans-serif;
@@ -518,7 +524,7 @@
         }
 
         .welcome-text h2 {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             margin-bottom: 4px;
             color: var(--white);
             white-space: nowrap;
@@ -526,7 +532,7 @@
 
         .welcome-text p {
             color: var(--text-secondary);
-            font-size: 0.88rem;
+            font-size: 0.98rem;
         }
 
         .dashboard-nav {
@@ -543,7 +549,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             font-family: 'Heebo', sans-serif;
-            font-size: 0.88rem;
+            font-size: 0.98rem;
             font-weight: 500;
             transition: all 0.25s;
             display: flex;
@@ -592,7 +598,7 @@
 
         .stat-card .stat-label {
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             margin-top: 4px;
         }
 
@@ -615,7 +621,7 @@
         }
 
         .upload-zone i {
-            font-size: 2.5rem;
+            font-size: 2.7rem;
             color: var(--accent);
             margin-bottom: 12px;
             display: block;
@@ -624,9 +630,9 @@
         .upload-zone p { color: var(--text-secondary); }
 
         .upload-zone .upload-hint {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             margin-top: 8px;
-            opacity: 0.7;
+            opacity: 0.85;
         }
 
         /* File List */
@@ -646,14 +652,14 @@
         .file-item:hover { border-color: var(--border); }
 
         .file-item .file-info { display: flex; align-items: center; gap: 12px; }
-        .file-item .file-icon { color: var(--accent); font-size: 1.2rem; }
-        .file-item .file-name { font-weight: 500; font-size: 0.95rem; }
-        .file-item .file-date { color: var(--text-secondary); font-size: 0.82rem; }
+        .file-item .file-icon { color: var(--accent); font-size: 1.3rem; }
+        .file-item .file-name { font-weight: 500; font-size: 1.05rem; }
+        .file-item .file-date { color: var(--text-secondary); font-size: 0.92rem; }
 
         .file-status {
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.78rem;
+            font-size: 0.88rem;
             font-weight: 500;
             white-space: nowrap;
         }
@@ -682,13 +688,13 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 16px;
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             color: var(--accent);
         }
 
         .profile-name {
             text-align: center;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 700;
             margin-bottom: 20px;
             color: var(--white);
@@ -704,7 +710,7 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .profile-stat .label { color: var(--text-secondary); font-size: 0.88rem; }
+        .profile-stat .label { color: var(--text-secondary); font-size: 0.98rem; }
         .profile-stat .value { font-weight: 700; color: var(--accent); }
 
         /* Skill Bars */
@@ -714,7 +720,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 6px;
-            font-size: 0.88rem;
+            font-size: 0.98rem;
         }
 
         .skill-bar .skill-header span:first-child { color: var(--text-secondary); }
@@ -757,17 +763,17 @@
         }
 
         .video-thumbnail i {
-            font-size: 2.8rem;
+            font-size: 3rem;
             color: var(--accent);
-            opacity: 0.7;
+            opacity: 0.85;
             transition: all 0.3s;
         }
 
         .video-thumbnail:hover i { opacity: 1; transform: scale(1.15); }
 
         .video-info { padding: 14px 16px; }
-        .video-info h4 { margin-bottom: 6px; font-size: 0.95rem; color: var(--white); }
-        .video-info p { color: var(--text-secondary); font-size: 0.82rem; }
+        .video-info h4 { margin-bottom: 6px; font-size: 1.05rem; color: var(--white); }
+        .video-info p { color: var(--text-secondary); font-size: 0.92rem; }
 
         /* Table */
         .comp-table {
@@ -783,14 +789,14 @@
         .comp-table td {
             padding: 14px 18px;
             text-align: right;
-            font-size: 0.92rem;
+            font-size: 1.02rem;
         }
 
         .comp-table th {
             background: var(--bg-secondary);
             color: var(--text-secondary);
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
 
         .comp-table td { border-bottom: 1px solid var(--border); }
@@ -820,21 +826,22 @@
             align-items: center;
             justify-content: center;
             color: var(--accent);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             flex-shrink: 0;
         }
 
-        .contact-item p { color: var(--text-secondary); font-size: 0.9rem; }
-        .contact-item h4 { margin-bottom: 2px; color: var(--white); font-size: 0.95rem; }
+        .contact-item p { color: var(--text-secondary); font-size: 1rem; }
+        .contact-item h4 { margin-bottom: 2px; color: var(--white); font-size: 1.05rem; }
 
         /* Footer */
         footer {
             background: var(--bg-primary);
             border-top: 1px solid var(--border);
             padding: 28px 24px;
+            padding-bottom: calc(28px + env(safe-area-inset-bottom));
             text-align: center;
             color: var(--text-secondary);
-            font-size: 0.82rem;
+            font-size: 0.92rem;
         }
 
         /* Toast */
@@ -854,7 +861,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             max-width: 90%;
         }
 
@@ -883,20 +890,20 @@
             border: 1px solid var(--border-light);
         }
 
-        .update-item strong { color: var(--white); font-size: 0.92rem; }
-        .update-item p { color: var(--text-secondary); font-size: 0.82rem; margin-top: 2px; }
+        .update-item strong { color: var(--white); font-size: 1.02rem; }
+        .update-item p { color: var(--text-secondary); font-size: 0.92rem; margin-top: 2px; }
 
         /* Weight chip */
         .weight-chip {
             background: var(--bg-secondary);
             padding: 8px 14px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             text-align: center;
             border: 1px solid var(--border-light);
         }
 
-        .weight-chip .month { color: var(--text-secondary); font-size: 0.78rem; }
+        .weight-chip .month { color: var(--text-secondary); font-size: 0.88rem; }
         .weight-chip .kg { font-weight: 700; color: var(--accent); margin-top: 2px; }
 
         /* ===== RESPONSIVE ===== */
@@ -908,8 +915,8 @@
         }
 
         @media (max-width: 768px) {
-            .hero h1 { font-size: 3.2rem; letter-spacing: 5px; }
-            .hero .subtitle { font-size: 1.3rem; }
+            .hero h1 { font-size: 3.4rem; letter-spacing: 5px; }
+            .hero .subtitle { font-size: 1.4rem; }
 
             .nav-links {
                 display: none;
@@ -945,7 +952,7 @@
             .profile-grid { grid-template-columns: 1fr; }
             .dashboard-nav { overflow-x: auto; padding-bottom: 8px; }
 
-            .comp-table { font-size: 0.82rem; }
+            .comp-table { font-size: 0.92rem; }
             .comp-table th, .comp-table td { padding: 10px 12px; }
 
             .section { padding: 70px 16px; }
@@ -954,7 +961,7 @@
         }
 
         @media (max-width: 480px) {
-            .hero h1 { font-size: 2.5rem; }
+            .hero h1 { font-size: 2.7rem; }
             .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
         }
 
@@ -1015,7 +1022,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 4.2rem;
             color: var(--accent);
         }
 
@@ -1024,7 +1031,7 @@
         }
 
         .coach-info h3 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: var(--white);
             margin-bottom: 6px;
         }
@@ -1032,13 +1039,13 @@
         .coach-info .coach-role {
             color: var(--accent);
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             margin-bottom: 10px;
         }
 
         .coach-info p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 1rem;
             line-height: 1.6;
         }
 
@@ -1060,7 +1067,7 @@
         .skill-slider-row label {
             min-width: 80px;
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
 
         .skill-slider-row input[type="range"] {
@@ -1075,7 +1082,7 @@
             text-align: center;
             color: var(--accent);
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
 
         /* Selection */
@@ -1108,14 +1115,14 @@
             width: 44px; height: 44px; border-radius: 50%;
             background: rgba(230,57,70,0.15); display: flex;
             align-items: center; justify-content: center;
-            color: var(--accent); font-size: 1.1rem;
+            color: var(--accent); font-size: 1.2rem;
         }
         .competitor-card .comp-name { font-weight: 700; color: var(--white); }
-        .competitor-card .comp-detail { color: var(--text-secondary); font-size: 0.82rem; margin-top: 2px; }
+        .competitor-card .comp-detail { color: var(--text-secondary); font-size: 0.92rem; margin-top: 2px; }
         .competitor-card .comp-stats { display: flex; gap: 16px; }
         .competitor-card .comp-stat-item { text-align: center; }
         .competitor-card .comp-stat-item .val { font-weight: 900; color: var(--accent); }
-        .competitor-card .comp-stat-item .lbl { color: var(--text-secondary); font-size: 0.75rem; }
+        .competitor-card .comp-stat-item .lbl { color: var(--text-secondary); font-size: 0.85rem; }
 
         .coach-checkbox-group {
             display: flex; align-items: center; gap: 10px;
@@ -1124,16 +1131,15 @@
             border: 1px solid rgba(230,57,70,0.2);
         }
         .coach-checkbox-group input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer; }
-        .coach-checkbox-group label { color: var(--text-primary); font-size: 0.92rem; cursor: pointer; font-weight: 500; }
+        .coach-checkbox-group label { color: var(--text-primary); font-size: 1.02rem; cursor: pointer; font-weight: 500; }
 
-        .lang-btn {
-            background: transparent; border: 1px solid var(--border);
-            color: var(--text-secondary); padding: 4px 8px; border-radius: 6px;
-            font-size: 0.72rem; cursor: pointer; font-weight: 700;
-            font-family: 'Heebo', sans-serif; transition: all 0.2s;
+        .lang-dropdown {
+            background: var(--bg-card); border: 1px solid var(--border);
+            color: var(--text-primary); padding: 6px 12px; border-radius: 8px;
+            font-size: 0.95rem; cursor: pointer; font-family: 'Heebo', sans-serif;
+            outline: none; appearance: auto;
         }
-        .lang-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .lang-btn.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .lang-dropdown:hover, .lang-dropdown:focus { border-color: var(--accent); }
 
         .loading-spinner {
             display: inline-block; width: 20px; height: 20px;
@@ -1181,10 +1187,12 @@
             <a href="#" class="logo" onclick="goHome(event)">
                 <img src="images/rocky-icon.png" alt="Rocky">
             </a>
-            <div class="lang-switcher" style="position:absolute;left:80px;top:50%;transform:translateY(-50%);display:flex;gap:4px;">
-                <button onclick="setLang('he')" class="lang-btn active" data-lang="he" title="עברית">HE</button>
-                <button onclick="setLang('en')" class="lang-btn" data-lang="en" title="English">EN</button>
-                <button onclick="setLang('de')" class="lang-btn" data-lang="de" title="Deutsch">DE</button>
+            <div class="lang-switcher" style="position:absolute;left:80px;top:50%;transform:translateY(-50%);">
+                <select id="langSelect" onchange="setLang(this.value)" class="lang-dropdown">
+                    <option value="he">עברית</option>
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                </select>
             </div>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="תפריט">
                 <i class="fas fa-bars"></i>
@@ -1211,7 +1219,7 @@
                     פתוח לכל מתחרה מכל מכון ומכל איגוד בישראל.
                     יחד נהפוך למרכז הידע, התמיכה וההשראה ללוחמים ולוחמות.
                 </p>
-                <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-bottom:32px; font-size:0.92rem; color:var(--text-secondary);">
+                <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-bottom:32px; font-size:1.02rem; color:var(--text-secondary);">
                     <span><i class="fas fa-user-tie" style="color:var(--accent);"></i> מאמן: גדי שור</span>
                     <span><i class="fas fa-clock" style="color:var(--accent);"></i> אימונים כל בוקר 9:00-12:00</span>
                     <span><i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> תפוצות ישראל 4, גבעתיים</span>
@@ -1467,14 +1475,14 @@
                     <h4 style="margin-bottom: 16px;"><i class="fas fa-bell" style="color: var(--accent);"></i> עדכונים אחרונים</h4>
                     <div style="display:flex; flex-direction:column; gap:12px;">
                         <div class="update-item">
-                            <i class="fas fa-calendar" style="color: var(--gold); font-size:1.1rem;"></i>
+                            <i class="fas fa-calendar" style="color: var(--gold); font-size:1.2rem;"></i>
                             <div>
                                 <strong>תחרות קרובה</strong>
                                 <p>אליפות ישראל - נא לוודא שכל המסמכים מעודכנים</p>
                             </div>
                         </div>
                         <div class="update-item">
-                            <i class="fas fa-check-circle" style="color: var(--success); font-size:1.1rem;"></i>
+                            <i class="fas fa-check-circle" style="color: var(--success); font-size:1.2rem;"></i>
                             <div>
                                 <strong>אישור רפואי</strong>
                                 <p>האישור הרפואי שלך אושר בהצלחה</p>
@@ -1684,7 +1692,7 @@
                         <div class="profile-card">
                             <h4 style="margin-bottom:18px;">יכולות טכניות</h4>
                             <div id="skillBarsDisplay"></div>
-                            <h4 style="margin:24px 0 14px; font-size:0.95rem;">עדכון יכולות</h4>
+                            <h4 style="margin:24px 0 14px; font-size:1.05rem;">עדכון יכולות</h4>
                             <div id="skillSlidersArea"></div>
                             <button class="form-submit" style="margin-top:12px;" onclick="saveSkills()">שמור יכולות</button>
                         </div>
@@ -1824,10 +1832,10 @@
                 <input type="password" id="loginPass" placeholder="הסיסמה שלך">
             </div>
             <button class="form-submit" id="loginBtn" onclick="login()">כניסה</button>
-            <p style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:0.85rem;">
+            <p style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:0.95rem;">
                 <a href="#" onclick="event.preventDefault(); resetPassword();" style="color:var(--accent);">שכחתי סיסמה</a>
             </p>
-            <p style="text-align:center; margin-top:8px; color:var(--text-secondary); font-size:0.85rem;">
+            <p style="text-align:center; margin-top:8px; color:var(--text-secondary); font-size:0.95rem;">
                 עדיין לא רשום? <a href="#" onclick="event.preventDefault(); openModal('registerModal'); closeModal('loginModal');" style="color:var(--accent);">הרשמה</a>
             </p>
         </div>
@@ -1871,7 +1879,7 @@
                 <input type="password" id="adminCode" placeholder="הזן קוד אדמין">
             </div>
             <button class="form-submit" id="regBtn" onclick="register()">הרשמה</button>
-            <p style="text-align:center; margin-top:16px; color:var(--text-secondary); font-size:0.85rem;">
+            <p style="text-align:center; margin-top:16px; color:var(--text-secondary); font-size:0.95rem;">
                 כבר רשום? <a href="#" onclick="event.preventDefault(); openModal('loginModal'); closeModal('registerModal');" style="color:var(--accent);">התחברות</a>
             </p>
         </div>
@@ -1880,7 +1888,7 @@
     <!-- Competitor Detail Modal (for coaches) -->
     <div class="competitor-detail-modal" id="competitorDetailModal">
         <div class="competitor-detail-content">
-            <button class="close-btn" onclick="closeCompetitorDetail()" style="position:absolute;top:16px;left:16px;background:none;border:none;color:var(--text-secondary);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+            <button class="close-btn" onclick="closeCompetitorDetail()" style="position:absolute;top:16px;left:16px;background:none;border:none;color:var(--text-secondary);font-size:1.3rem;cursor:pointer;"><i class="fas fa-times"></i></button>
             <div id="competitorDetailBody"></div>
         </div>
     </div>
@@ -2351,7 +2359,7 @@
                     <div class="video-info">
                         <h4>${sanitize(v.title)}</h4>
                         <p><i class="fas fa-calendar-alt"></i> ${v.date}</p>
-                        ${v.notes ? `<p style="margin-top:6px; color:var(--text-secondary); font-size:0.8rem; font-style:italic;"><i class="fas fa-comment-alt" style="color:var(--accent);"></i> ${sanitize(v.notes)}</p>` : ''}
+                        ${v.notes ? `<p style="margin-top:6px; color:var(--text-secondary); font-size:0.9rem; font-style:italic;"><i class="fas fa-comment-alt" style="color:var(--accent);"></i> ${sanitize(v.notes)}</p>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -2537,7 +2545,7 @@
             const roleColors = { admin: 'var(--gold)', coach: '#8ecae6', competitor: 'var(--accent)' };
             allDocs.forEach(d => {
                 const w = d.wins || 0, l = d.losses || 0, dr = d.draws || 0;
-                const roleBadge = isAdmin ? `<span style="color:${roleColors[d.role]||'var(--text-secondary)'};font-size:0.75rem;font-weight:700;"> (${roleLabels[d.role] || d.role})</span>` : '';
+                const roleBadge = isAdmin ? `<span style="color:${roleColors[d.role]||'var(--text-secondary)'};font-size:0.85rem;font-weight:700;"> (${roleLabels[d.role] || d.role})</span>` : '';
                 const card = document.createElement('div');
                 card.className = 'competitor-card';
                 card.onclick = () => showCompetitorDetail(d.id);
@@ -2581,7 +2589,7 @@
                     <div class="profile-stat"><span class="label">קטגוריה</span><span class="value">${d.category || '--'}</span></div>
                     <div class="profile-stat"><span class="label">ניסיון</span><span class="value">${d.experience != null ? d.experience + ' שנים' : '--'}</span></div>
                     <div class="profile-stat"><span class="label">מכון</span><span class="value">${sanitize(d.gym || '--')}</span></div>
-                    <div class="profile-stat"><span class="label">אימייל</span><span class="value" style="font-size:0.82rem;">${sanitize(d.email || '--')}</span></div>
+                    <div class="profile-stat"><span class="label">אימייל</span><span class="value" style="font-size:0.92rem;">${sanitize(d.email || '--')}</span></div>
                     <div class="profile-stat"><span class="label">טלפון</span><span class="value">${sanitize(d.phone || '--')}</span></div>
                 </div>
 
@@ -2675,6 +2683,55 @@
                 reg_gym: 'מכון / מועדון', reg_pass: 'סיסמה (לפחות 6 תווים)', reg_coach: 'אני מאמן',
                 admin_label: 'אני אדמין', admin_code: 'קוד אדמין', reg_btn: 'הרשמה',
                 reg_has_account: 'כבר רשום?', reg_login_link: 'התחברות',
+                // Dashboard
+                dash_welcome: 'ברוך הבא לאזור האישי שלך',
+                dash_overview: 'סקירה', dash_documents: 'מסמכים', dash_videos: 'סרטונים',
+                dash_profile: 'פרופיל', dash_competitions: 'תחרויות',
+                dash_manage: 'ניהול מתחרים', dash_manage_admin: 'ניהול משתמשים', dash_logout: 'יציאה',
+                // Stats
+                stat_fights: 'קרבות', stat_wins: 'ניצחונות', stat_weight: 'משקל (ק"ג)', stat_docs: 'מסמכים',
+                // Overview
+                dash_updates: 'עדכונים אחרונים', dash_upcoming_comp: 'תחרות קרובה',
+                dash_upcoming_comp_desc: 'אליפות ישראל - נא לוודא שכל המסמכים מעודכנים',
+                dash_medical_approved: 'אישור רפואי', dash_medical_approved_desc: 'האישור הרפואי שלך אושר בהצלחה',
+                // Documents
+                dash_upload_docs: 'העלאת מסמכים', dash_doc_type: 'סוג מסמך',
+                dash_doc_select: 'בחר סוג מסמך', dash_doc_medical: 'אישור רופא',
+                dash_doc_registration: 'טופס הרשמה לתחרות', dash_doc_passport: 'פספורט',
+                dash_doc_insurance: 'ביטוח', dash_doc_other: 'אחר',
+                dash_upload_click: 'לחץ כאן או גרור קובץ להעלאה', dash_upload_hint: 'PDF, JPG, PNG - עד 10MB',
+                dash_my_docs: 'המסמכים שלי',
+                dash_doc_approved: 'אושר', dash_doc_pending: 'בבדיקה',
+                // Videos
+                dash_fight_videos: 'סרטוני קרבות', dash_video_name: 'שם / תיאור הסרטון',
+                dash_video_name_ph: 'למשל: קרב חצי גמר - אליפות הדרום',
+                dash_video_notes: 'הערות לניתוח (אופציונלי)',
+                dash_video_notes_ph: 'נקודות לשיפור, טכניקות לשים לב אליהן...',
+                dash_upload_video: 'העלה סרטון קרב לניתוח', dash_upload_video_hint: 'MP4, MOV - עד 500MB',
+                // Profile
+                dash_profile_title: 'פרופיל מתחרה',
+                dash_prof_weight: 'משקל', dash_prof_height: 'גובה', dash_prof_category: 'קטגוריה',
+                dash_prof_exp: 'ניסיון', dash_prof_gym: 'מכון / מועדון',
+                dash_prof_fights: 'קרבות', dash_prof_record: 'מאזן (W-L-D)',
+                dash_update_details: 'עדכון פרטים', dash_save_changes: 'שמור שינויים',
+                dash_weight_kg: 'משקל (ק"ג)', dash_height_cm: 'גובה (ס"מ)',
+                dash_weight_cat: 'קטגוריית משקל', dash_select_cat: 'בחר קטגוריה',
+                dash_exp_years: 'שנות ניסיון', dash_gym_name: 'מכון / מועדון',
+                dash_wins: 'ניצחונות', dash_losses: 'הפסדים', dash_draws: 'תיקו',
+                dash_tech_skills: 'יכולות טכניות', dash_update_skills: 'עדכון יכולות',
+                dash_save_skills: 'שמור יכולות', dash_weight_history: 'היסטוריית משקל',
+                // Competitions
+                dash_comp_title: 'תחרויות', dash_upcoming: 'תחרויות קרובות',
+                dash_comp_register: 'הרשמה לתחרות חדשה', dash_comp_name: 'שם התחרות',
+                dash_comp_date: 'תאריך', dash_comp_location: 'מיקום',
+                dash_comp_weight_cat: 'קטגוריית משקל', dash_comp_submit: 'שלח הרשמה',
+                dash_comp_history: 'היסטוריית תחרויות',
+                dash_th_comp: 'תחרות', dash_th_date: 'תאריך', dash_th_location: 'מיקום',
+                dash_th_status: 'סטטוס', dash_th_result: 'תוצאה',
+                dash_registered: 'נרשם',
+                // Coach panel
+                dash_coach_title: 'ניהול מתחרים', dash_coach_desc: 'לחץ על מתחרה לצפייה בפרטים המלאים שלו.',
+                dash_loading: 'טוען מתחרים...',
             },
             en: {
                 nav_about: 'About', nav_features: 'Services', nav_contact: 'Contact', nav_login: 'Login',
@@ -2704,6 +2761,48 @@
                 reg_gym: 'Gym / Club', reg_pass: 'Password (min 6 chars)', reg_coach: 'I am a coach',
                 admin_label: 'I am an admin', admin_code: 'Admin code', reg_btn: 'Register',
                 reg_has_account: 'Already registered?', reg_login_link: 'Login',
+                // Dashboard
+                dash_welcome: 'Welcome to your personal area',
+                dash_overview: 'Overview', dash_documents: 'Documents', dash_videos: 'Videos',
+                dash_profile: 'Profile', dash_competitions: 'Competitions',
+                dash_manage: 'Manage Competitors', dash_manage_admin: 'Manage Users', dash_logout: 'Logout',
+                stat_fights: 'Fights', stat_wins: 'Wins', stat_weight: 'Weight (kg)', stat_docs: 'Documents',
+                dash_updates: 'Recent Updates', dash_upcoming_comp: 'Upcoming Competition',
+                dash_upcoming_comp_desc: 'Israel Championship - please ensure all documents are up to date',
+                dash_medical_approved: 'Medical Certificate', dash_medical_approved_desc: 'Your medical certificate has been approved',
+                dash_upload_docs: 'Upload Documents', dash_doc_type: 'Document Type',
+                dash_doc_select: 'Select document type', dash_doc_medical: 'Medical Certificate',
+                dash_doc_registration: 'Competition Registration Form', dash_doc_passport: 'Passport',
+                dash_doc_insurance: 'Insurance', dash_doc_other: 'Other',
+                dash_upload_click: 'Click here or drag a file to upload', dash_upload_hint: 'PDF, JPG, PNG - up to 10MB',
+                dash_my_docs: 'My Documents',
+                dash_doc_approved: 'Approved', dash_doc_pending: 'Pending',
+                dash_fight_videos: 'Fight Videos', dash_video_name: 'Video Name / Description',
+                dash_video_name_ph: 'e.g.: Semi-final fight - Southern Championship',
+                dash_video_notes: 'Analysis Notes (optional)',
+                dash_video_notes_ph: 'Points to improve, techniques to watch...',
+                dash_upload_video: 'Upload a fight video for analysis', dash_upload_video_hint: 'MP4, MOV - up to 500MB',
+                dash_profile_title: 'Competitor Profile',
+                dash_prof_weight: 'Weight', dash_prof_height: 'Height', dash_prof_category: 'Category',
+                dash_prof_exp: 'Experience', dash_prof_gym: 'Gym / Club',
+                dash_prof_fights: 'Fights', dash_prof_record: 'Record (W-L-D)',
+                dash_update_details: 'Update Details', dash_save_changes: 'Save Changes',
+                dash_weight_kg: 'Weight (kg)', dash_height_cm: 'Height (cm)',
+                dash_weight_cat: 'Weight Category', dash_select_cat: 'Select category',
+                dash_exp_years: 'Years of Experience', dash_gym_name: 'Gym / Club',
+                dash_wins: 'Wins', dash_losses: 'Losses', dash_draws: 'Draws',
+                dash_tech_skills: 'Technical Skills', dash_update_skills: 'Update Skills',
+                dash_save_skills: 'Save Skills', dash_weight_history: 'Weight History',
+                dash_comp_title: 'Competitions', dash_upcoming: 'Upcoming Competitions',
+                dash_comp_register: 'Register for New Competition', dash_comp_name: 'Competition Name',
+                dash_comp_date: 'Date', dash_comp_location: 'Location',
+                dash_comp_weight_cat: 'Weight Category', dash_comp_submit: 'Submit Registration',
+                dash_comp_history: 'Competition History',
+                dash_th_comp: 'Competition', dash_th_date: 'Date', dash_th_location: 'Location',
+                dash_th_status: 'Status', dash_th_result: 'Result',
+                dash_registered: 'Registered',
+                dash_coach_title: 'Manage Competitors', dash_coach_desc: 'Click on a competitor to view their full details.',
+                dash_loading: 'Loading competitors...',
             },
             de: {
                 nav_about: 'Über uns', nav_features: 'Dienste', nav_contact: 'Kontakt', nav_login: 'Anmelden',
@@ -2733,6 +2832,48 @@
                 reg_gym: 'Studio / Verein', reg_pass: 'Passwort (mind. 6 Zeichen)', reg_coach: 'Ich bin Trainer',
                 admin_label: 'Ich bin Admin', admin_code: 'Admin-Code', reg_btn: 'Registrieren',
                 reg_has_account: 'Bereits registriert?', reg_login_link: 'Anmelden',
+                // Dashboard
+                dash_welcome: 'Willkommen in deinem persoenlichen Bereich',
+                dash_overview: 'Uebersicht', dash_documents: 'Dokumente', dash_videos: 'Videos',
+                dash_profile: 'Profil', dash_competitions: 'Wettkaempfe',
+                dash_manage: 'Wettkämpfer verwalten', dash_manage_admin: 'Benutzer verwalten', dash_logout: 'Abmelden',
+                stat_fights: 'Kämpfe', stat_wins: 'Siege', stat_weight: 'Gewicht (kg)', stat_docs: 'Dokumente',
+                dash_updates: 'Letzte Aktualisierungen', dash_upcoming_comp: 'Bevorstehender Wettkampf',
+                dash_upcoming_comp_desc: 'Israel-Meisterschaft - bitte alle Dokumente aktualisieren',
+                dash_medical_approved: 'Ärztliches Attest', dash_medical_approved_desc: 'Dein ärztliches Attest wurde genehmigt',
+                dash_upload_docs: 'Dokumente hochladen', dash_doc_type: 'Dokumenttyp',
+                dash_doc_select: 'Dokumenttyp wählen', dash_doc_medical: 'Ärztliches Attest',
+                dash_doc_registration: 'Wettkampf-Anmeldeformular', dash_doc_passport: 'Reisepass',
+                dash_doc_insurance: 'Versicherung', dash_doc_other: 'Sonstiges',
+                dash_upload_click: 'Hier klicken oder Datei hierher ziehen', dash_upload_hint: 'PDF, JPG, PNG - bis 10MB',
+                dash_my_docs: 'Meine Dokumente',
+                dash_doc_approved: 'Genehmigt', dash_doc_pending: 'In Prüfung',
+                dash_fight_videos: 'Kampfvideos', dash_video_name: 'Videoname / Beschreibung',
+                dash_video_name_ph: 'z.B.: Halbfinale - Südmeisterschaft',
+                dash_video_notes: 'Analysenotizen (optional)',
+                dash_video_notes_ph: 'Verbesserungspunkte, Techniken...',
+                dash_upload_video: 'Kampfvideo zur Analyse hochladen', dash_upload_video_hint: 'MP4, MOV - bis 500MB',
+                dash_profile_title: 'Wettkämpfer-Profil',
+                dash_prof_weight: 'Gewicht', dash_prof_height: 'Größe', dash_prof_category: 'Kategorie',
+                dash_prof_exp: 'Erfahrung', dash_prof_gym: 'Studio / Verein',
+                dash_prof_fights: 'Kämpfe', dash_prof_record: 'Bilanz (S-N-U)',
+                dash_update_details: 'Details aktualisieren', dash_save_changes: 'Änderungen speichern',
+                dash_weight_kg: 'Gewicht (kg)', dash_height_cm: 'Größe (cm)',
+                dash_weight_cat: 'Gewichtsklasse', dash_select_cat: 'Kategorie wählen',
+                dash_exp_years: 'Jahre Erfahrung', dash_gym_name: 'Studio / Verein',
+                dash_wins: 'Siege', dash_losses: 'Niederlagen', dash_draws: 'Unentschieden',
+                dash_tech_skills: 'Technische Fähigkeiten', dash_update_skills: 'Fähigkeiten aktualisieren',
+                dash_save_skills: 'Fähigkeiten speichern', dash_weight_history: 'Gewichtsverlauf',
+                dash_comp_title: 'Wettkämpfe', dash_upcoming: 'Bevorstehende Wettkämpfe',
+                dash_comp_register: 'Für neuen Wettkampf anmelden', dash_comp_name: 'Wettkampfname',
+                dash_comp_date: 'Datum', dash_comp_location: 'Ort',
+                dash_comp_weight_cat: 'Gewichtsklasse', dash_comp_submit: 'Anmeldung absenden',
+                dash_comp_history: 'Wettkampfhistorie',
+                dash_th_comp: 'Wettkampf', dash_th_date: 'Datum', dash_th_location: 'Ort',
+                dash_th_status: 'Status', dash_th_result: 'Ergebnis',
+                dash_registered: 'Angemeldet',
+                dash_coach_title: 'Wettkämpfer verwalten', dash_coach_desc: 'Klicke auf einen Wettkämpfer für Details.',
+                dash_loading: 'Wettkämpfer werden geladen...',
             }
         };
 
@@ -2742,8 +2883,8 @@
             currentLang = lang;
             localStorage.setItem('rocky_lang', lang);
 
-            // Update active button
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+            // Update dropdown value
+            document.getElementById('langSelect').value = lang;
 
             // Set direction
             const isRTL = lang === 'he';
@@ -2854,6 +2995,167 @@
             if (regBtnEl && !regBtnEl.disabled) regBtnEl.textContent = t.reg_btn;
             document.querySelector('label[for="regIsCoach"]').innerHTML = `<i class="fas fa-user-shield"></i> ${t.reg_coach}`;
             document.querySelector('[data-i18n="admin_label"]').textContent = t.admin_label;
+
+            // ===== DASHBOARD TRANSLATIONS =====
+            // Welcome text
+            const dashWelcomeP = document.querySelector('.welcome-text p');
+            if (dashWelcomeP) dashWelcomeP.textContent = t.dash_welcome;
+
+            // Dashboard nav buttons
+            const dashNavBtns = document.querySelectorAll('.dashboard-nav button');
+            dashNavBtns.forEach(btn => {
+                const onclick = btn.getAttribute('onclick') || '';
+                if (onclick.includes("'overview'")) btn.innerHTML = `<i class="fas fa-th-large"></i> ${t.dash_overview}`;
+                else if (onclick.includes("'documents'")) btn.innerHTML = `<i class="fas fa-folder-open"></i> ${t.dash_documents}`;
+                else if (onclick.includes("'videos'")) btn.innerHTML = `<i class="fas fa-play-circle"></i> ${t.dash_videos}`;
+                else if (onclick.includes("'profile'")) btn.innerHTML = `<i class="fas fa-user"></i> ${t.dash_profile}`;
+                else if (onclick.includes("'competitions'")) btn.innerHTML = `<i class="fas fa-medal"></i> ${t.dash_competitions}`;
+                else if (onclick.includes("'coach'")) btn.innerHTML = isAdmin ? `<i class="fas fa-crown"></i> ${t.dash_manage_admin}` : `<i class="fas fa-users-cog"></i> ${t.dash_manage}`;
+                else if (onclick.includes('logout')) { btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${t.dash_logout}`; btn.style.color = 'var(--accent)'; }
+            });
+
+            // Stats labels
+            const statLabels = document.querySelectorAll('.stat-label');
+            if (statLabels[0]) statLabels[0].textContent = t.stat_fights;
+            if (statLabels[1]) statLabels[1].textContent = t.stat_wins;
+            if (statLabels[2]) statLabels[2].textContent = t.stat_weight;
+            if (statLabels[3]) statLabels[3].textContent = t.stat_docs;
+
+            // Overview updates
+            const updateItems = document.querySelectorAll('#panel-overview .update-item');
+            if (updateItems[0]) { updateItems[0].querySelector('strong').textContent = t.dash_upcoming_comp; updateItems[0].querySelector('p').textContent = t.dash_upcoming_comp_desc; }
+            if (updateItems[1]) { updateItems[1].querySelector('strong').textContent = t.dash_medical_approved; updateItems[1].querySelector('p').textContent = t.dash_medical_approved_desc; }
+            const updatesTitle = document.querySelector('#panel-overview .profile-card h4');
+            if (updatesTitle) updatesTitle.innerHTML = `<i class="fas fa-bell" style="color: var(--accent);"></i> ${t.dash_updates}`;
+
+            // Documents panel
+            const docsH3 = document.querySelector('#panel-documents > h3');
+            if (docsH3) docsH3.innerHTML = `<i class="fas fa-cloud-upload-alt" style="color: var(--accent);"></i> ${t.dash_upload_docs}`;
+            const docTypeLabel = document.querySelector('#panel-documents .form-group label');
+            if (docTypeLabel) docTypeLabel.textContent = t.dash_doc_type;
+            const docTypeSelect = document.getElementById('docType');
+            if (docTypeSelect) {
+                docTypeSelect.options[0].textContent = t.dash_doc_select;
+                docTypeSelect.options[1].textContent = t.dash_doc_medical;
+                docTypeSelect.options[2].textContent = t.dash_doc_registration;
+                docTypeSelect.options[3].textContent = t.dash_doc_passport;
+                docTypeSelect.options[4].textContent = t.dash_doc_insurance;
+                docTypeSelect.options[5].textContent = t.dash_doc_other;
+            }
+            const uploadZoneFile = document.getElementById('uploadZoneFile');
+            if (uploadZoneFile) {
+                const uploadP = uploadZoneFile.querySelectorAll('p');
+                if (uploadP[0]) uploadP[0].textContent = t.dash_upload_click;
+                if (uploadP[1]) uploadP[1].textContent = t.dash_upload_hint;
+            }
+            const myDocsH3 = document.querySelectorAll('#panel-documents > h3');
+            if (myDocsH3[1]) myDocsH3[1].innerHTML = `<i class="fas fa-folder" style="color: var(--accent);"></i> ${t.dash_my_docs}`;
+
+            // Videos panel
+            const videosH3 = document.querySelector('#panel-videos > h3');
+            if (videosH3) videosH3.innerHTML = `<i class="fas fa-video" style="color: var(--accent);"></i> ${t.dash_fight_videos}`;
+            const videoLabels = document.querySelectorAll('#panel-videos .form-group label');
+            if (videoLabels[0]) videoLabels[0].textContent = t.dash_video_name;
+            if (videoLabels[1]) videoLabels[1].textContent = t.dash_video_notes;
+            const videoTitleInput = document.getElementById('videoTitle');
+            if (videoTitleInput) videoTitleInput.placeholder = t.dash_video_name_ph;
+            const videoNotesInput = document.getElementById('videoNotes');
+            if (videoNotesInput) videoNotesInput.placeholder = t.dash_video_notes_ph;
+            const uploadZoneVideo = document.getElementById('uploadZoneVideo');
+            if (uploadZoneVideo) {
+                const vUploadP = uploadZoneVideo.querySelectorAll('p');
+                if (vUploadP[0]) vUploadP[0].textContent = t.dash_upload_video;
+                if (vUploadP[1]) vUploadP[1].textContent = t.dash_upload_video_hint;
+            }
+
+            // Profile panel
+            const profileH3 = document.querySelector('#panel-profile > h3');
+            if (profileH3) profileH3.innerHTML = `<i class="fas fa-user-circle" style="color: var(--accent);"></i> ${t.dash_profile_title}`;
+            const profStatLabels = document.querySelectorAll('#panel-profile .profile-stat .label');
+            if (profStatLabels[0]) profStatLabels[0].textContent = t.dash_prof_weight;
+            if (profStatLabels[1]) profStatLabels[1].textContent = t.dash_prof_height;
+            if (profStatLabels[2]) profStatLabels[2].textContent = t.dash_prof_category;
+            if (profStatLabels[3]) profStatLabels[3].textContent = t.dash_prof_exp;
+            if (profStatLabels[4]) profStatLabels[4].textContent = t.dash_prof_gym;
+            if (profStatLabels[5]) profStatLabels[5].textContent = t.dash_prof_fights;
+            if (profStatLabels[6]) profStatLabels[6].textContent = t.dash_prof_record;
+
+            // Profile form
+            const profileCards = document.querySelectorAll('#panel-profile .profile-card');
+            if (profileCards[1]) {
+                const pfH4 = profileCards[1].querySelector('h4');
+                if (pfH4) pfH4.textContent = t.dash_update_details;
+                const pfLabels = profileCards[1].querySelectorAll('.form-group label');
+                if (pfLabels[0]) pfLabels[0].textContent = t.dash_weight_kg;
+                if (pfLabels[1]) pfLabels[1].textContent = t.dash_height_cm;
+                if (pfLabels[2]) pfLabels[2].textContent = t.dash_weight_cat;
+                if (pfLabels[3]) pfLabels[3].textContent = t.dash_exp_years;
+                if (pfLabels[4]) pfLabels[4].textContent = t.dash_gym_name;
+                if (pfLabels[5]) pfLabels[5].textContent = t.dash_wins;
+                if (pfLabels[6]) pfLabels[6].textContent = t.dash_losses;
+                if (pfLabels[7]) pfLabels[7].textContent = t.dash_draws;
+                const pfSubmit = profileCards[1].querySelector('.form-submit');
+                if (pfSubmit) pfSubmit.textContent = t.dash_save_changes;
+            }
+            // Category select placeholder
+            const catSelect = document.getElementById('categoryInput');
+            if (catSelect && catSelect.options[0]) catSelect.options[0].textContent = t.dash_select_cat;
+
+            // Skills card
+            if (profileCards[2]) {
+                const skillsH4s = profileCards[2].querySelectorAll('h4');
+                if (skillsH4s[0]) skillsH4s[0].textContent = t.dash_tech_skills;
+                if (skillsH4s[1]) skillsH4s[1].textContent = t.dash_update_skills;
+                const skillSubmit = profileCards[2].querySelector('.form-submit');
+                if (skillSubmit) skillSubmit.textContent = t.dash_save_skills;
+            }
+            // Weight history card
+            if (profileCards[3]) {
+                const whH4 = profileCards[3].querySelector('h4');
+                if (whH4) whH4.textContent = t.dash_weight_history;
+            }
+
+            // Competitions panel
+            const compH3 = document.querySelector('#panel-competitions > h3');
+            if (compH3) compH3.innerHTML = `<i class="fas fa-medal" style="color: var(--accent);"></i> ${t.dash_comp_title}`;
+            const compCards = document.querySelectorAll('#panel-competitions .profile-card');
+            if (compCards[0]) {
+                const ucH4 = compCards[0].querySelector('h4');
+                if (ucH4) ucH4.innerHTML = `<i class="fas fa-star" style="color: var(--gold);"></i> ${t.dash_upcoming}`;
+                const ucThs = compCards[0].querySelectorAll('th');
+                if (ucThs[0]) ucThs[0].textContent = t.dash_th_comp;
+                if (ucThs[1]) ucThs[1].textContent = t.dash_th_date;
+                if (ucThs[2]) ucThs[2].textContent = t.dash_th_location;
+                if (ucThs[3]) ucThs[3].textContent = t.dash_th_status;
+            }
+            if (compCards[1]) {
+                const regH4 = compCards[1].querySelector('h4');
+                if (regH4) regH4.innerHTML = `<i class="fas fa-clipboard-list" style="color: var(--accent);"></i> ${t.dash_comp_register}`;
+                const regLabelsComp = compCards[1].querySelectorAll('.form-group label');
+                if (regLabelsComp[0]) regLabelsComp[0].textContent = t.dash_comp_name;
+                if (regLabelsComp[1]) regLabelsComp[1].textContent = t.dash_comp_date;
+                if (regLabelsComp[2]) regLabelsComp[2].textContent = t.dash_comp_location;
+                if (regLabelsComp[3]) regLabelsComp[3].textContent = t.dash_comp_weight_cat;
+                const compSubmit = compCards[1].querySelector('.form-submit');
+                if (compSubmit) compSubmit.textContent = t.dash_comp_submit;
+                const compWeightSel = document.getElementById('compWeight');
+                if (compWeightSel && compWeightSel.options[0]) compWeightSel.options[0].textContent = t.dash_select_cat;
+            }
+            if (compCards[2]) {
+                const histH4 = compCards[2].querySelector('h4');
+                if (histH4) histH4.innerHTML = `<i class="fas fa-history" style="color: var(--accent);"></i> ${t.dash_comp_history}`;
+                const histThs = compCards[2].querySelectorAll('th');
+                if (histThs[0]) histThs[0].textContent = t.dash_th_comp;
+                if (histThs[1]) histThs[1].textContent = t.dash_th_date;
+                if (histThs[2]) histThs[2].textContent = t.dash_th_result;
+                if (histThs[3]) histThs[3].textContent = t.dash_th_location;
+            }
+
+            // Coach panel
+            const coachH3 = document.querySelector('#panel-coach > h3');
+            if (coachH3) coachH3.innerHTML = `<i class="fas fa-users-cog" style="color: var(--accent);"></i> ${t.dash_coach_title}`;
+            const coachDesc = document.querySelector('#panel-coach > p');
+            if (coachDesc) coachDesc.textContent = t.dash_coach_desc;
         }
 
         // Apply saved language on load
