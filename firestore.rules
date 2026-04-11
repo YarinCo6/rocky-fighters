@@ -6,6 +6,8 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       // Coaches can read all competitor data
       allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
+      // Admins can read and write ALL user data
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
   }
 }

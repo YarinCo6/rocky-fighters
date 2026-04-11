@@ -1126,6 +1126,15 @@
         .coach-checkbox-group input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer; }
         .coach-checkbox-group label { color: var(--text-primary); font-size: 0.92rem; cursor: pointer; font-weight: 500; }
 
+        .lang-btn {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-secondary); padding: 4px 8px; border-radius: 6px;
+            font-size: 0.72rem; cursor: pointer; font-weight: 700;
+            font-family: 'Heebo', sans-serif; transition: all 0.2s;
+        }
+        .lang-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .lang-btn.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+
         .loading-spinner {
             display: inline-block; width: 20px; height: 20px;
             border: 3px solid var(--border); border-top-color: var(--accent);
@@ -1172,6 +1181,11 @@
             <a href="#" class="logo" onclick="goHome(event)">
                 <img src="images/rocky-icon.png" alt="Rocky">
             </a>
+            <div class="lang-switcher" style="position:absolute;left:80px;top:50%;transform:translateY(-50%);display:flex;gap:4px;">
+                <button onclick="setLang('he')" class="lang-btn active" data-lang="he" title="עברית">HE</button>
+                <button onclick="setLang('en')" class="lang-btn" data-lang="en" title="English">EN</button>
+                <button onclick="setLang('de')" class="lang-btn" data-lang="de" title="Deutsch">DE</button>
+            </div>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="תפריט">
                 <i class="fas fa-bars"></i>
             </button>
@@ -1810,7 +1824,10 @@
                 <input type="password" id="loginPass" placeholder="הסיסמה שלך">
             </div>
             <button class="form-submit" id="loginBtn" onclick="login()">כניסה</button>
-            <p style="text-align:center; margin-top:16px; color:var(--text-secondary); font-size:0.85rem;">
+            <p style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:0.85rem;">
+                <a href="#" onclick="event.preventDefault(); resetPassword();" style="color:var(--accent);">שכחתי סיסמה</a>
+            </p>
+            <p style="text-align:center; margin-top:8px; color:var(--text-secondary); font-size:0.85rem;">
                 עדיין לא רשום? <a href="#" onclick="event.preventDefault(); openModal('registerModal'); closeModal('loginModal');" style="color:var(--accent);">הרשמה</a>
             </p>
         </div>
@@ -1842,8 +1859,16 @@
                 <input type="password" id="regPass" placeholder="בחר סיסמה">
             </div>
             <div class="coach-checkbox-group">
-                <input type="checkbox" id="regIsCoach">
+                <input type="checkbox" id="regIsCoach" onchange="if(this.checked) document.getElementById('regIsAdmin').checked=false;">
                 <label for="regIsCoach"><i class="fas fa-user-shield"></i> אני מאמן</label>
+            </div>
+            <div class="coach-checkbox-group" style="border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.06);">
+                <input type="checkbox" id="regIsAdmin" onchange="if(this.checked) document.getElementById('regIsCoach').checked=false;">
+                <label for="regIsAdmin"><i class="fas fa-crown" style="color:var(--gold);"></i> <span data-i18n="admin_label">אני אדמין</span></label>
+            </div>
+            <div class="form-group" id="adminCodeGroup" style="display:none;">
+                <label>קוד אדמין</label>
+                <input type="password" id="adminCode" placeholder="הזן קוד אדמין">
             </div>
             <button class="form-submit" id="regBtn" onclick="register()">הרשמה</button>
             <p style="text-align:center; margin-top:16px; color:var(--text-secondary); font-size:0.85rem;">
@@ -1876,6 +1901,7 @@
         let currentUser = null;
         let userData = null;
         let isCoach = false;
+        let isAdmin = false;
 
         // ===== HELPERS =====
         function sanitize(str) {
@@ -1990,6 +2016,26 @@
             if (e.key === 'Enter') login();
         });
 
+        // Admin code toggle
+        document.getElementById('regIsAdmin').addEventListener('change', function() {
+            document.getElementById('adminCodeGroup').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Password reset
+        async function resetPassword() {
+            const email = document.getElementById('loginEmail').value.trim();
+            if (!email) { showToast('הזן אימייל קודם'); return; }
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast('נשלח קישור לאיפוס סיסמה למייל שלך');
+            } catch (err) {
+                if (err.code === 'auth/user-not-found') showToast('אימייל לא נמצא במערכת');
+                else showToast('שגיאה בשליחת המייל');
+            }
+        }
+
+        const ADMIN_CODE = 'Rocky2026!';
+
         async function register() {
             const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
@@ -1997,6 +2043,7 @@
             const gym = document.getElementById('regGym').value.trim();
             const pass = document.getElementById('regPass').value;
             const isCoachReg = document.getElementById('regIsCoach').checked;
+            const isAdminReg = document.getElementById('regIsAdmin').checked;
 
             if (!name || !email || !pass) {
                 showToast('נא למלא שם, אימייל וסיסמה');
@@ -2006,11 +2053,25 @@
                 showToast('הסיסמה חייבת להכיל לפחות 6 תווים');
                 return;
             }
+            if (isAdminReg) {
+                const code = document.getElementById('adminCode').value.trim();
+                if (code !== ADMIN_CODE) {
+                    showToast('קוד אדמין שגוי');
+                    return;
+                }
+            }
+
+            let role = 'competitor';
+            if (isAdminReg) role = 'admin';
+            else if (isCoachReg) role = 'coach';
 
             setBtnLoading('regBtn', true);
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
                 await cred.user.updateProfile({ displayName: name });
+
+                // Send email verification
+                await cred.user.sendEmailVerification();
 
                 // Save user data to Firestore
                 await db.collection('users').doc(cred.user.uid).set({
@@ -2018,7 +2079,7 @@
                     email,
                     phone,
                     gym,
-                    role: isCoachReg ? 'coach' : 'competitor',
+                    role,
                     weight: null,
                     height: null,
                     category: '',
@@ -2041,9 +2102,12 @@
                 document.getElementById('regGym').value = '';
                 document.getElementById('regPass').value = '';
                 document.getElementById('regIsCoach').checked = false;
+                document.getElementById('regIsAdmin').checked = false;
+                document.getElementById('adminCode').value = '';
+                document.getElementById('adminCodeGroup').style.display = 'none';
 
                 closeModal('registerModal');
-                showToast('נרשמת בהצלחה! ברוך הבא ל-Rocky');
+                showToast('נרשמת בהצלחה! נשלח אימייל אימות');
             } catch (err) {
                 const msgs = {
                     'auth/email-already-in-use': 'האימייל כבר רשום במערכת',
@@ -2063,6 +2127,7 @@
                 if (doc.exists) {
                     userData = doc.data();
                     isCoach = userData.role === 'coach';
+                    isAdmin = userData.role === 'admin';
                     enterDashboard();
                 } else {
                     // First-time user without Firestore doc yet
@@ -2074,6 +2139,7 @@
                     currentUser = null;
                     userData = null;
                     isCoach = false;
+                    isAdmin = false;
                     exitDashboard();
                 }
             }
@@ -2106,9 +2172,12 @@
 
             document.querySelectorAll('.nav-public').forEach(el => el.style.display = 'none');
 
-            // Coach panel
-            if (isCoach) {
+            // Coach/Admin panel
+            if (isCoach || isAdmin) {
                 document.getElementById('coachPanelBtn').style.display = '';
+                document.getElementById('coachPanelBtn').innerHTML = isAdmin
+                    ? '<i class="fas fa-crown"></i> ניהול משתמשים'
+                    : '<i class="fas fa-users-cog"></i> ניהול מתחרים';
                 loadCompetitors();
             } else {
                 document.getElementById('coachPanelBtn').style.display = 'none';
@@ -2443,28 +2512,40 @@
 
         // ===== COACH: LOAD COMPETITORS =====
         async function loadCompetitors() {
-            if (!isCoach) return;
+            if (!isCoach && !isAdmin) return;
             const list = document.getElementById('competitorList');
-            list.innerHTML = '<p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען מתחרים...</p>';
+            list.innerHTML = '<p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען משתמשים...</p>';
 
-            const snapshot = await db.collection('users').where('role', '==', 'competitor').get();
-            if (snapshot.empty) {
-                list.innerHTML = '<p style="color:var(--text-secondary);">אין מתחרים רשומים עדיין.</p>';
+            let snapshot;
+            if (isAdmin) {
+                // Admin sees everyone
+                snapshot = await db.collection('users').get();
+            } else {
+                // Coach sees only competitors
+                snapshot = await db.collection('users').where('role', '==', 'competitor').get();
+            }
+            const allDocs = [];
+            snapshot.forEach(doc => { if (doc.id !== currentUser.uid) allDocs.push({ id: doc.id, ...doc.data() }); });
+
+            if (allDocs.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-secondary);">אין משתמשים רשומים עדיין.</p>';
                 return;
             }
 
             list.innerHTML = '';
-            snapshot.forEach(doc => {
-                const d = doc.data();
+            const roleLabels = { admin: 'אדמין', coach: 'מאמן', competitor: 'מתחרה' };
+            const roleColors = { admin: 'var(--gold)', coach: '#8ecae6', competitor: 'var(--accent)' };
+            allDocs.forEach(d => {
                 const w = d.wins || 0, l = d.losses || 0, dr = d.draws || 0;
+                const roleBadge = isAdmin ? `<span style="color:${roleColors[d.role]||'var(--text-secondary)'};font-size:0.75rem;font-weight:700;"> (${roleLabels[d.role] || d.role})</span>` : '';
                 const card = document.createElement('div');
                 card.className = 'competitor-card';
-                card.onclick = () => showCompetitorDetail(doc.id);
+                card.onclick = () => showCompetitorDetail(d.id);
                 card.innerHTML = `
                     <div class="comp-info">
                         <div class="comp-avatar"><i class="fas fa-user"></i></div>
                         <div>
-                            <div class="comp-name">${sanitize(d.name || 'ללא שם')}</div>
+                            <div class="comp-name">${sanitize(d.name || 'ללא שם')}${roleBadge}</div>
                             <div class="comp-detail">${sanitize(d.gym || '--')} | ${d.category || '--'}</div>
                         </div>
                     </div>
@@ -2555,6 +2636,228 @@
             });
         }, { threshold: 0.15 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // ===== LANGUAGE SYSTEM =====
+        const translations = {
+            he: {
+                // Nav
+                nav_about: 'אודות', nav_features: 'שירותים', nav_contact: 'צור קשר', nav_login: 'כניסת מתחרים',
+                // Hero
+                hero_subtitle: 'קבוצת מתחרים',
+                hero_desc: 'מסגרת אימונים מקצועית למתחרים בענף הלחימה. פתוח לכל מתחרה מכל מכון ומכל איגוד בישראל. יחד נהפוך למרכז הידע, התמיכה וההשראה ללוחמים ולוחמות.',
+                hero_coach: 'מאמן: גדי שור', hero_hours: 'אימונים כל בוקר 9:00-12:00', hero_address: 'תפוצות ישראל 4, גבעתיים',
+                hero_discover: 'גלה עוד', hero_enter: 'כניסת מתחרים',
+                // About
+                about_title: 'אודות הקבוצה', about_sub: 'Rocky - קבוצת מתחרים ישראלית בענף הלחימה',
+                about_open: 'פתוח לכולם', about_open_desc: 'הקבוצה נגישה לכל מתחרה מכל מכון ומכל איגוד בארץ. אנחנו מאמינים שלחימה מאחדת מעבר לגבולות ארגוניים.',
+                about_pro: 'מקצועיות', about_pro_desc: 'מסגרת אימונים מקצועית ונוחה למתחרים, עם ליווי אישי, ניתוח קרבות, ותכנון אסטרטגי לכל תחרות.',
+                about_know: 'חזית הידע', about_know_desc: 'שואפים להיות בחזית הידע בתחום הלחימה, מרכז ללימוד מעמיק, תמיכה והשראה ללוחמים ולוחמות בישראל.',
+                // Coaches
+                coaches_title: 'הצוות המקצועי', coaches_sub: 'המאמנים שלנו',
+                // Features
+                feat_title: 'מה אנחנו מציעים', feat_sub: 'כלים ושירותים למתחרים',
+                feat_docs: 'ניהול מסמכים', feat_docs_desc: 'העלאת אישורי רופא, טפסי הרשמה, פספורט, ביטוח ועוד - הכל מרוכז במקום אחד.',
+                feat_video: 'ניתוח סרטונים', feat_video_desc: 'שיתוף סרטוני קרבות לניתוח ושיפור. למידה מכל קרב לשדרוג הביצועים.',
+                feat_track: 'מעקב התקדמות', feat_track_desc: 'מעקב על כוח, משקל ויכולות טכניות של כל מתחרה. נתונים שעוזרים לשפר.',
+                feat_comp: 'ניהול תחרויות', feat_comp_desc: 'מערכת מרוכזת לניהול הרשמה לתחרויות, מעקב אחר תאריכים ודרישות.',
+                // Contact
+                contact_title: 'צור קשר', contact_sub: 'רוצה להצטרף? יש שאלות? דבר איתנו',
+                contact_address_label: 'כתובת המכון', contact_hours_label: 'שעות אימון', contact_hours_val: 'כל בוקר 9:00 - 12:00',
+                contact_coach_label: 'מאמן', contact_email_label: 'אימייל', contact_follow: 'עקבו אחרינו',
+                contact_name: 'שם מלא', contact_phone: 'טלפון', contact_msg: 'הודעה', contact_send: 'שלח הודעה',
+                contact_name_ph: 'השם שלך', contact_phone_ph: '050-0000000', contact_msg_ph: 'מה תרצה לשאול?',
+                // Footer
+                footer: '© 2026 Rocky - קבוצת מתחרים | כל הזכויות שמורות',
+                // Auth
+                login_title: 'כניסה', login_email: 'אימייל', login_pass: 'סיסמה', login_btn: 'כניסה',
+                login_forgot: 'שכחתי סיסמה', login_no_account: 'עדיין לא רשום?', login_register_link: 'הרשמה',
+                reg_title: 'הרשמה', reg_name: 'שם מלא', reg_email: 'אימייל', reg_phone: 'טלפון',
+                reg_gym: 'מכון / מועדון', reg_pass: 'סיסמה (לפחות 6 תווים)', reg_coach: 'אני מאמן',
+                admin_label: 'אני אדמין', admin_code: 'קוד אדמין', reg_btn: 'הרשמה',
+                reg_has_account: 'כבר רשום?', reg_login_link: 'התחברות',
+            },
+            en: {
+                nav_about: 'About', nav_features: 'Services', nav_contact: 'Contact', nav_login: 'Login',
+                hero_subtitle: 'Competition Team',
+                hero_desc: 'Professional training framework for fighters. Open to every competitor from any gym and any federation in Israel. Together we become the center of knowledge, support and inspiration.',
+                hero_coach: 'Coach: Gadi Shor', hero_hours: 'Training every morning 9:00-12:00', hero_address: 'Tfutsot Israel 4, Givatayim',
+                hero_discover: 'Learn More', hero_enter: 'Login',
+                about_title: 'About The Team', about_sub: 'Rocky - Israeli competition team in combat sports',
+                about_open: 'Open To All', about_open_desc: 'The team is accessible to every competitor from any gym and federation. We believe fighting unites beyond organizational borders.',
+                about_pro: 'Professionalism', about_pro_desc: 'Professional and comfortable training for competitors, with personal guidance, fight analysis, and strategic planning.',
+                about_know: 'Cutting Edge', about_know_desc: 'Striving to be at the forefront of combat knowledge, a center for deep learning, support and inspiration.',
+                coaches_title: 'Professional Team', coaches_sub: 'Our Coaches',
+                feat_title: 'What We Offer', feat_sub: 'Tools and services for competitors',
+                feat_docs: 'Document Management', feat_docs_desc: 'Upload medical certificates, registration forms, passport, insurance - all in one place.',
+                feat_video: 'Video Analysis', feat_video_desc: 'Share fight videos for analysis and improvement. Learn from every fight.',
+                feat_track: 'Progress Tracking', feat_track_desc: 'Track strength, weight and technical abilities. Data that helps improve.',
+                feat_comp: 'Competition Management', feat_comp_desc: 'Centralized system for competition registration, date tracking and requirements.',
+                contact_title: 'Contact Us', contact_sub: 'Want to join? Have questions? Talk to us',
+                contact_address_label: 'Gym Address', contact_hours_label: 'Training Hours', contact_hours_val: 'Every morning 9:00 - 12:00',
+                contact_coach_label: 'Coach', contact_email_label: 'Email', contact_follow: 'Follow Us',
+                contact_name: 'Full Name', contact_phone: 'Phone', contact_msg: 'Message', contact_send: 'Send Message',
+                contact_name_ph: 'Your name', contact_phone_ph: '050-0000000', contact_msg_ph: 'What would you like to ask?',
+                footer: '© 2026 Rocky - Competition Team | All rights reserved',
+                login_title: 'Login', login_email: 'Email', login_pass: 'Password', login_btn: 'Login',
+                login_forgot: 'Forgot password', login_no_account: 'Not registered yet?', login_register_link: 'Register',
+                reg_title: 'Register', reg_name: 'Full Name', reg_email: 'Email', reg_phone: 'Phone',
+                reg_gym: 'Gym / Club', reg_pass: 'Password (min 6 chars)', reg_coach: 'I am a coach',
+                admin_label: 'I am an admin', admin_code: 'Admin code', reg_btn: 'Register',
+                reg_has_account: 'Already registered?', reg_login_link: 'Login',
+            },
+            de: {
+                nav_about: 'Über uns', nav_features: 'Dienste', nav_contact: 'Kontakt', nav_login: 'Anmelden',
+                hero_subtitle: 'Wettkampfteam',
+                hero_desc: 'Professionelles Trainingskonzept für Kämpfer. Offen für jeden Wettkämpfer aus jedem Studio und Verband in Israel. Gemeinsam werden wir zum Zentrum des Wissens und der Inspiration.',
+                hero_coach: 'Trainer: Gadi Shor', hero_hours: 'Training jeden Morgen 9:00-12:00', hero_address: 'Tfutsot Israel 4, Givatayim',
+                hero_discover: 'Mehr erfahren', hero_enter: 'Anmelden',
+                about_title: 'Über das Team', about_sub: 'Rocky - Israelisches Wettkampfteam im Kampfsport',
+                about_open: 'Offen für alle', about_open_desc: 'Das Team ist für jeden Wettkämpfer zugänglich. Wir glauben, dass Kampfsport über organisatorische Grenzen hinaus verbindet.',
+                about_pro: 'Professionalität', about_pro_desc: 'Professionelles Training mit persönlicher Betreuung, Kampfanalyse und strategischer Planung.',
+                about_know: 'Spitzenklasse', about_know_desc: 'Wir streben danach, an der Spitze des Kampfwissens zu stehen, ein Zentrum für Lernen und Inspiration.',
+                coaches_title: 'Unser Team', coaches_sub: 'Unsere Trainer',
+                feat_title: 'Was wir bieten', feat_sub: 'Tools und Dienste für Wettkämpfer',
+                feat_docs: 'Dokumentenverwaltung', feat_docs_desc: 'Ärztliche Atteste, Anmeldeformulare, Reisepass, Versicherung - alles an einem Ort.',
+                feat_video: 'Videoanalyse', feat_video_desc: 'Kampfvideos teilen für Analyse und Verbesserung.',
+                feat_track: 'Fortschrittsverfolgung', feat_track_desc: 'Kraft, Gewicht und technische Fähigkeiten verfolgen.',
+                feat_comp: 'Wettkampfverwaltung', feat_comp_desc: 'Zentrales System für Wettkampfanmeldung und Terminverfolgung.',
+                contact_title: 'Kontakt', contact_sub: 'Möchtest du beitreten? Fragen? Sprich mit uns',
+                contact_address_label: 'Studioadresse', contact_hours_label: 'Trainingszeiten', contact_hours_val: 'Jeden Morgen 9:00 - 12:00',
+                contact_coach_label: 'Trainer', contact_email_label: 'E-Mail', contact_follow: 'Folgt uns',
+                contact_name: 'Vollständiger Name', contact_phone: 'Telefon', contact_msg: 'Nachricht', contact_send: 'Nachricht senden',
+                contact_name_ph: 'Dein Name', contact_phone_ph: '050-0000000', contact_msg_ph: 'Was möchtest du fragen?',
+                footer: '© 2026 Rocky - Wettkampfteam | Alle Rechte vorbehalten',
+                login_title: 'Anmelden', login_email: 'E-Mail', login_pass: 'Passwort', login_btn: 'Anmelden',
+                login_forgot: 'Passwort vergessen', login_no_account: 'Noch nicht registriert?', login_register_link: 'Registrieren',
+                reg_title: 'Registrieren', reg_name: 'Vollständiger Name', reg_email: 'E-Mail', reg_phone: 'Telefon',
+                reg_gym: 'Studio / Verein', reg_pass: 'Passwort (mind. 6 Zeichen)', reg_coach: 'Ich bin Trainer',
+                admin_label: 'Ich bin Admin', admin_code: 'Admin-Code', reg_btn: 'Registrieren',
+                reg_has_account: 'Bereits registriert?', reg_login_link: 'Anmelden',
+            }
+        };
+
+        let currentLang = localStorage.getItem('rocky_lang') || 'he';
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('rocky_lang', lang);
+
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+
+            // Set direction
+            const isRTL = lang === 'he';
+            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+
+            const t = translations[lang];
+
+            // Nav
+            const navLinks = document.querySelectorAll('#navLinks li a');
+            navLinks.forEach(a => {
+                if (a.classList.contains('btn-login')) a.textContent = t.nav_login;
+                else if (a.getAttribute('href') === '#about') a.textContent = t.nav_about;
+                else if (a.getAttribute('href') === '#features') a.textContent = t.nav_features;
+                else if (a.getAttribute('href') === '#contact') a.textContent = t.nav_contact;
+            });
+
+            // Hero
+            const heroSub = document.querySelector('.hero .subtitle');
+            if (heroSub) heroSub.textContent = t.hero_subtitle;
+            const heroDesc = document.querySelector('.hero .description');
+            if (heroDesc) heroDesc.textContent = t.hero_desc;
+            const heroSpans = document.querySelectorAll('.hero-content > div span');
+            if (heroSpans[0]) heroSpans[0].innerHTML = `<i class="fas fa-user-tie" style="color:var(--accent);"></i> ${t.hero_coach}`;
+            if (heroSpans[1]) heroSpans[1].innerHTML = `<i class="fas fa-clock" style="color:var(--accent);"></i> ${t.hero_hours}`;
+            if (heroSpans[2]) heroSpans[2].innerHTML = `<i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> ${t.hero_address}`;
+            const heroBtns = document.querySelectorAll('.hero-buttons .btn');
+            if (heroBtns[0]) heroBtns[0].innerHTML = `<i class="fas fa-info-circle"></i> ${t.hero_discover}`;
+            if (heroBtns[1]) heroBtns[1].innerHTML = `<i class="fas fa-sign-in-alt"></i> ${t.hero_enter}`;
+
+            // About
+            const aboutHeader = document.querySelector('#about .section-header h2');
+            if (aboutHeader) aboutHeader.textContent = t.about_title;
+            const aboutSub = document.querySelector('#about .section-header p');
+            if (aboutSub) aboutSub.textContent = t.about_sub;
+            const aboutCards = document.querySelectorAll('.about-card');
+            if (aboutCards[0]) { aboutCards[0].querySelector('h3').textContent = t.about_open; aboutCards[0].querySelector('.about-card-body p').textContent = t.about_open_desc; }
+            if (aboutCards[1]) { aboutCards[1].querySelector('h3').textContent = t.about_pro; aboutCards[1].querySelector('.about-card-body p').textContent = t.about_pro_desc; }
+            if (aboutCards[2]) { aboutCards[2].querySelector('h3').textContent = t.about_know; aboutCards[2].querySelector('.about-card-body p').textContent = t.about_know_desc; }
+
+            // Coaches
+            const coachTitle = document.querySelector('#coaches .section-header h2');
+            if (coachTitle) coachTitle.textContent = t.coaches_title;
+            const coachSub = document.querySelector('#coaches .section-header p');
+            if (coachSub) coachSub.textContent = t.coaches_sub;
+
+            // Features
+            const featTitle = document.querySelector('#features .section-header h2');
+            if (featTitle) featTitle.textContent = t.feat_title;
+            const featSub = document.querySelector('#features .section-header p');
+            if (featSub) featSub.textContent = t.feat_sub;
+            const featCards = document.querySelectorAll('.feature-card');
+            const featData = [
+                [t.feat_docs, t.feat_docs_desc], [t.feat_video, t.feat_video_desc],
+                [t.feat_track, t.feat_track_desc], [t.feat_comp, t.feat_comp_desc]
+            ];
+            featCards.forEach((card, i) => {
+                if (featData[i]) { card.querySelector('h3').textContent = featData[i][0]; card.querySelector('p').textContent = featData[i][1]; }
+            });
+
+            // Contact
+            const contTitle = document.querySelector('#contact .section-header h2');
+            if (contTitle) contTitle.textContent = t.contact_title;
+            const contSub = document.querySelector('#contact .section-header p');
+            if (contSub) contSub.textContent = t.contact_sub;
+            const contItems = document.querySelectorAll('.contact-item');
+            if (contItems[0]) { contItems[0].querySelector('h4').textContent = t.contact_address_label; }
+            if (contItems[1]) { contItems[1].querySelector('h4').textContent = t.contact_hours_label; contItems[1].querySelector('p').textContent = t.contact_hours_val; }
+            if (contItems[2]) { contItems[2].querySelector('h4').textContent = t.contact_coach_label; }
+            if (contItems[3]) { contItems[3].querySelector('h4').textContent = t.contact_email_label; }
+            if (contItems[4]) { contItems[4].querySelector('h4').textContent = t.contact_follow; }
+            const contLabels = document.querySelectorAll('#contact .form-group label');
+            if (contLabels[0]) contLabels[0].textContent = t.contact_name;
+            if (contLabels[1]) contLabels[1].textContent = t.contact_phone;
+            if (contLabels[2]) contLabels[2].textContent = t.contact_msg;
+            const contNameInput = document.getElementById('contactName');
+            if (contNameInput) contNameInput.placeholder = t.contact_name_ph;
+            const contPhoneInput = document.getElementById('contactPhone');
+            if (contPhoneInput) contPhoneInput.placeholder = t.contact_phone_ph;
+            const contMsgInput = document.getElementById('contactMsg');
+            if (contMsgInput) contMsgInput.placeholder = t.contact_msg_ph;
+            const sendBtn = document.querySelector('#contact .form-submit');
+            if (sendBtn) sendBtn.innerHTML = `<i class="fas fa-paper-plane"></i> ${t.contact_send}`;
+
+            // Footer
+            const footer = document.querySelector('footer p');
+            if (footer) footer.textContent = t.footer;
+
+            // Login modal
+            const loginH2 = document.querySelector('#loginModal h2');
+            if (loginH2) loginH2.innerHTML = `<i class="fas fa-fist-raised" style="color:var(--accent);"></i> ${t.login_title}`;
+            const loginLabels = document.querySelectorAll('#loginModal .form-group label');
+            if (loginLabels[0]) loginLabels[0].textContent = t.login_email;
+            if (loginLabels[1]) loginLabels[1].textContent = t.login_pass;
+            const loginBtnEl = document.getElementById('loginBtn');
+            if (loginBtnEl && !loginBtnEl.disabled) loginBtnEl.textContent = t.login_btn;
+
+            // Register modal
+            const regH2 = document.querySelector('#registerModal h2');
+            if (regH2) regH2.innerHTML = `<i class="fas fa-user-plus" style="color:var(--accent);"></i> ${t.reg_title}`;
+            const regLabels = document.querySelectorAll('#registerModal .form-group label');
+            if (regLabels[0]) regLabels[0].textContent = t.reg_name;
+            if (regLabels[1]) regLabels[1].textContent = t.reg_email;
+            if (regLabels[2]) regLabels[2].textContent = t.reg_phone;
+            if (regLabels[3]) regLabels[3].textContent = t.reg_gym;
+            if (regLabels[4]) regLabels[4].textContent = t.reg_pass;
+            const regBtnEl = document.getElementById('regBtn');
+            if (regBtnEl && !regBtnEl.disabled) regBtnEl.textContent = t.reg_btn;
+            document.querySelector('label[for="regIsCoach"]').innerHTML = `<i class="fas fa-user-shield"></i> ${t.reg_coach}`;
+            document.querySelector('[data-i18n="admin_label"]').textContent = t.admin_label;
+        }
+
+        // Apply saved language on load
+        if (currentLang !== 'he') setLang(currentLang);
     </script>
 </body>
 </html>
