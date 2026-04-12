@@ -19,7 +19,7 @@
             --accent-dark: #c62b38;
             --accent-glow: rgba(230, 57, 70, 0.3);
             --text-primary: #f1f1f1;
-            --text-secondary: #d4d4e0;
+            --text-secondary: #ffffff;
             --white: #ffffff;
             --border: #2a2a3e;
             --border-light: rgba(255,255,255,0.08);
@@ -138,7 +138,7 @@
             position: relative;
             background: linear-gradient(160deg, var(--bg-primary) 0%, #1a0a10 50%, var(--bg-primary) 100%);
             overflow: hidden;
-            padding-top: env(safe-area-inset-top);
+            padding-top: calc(90px + env(safe-area-inset-top));
             padding-bottom: env(safe-area-inset-bottom);
         }
 
@@ -264,10 +264,11 @@
         }
 
         .section-header h2 {
-            font-size: 2.6rem;
+            font-size: 3rem;
             font-weight: 900;
             margin-bottom: 10px;
             color: var(--white);
+            letter-spacing: 1px;
         }
 
         .section-header p {
@@ -337,7 +338,8 @@
         }
 
         .about-card h3 {
-            font-size: 1.35rem;
+            font-size: 1.5rem;
+            font-weight: 900;
             margin-bottom: 12px;
             color: var(--white);
         }
@@ -385,7 +387,8 @@
         }
 
         .feature-card h3 {
-            font-size: 1.2rem;
+            font-size: 1.35rem;
+            font-weight: 900;
             margin-bottom: 6px;
             color: var(--white);
         }
@@ -935,6 +938,7 @@
             .nav-links .btn-login { margin-inline-end: 0; text-align: center; width: 100%; }
             .nav-links li { width: 100%; }
             .nav-links li a { display: block; }
+            .nav-lang-item { width: 100%; justify-content: center; padding: 8px 0; }
             .mobile-menu-btn {
                 position: absolute;
                 left: 20px;
@@ -1134,12 +1138,13 @@
         .coach-checkbox-group label { color: var(--text-primary); font-size: 1.02rem; cursor: pointer; font-weight: 500; }
 
         .lang-dropdown {
-            background: var(--bg-card); border: 1px solid var(--border);
-            color: var(--text-primary); padding: 6px 12px; border-radius: 8px;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-primary); padding: 8px 14px; border-radius: 8px;
             font-size: 0.95rem; cursor: pointer; font-family: 'Heebo', sans-serif;
             outline: none; appearance: auto;
         }
         .lang-dropdown:hover, .lang-dropdown:focus { border-color: var(--accent); }
+        .nav-lang-item { display: flex; align-items: center; }
 
         .loading-spinner {
             display: inline-block; width: 20px; height: 20px;
@@ -1187,13 +1192,6 @@
             <a href="#" class="logo" onclick="goHome(event)">
                 <img src="images/rocky-icon.png" alt="Rocky">
             </a>
-            <div class="lang-switcher" style="position:absolute;left:80px;top:50%;transform:translateY(-50%);">
-                <select id="langSelect" onchange="setLang(this.value)" class="lang-dropdown">
-                    <option value="he">עברית</option>
-                    <option value="en">English</option>
-                    <option value="de">Deutsch</option>
-                </select>
-            </div>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="תפריט">
                 <i class="fas fa-bars"></i>
             </button>
@@ -1202,6 +1200,14 @@
                 <li><a href="#contact" class="nav-public">צור קשר</a></li>
                 <li><a href="#features" class="nav-public">שירותים</a></li>
                 <li><a href="#about" class="nav-public">אודות</a></li>
+                <li class="nav-lang-item">
+                    <i class="fas fa-globe" style="color:var(--accent); margin-inline-end:6px;"></i>
+                    <select id="langSelect" onchange="setLang(this.value)" class="lang-dropdown">
+                        <option value="he">עברית</option>
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </li>
             </ul>
         </div>
     </nav>
@@ -1872,7 +1878,7 @@
             </div>
             <div class="coach-checkbox-group" style="border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.06);">
                 <input type="checkbox" id="regIsAdmin" onchange="if(this.checked) document.getElementById('regIsCoach').checked=false;">
-                <label for="regIsAdmin"><i class="fas fa-crown" style="color:var(--gold);"></i> <span data-i18n="admin_label">אני אדמין</span></label>
+                <label for="regIsAdmin"><span data-i18n="admin_label">אני אדמין</span></label>
             </div>
             <div class="form-group" id="adminCodeGroup" style="display:none;">
                 <label>קוד אדמין</label>
@@ -2732,6 +2738,11 @@
                 // Coach panel
                 dash_coach_title: 'ניהול מתחרים', dash_coach_desc: 'לחץ על מתחרה לצפייה בפרטים המלאים שלו.',
                 dash_loading: 'טוען מתחרים...',
+                // Coach cards
+                coach_gadi_name: 'גדי שור', coach_gadi_role: 'מאמן ראשי - לחימה', coach_gadi_bio: 'מאמן ומנהל קבוצת Rocky. מוביל את המתחרים לתוצאות ברמה הגבוהה ביותר.',
+                coach_omer_name: 'עומר עמנואלי', coach_omer_role: 'מאמן בכיר ומתחרה פעיל', coach_omer_bio: 'מייסד קבוצת Rocky בשיתוף עם גדי, המאמן הראשי. מאמן בכיר ומתחרה פעיל שמוביל בדוגמה אישית.',
+                coach_yarden_name: 'ירדן בני', coach_yarden_role: 'מאמן בכיר ומתחרה פעיל', coach_yarden_bio: 'מאמן בכיר ומתחרה פעיל. לירדן ניסיון עשיר בהדרכה.',
+                coach_stefan_name: 'סטפן אוטו', coach_stefan_role: 'מאמן כושר וכוח', coach_stefan_bio: 'מאמן כושר וכוח מקצועי. אחראי על הכנה גופנית, חיזוק ובניית כוח למתחרים.',
             },
             en: {
                 nav_about: 'About', nav_features: 'Services', nav_contact: 'Contact', nav_login: 'Login',
@@ -2803,6 +2814,11 @@
                 dash_registered: 'Registered',
                 dash_coach_title: 'Manage Competitors', dash_coach_desc: 'Click on a competitor to view their full details.',
                 dash_loading: 'Loading competitors...',
+                // Coach cards
+                coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Head Coach - Fighting', coach_gadi_bio: 'Coach and manager of Rocky team. Leading competitors to top results.',
+                coach_omer_name: 'Omer Emanueli', coach_omer_role: 'Senior Coach & Active Competitor', coach_omer_bio: 'Co-founder of Rocky team with Gadi, the head coach. Senior coach and active competitor leading by example.',
+                coach_yarden_name: 'Yarden Beni', coach_yarden_role: 'Senior Coach & Active Competitor', coach_yarden_bio: 'Senior coach and active competitor. Yarden has extensive coaching experience.',
+                coach_stefan_name: 'Stefan Otto', coach_stefan_role: 'Strength & Conditioning Coach', coach_stefan_bio: 'Professional strength and conditioning coach. Responsible for physical preparation and strength building.',
             },
             de: {
                 nav_about: 'Über uns', nav_features: 'Dienste', nav_contact: 'Kontakt', nav_login: 'Anmelden',
@@ -2874,6 +2890,11 @@
                 dash_registered: 'Angemeldet',
                 dash_coach_title: 'Wettkämpfer verwalten', dash_coach_desc: 'Klicke auf einen Wettkämpfer für Details.',
                 dash_loading: 'Wettkämpfer werden geladen...',
+                // Coach cards
+                coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Cheftrainer - Kampfsport', coach_gadi_bio: 'Trainer und Leiter des Rocky-Teams. Führt die Wettkämpfer zu Spitzenleistungen.',
+                coach_omer_name: 'Omer Emanueli', coach_omer_role: 'Senior-Trainer & aktiver Wettkämpfer', coach_omer_bio: 'Mitgründer des Rocky-Teams mit Gadi. Senior-Trainer der mit persönlichem Beispiel vorangeht.',
+                coach_yarden_name: 'Yarden Beni', coach_yarden_role: 'Senior-Trainer & aktiver Wettkämpfer', coach_yarden_bio: 'Senior-Trainer und aktiver Wettkämpfer. Yarden hat umfangreiche Trainingserfahrung.',
+                coach_stefan_name: 'Stefan Otto', coach_stefan_role: 'Kraft- und Konditionstrainer', coach_stefan_bio: 'Professioneller Kraft- und Konditionstrainer. Verantwortlich für körperliche Vorbereitung und Kraftaufbau.',
             }
         };
 
@@ -2930,6 +2951,22 @@
             if (coachTitle) coachTitle.textContent = t.coaches_title;
             const coachSub = document.querySelector('#coaches .section-header p');
             if (coachSub) coachSub.textContent = t.coaches_sub;
+
+            // Coach cards
+            const coachCards = document.querySelectorAll('.coach-card');
+            const coachData = [
+                { name: t.coach_gadi_name, role: t.coach_gadi_role, bio: t.coach_gadi_bio },
+                { name: t.coach_omer_name, role: t.coach_omer_role, bio: t.coach_omer_bio },
+                { name: t.coach_yarden_name, role: t.coach_yarden_role, bio: t.coach_yarden_bio },
+                { name: t.coach_stefan_name, role: t.coach_stefan_role, bio: t.coach_stefan_bio }
+            ];
+            coachCards.forEach((card, i) => {
+                if (coachData[i]) {
+                    card.querySelector('.coach-info h3').textContent = coachData[i].name;
+                    card.querySelector('.coach-role').textContent = coachData[i].role;
+                    card.querySelector('.coach-info p').textContent = coachData[i].bio;
+                }
+            });
 
             // Features
             const featTitle = document.querySelector('#features .section-header h2');
