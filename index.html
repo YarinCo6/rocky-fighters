@@ -227,50 +227,96 @@
             flex-wrap: wrap;
         }
 
-        .contact-options {
+        /* Contact Modal */
+        .contact-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
             display: flex;
-            gap: 12px;
+            align-items: center;
             justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 18px;
-            max-height: 0;
-            overflow: hidden;
             opacity: 0;
-            transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
-        .contact-options.open {
-            max-height: 200px;
+        .contact-modal-overlay.open {
             opacity: 1;
+            pointer-events: all;
+        }
+        .contact-modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px 40px 40px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .contact-modal-overlay.open .contact-modal-box {
+            transform: scale(1);
+        }
+        .contact-modal-close {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.4rem;
+            cursor: pointer;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .contact-modal-close:hover { background: var(--border); color: var(--white); }
+        .contact-modal-box h3 {
+            font-size: 1.6rem; font-weight: 800;
+            color: var(--white); margin-bottom: 8px;
+        }
+        .contact-modal-box p {
+            color: var(--text-secondary); margin-bottom: 32px; font-size: 1rem;
+        }
+        .contact-modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
         .contact-option-btn {
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
             font-family: 'Heebo', sans-serif;
             text-decoration: none;
             transition: all 0.25s;
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 10px;
         }
         .contact-option-btn.phone {
             background: var(--accent);
             color: var(--white);
         }
-        .contact-option-btn.phone:hover { filter: brightness(1.1); }
+        .contact-option-btn.phone:hover { filter: brightness(1.1); transform: translateY(-2px); }
         .contact-option-btn.whatsapp {
             background: transparent;
             border: 2px solid #25D366;
             color: #25D366;
         }
-        .contact-option-btn.whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
+        .contact-option-btn.whatsapp:hover { background: rgba(37, 211, 102, 0.1); transform: translateY(-2px); }
         .contact-option-btn.email {
             background: transparent;
-            border: 2px solid var(--white);
+            border: 2px solid var(--border);
             color: var(--white);
         }
-        .contact-option-btn.email:hover { background: rgba(255,255,255,0.08); }
+        .contact-option-btn.email:hover { background: var(--border); transform: translateY(-2px); }
 
         /* ===== BUTTONS ===== */
         .btn {
@@ -1334,13 +1380,8 @@
                     <span><i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> תפוצות ישראל 4, גבעתיים</span>
                 </div>
                 <div class="hero-buttons">
-                    <button class="btn btn-primary" onclick="toggleContactOptions()"><i class="fas fa-phone-alt"></i> <span data-i18n="hero_contact">צור קשר</span></button>
+                    <button class="btn btn-primary" onclick="openContactModal()"><span data-i18n="hero_contact">צור קשר</span></button>
                     <a href="#" class="btn btn-outline" onclick="event.preventDefault(); openModal('loginModal')"><i class="fas fa-sign-in-alt"></i> <span data-i18n="hero_enter">כניסת מתחרים</span></a>
-                </div>
-                <div class="contact-options" id="contactOptions">
-                    <a href="tel:+972501234567" class="contact-option-btn phone"><i class="fas fa-phone"></i> <span data-i18n="hero_phone">התקשרו אלינו</span></a>
-                    <a href="https://wa.me/972501234567" target="_blank" class="contact-option-btn whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                    <a href="mailto:rocky.team.il@gmail.com" class="contact-option-btn email"><i class="fas fa-envelope"></i> <span data-i18n="hero_email">שלחו מייל</span></a>
                 </div>
             </div>
         </section>
@@ -1543,6 +1584,26 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="contact-modal-overlay" id="contactModal" onclick="closeContactModal(event)">
+        <div class="contact-modal-box">
+            <button class="contact-modal-close" onclick="closeContactModal()"><i class="fas fa-times"></i></button>
+            <h3 data-i18n="contact_modal_title">דברו איתנו</h3>
+            <p data-i18n="contact_modal_sub">בחרו את דרך ההתקשרות המועדפת</p>
+            <div class="contact-modal-options">
+                <a href="tel:+972501234567" class="contact-option-btn phone">
+                    <i class="fas fa-phone"></i> <span data-i18n="hero_phone">התקשרו אלינו</span>
+                </a>
+                <a href="https://wa.me/972501234567" target="_blank" class="contact-option-btn whatsapp">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="mailto:rocky.team.il@gmail.com" class="contact-option-btn email">
+                    <i class="fas fa-envelope"></i> <span data-i18n="hero_email">שלחו מייל</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- DASHBOARD -->
@@ -2772,6 +2833,7 @@
                 hero_desc: 'מסגרת אימונים מקצועית למתחרים בענף הלחימה. פתוח לכל מתחרה מכל מכון ומכל איגוד בישראל. יחד נהפוך למרכז הידע, התמיכה וההשראה ללוחמים ולוחמות.',
                 hero_coach: 'מאמן: גדי שור', hero_hours: 'אימונים כל בוקר 9:00-12:00', hero_address: 'תפוצות ישראל 4, גבעתיים',
                 hero_contact: 'צור קשר', hero_phone: 'התקשרו אלינו', hero_whatsapp: 'WhatsApp', hero_email: 'שלחו מייל', hero_enter: 'כניסת מתחרים',
+                contact_modal_title: 'דברו איתנו', contact_modal_sub: 'בחרו את דרך ההתקשרות המועדפת',
                 // About
                 about_title: 'אודות הקבוצה', about_sub: 'Rocky - קבוצת מתחרים ישראלית בענף הלחימה',
                 about_open: 'פתוח לכולם', about_open_desc: 'הקבוצה נגישה לכל מתחרה מכל מכון ומכל איגוד בארץ. אנחנו מאמינים שלחימה מאחדת מעבר לגבולות ארגוניים.',
@@ -2861,6 +2923,7 @@
                 hero_desc: 'Professional training framework for fighters. Open to every competitor from any gym and any federation in Israel. Together we become the center of knowledge, support and inspiration.',
                 hero_coach: 'Coach: Gadi Shor', hero_hours: 'Training every morning 9:00-12:00', hero_address: 'Tfutsot Israel 4, Givatayim',
                 hero_contact: 'Contact Us', hero_phone: 'Call Us', hero_whatsapp: 'WhatsApp', hero_email: 'Email Us', hero_enter: 'Login',
+                contact_modal_title: 'Get In Touch', contact_modal_sub: 'Choose your preferred way to contact us',
                 about_title: 'About The Team', about_sub: 'Rocky - Israeli competition team in combat sports',
                 about_open: 'Open To All', about_open_desc: 'The team is accessible to every competitor from any gym and federation. We believe fighting unites beyond organizational borders.',
                 about_pro: 'Professionalism', about_pro_desc: 'Professional and comfortable training for competitors, with personal guidance, fight analysis, and strategic planning.',
@@ -2937,6 +3000,7 @@
                 hero_desc: 'Professionelles Trainingskonzept für Kämpfer. Offen für jeden Wettkämpfer aus jedem Studio und Verband in Israel. Gemeinsam werden wir zum Zentrum des Wissens und der Inspiration.',
                 hero_coach: 'Trainer: Gadi Shor', hero_hours: 'Training jeden Morgen 9:00-12:00', hero_address: 'Tfutsot Israel 4, Givatayim',
                 hero_contact: 'Kontakt', hero_phone: 'Anrufen', hero_whatsapp: 'WhatsApp', hero_email: 'E-Mail senden', hero_enter: 'Anmelden',
+                contact_modal_title: 'Kontaktiere uns', contact_modal_sub: 'Wähle deine bevorzugte Kontaktmethode',
                 about_title: 'Über das Team', about_sub: 'Rocky - Israelisches Wettkampfteam im Kampfsport',
                 about_open: 'Offen für alle', about_open_desc: 'Das Team ist für jeden Wettkämpfer zugänglich. Wir glauben, dass Kampfsport über organisatorische Grenzen hinaus verbindet.',
                 about_pro: 'Professionalität', about_pro_desc: 'Professionelles Training mit persönlicher Betreuung, Kampfanalyse und strategischer Planung.',
@@ -3011,8 +3075,14 @@
 
         let currentLang = localStorage.getItem('rocky_lang') || 'he';
 
-        function toggleContactOptions() {
-            document.getElementById('contactOptions').classList.toggle('open');
+        function openContactModal() {
+            document.getElementById('contactModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeContactModal(e) {
+            if (e && e.target !== document.getElementById('contactModal')) return;
+            document.getElementById('contactModal').classList.remove('open');
+            document.body.style.overflow = '';
         }
 
         function toggleLangSwitcher() {
