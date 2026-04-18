@@ -140,7 +140,7 @@
             background: linear-gradient(160deg, var(--bg-primary) 0%, #0d1a30 50%, var(--bg-primary) 100%);
             overflow: hidden;
             padding-top: calc(90px + env(safe-area-inset-top));
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: calc(60px + env(safe-area-inset-bottom));
         }
 
         .hero::before {
@@ -1289,8 +1289,12 @@
                     <span><i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> תפוצות ישראל 4, גבעתיים</span>
                 </div>
                 <div class="hero-buttons">
-                    <a href="#about" class="btn btn-primary"><i class="fas fa-info-circle"></i> גלה עוד</a>
-                    <a href="#" class="btn btn-outline" onclick="event.preventDefault(); openModal('loginModal')"><i class="fas fa-sign-in-alt"></i> כניסת מתחרים</a>
+                    <a href="tel:+972501234567" class="btn btn-primary"><i class="fas fa-phone"></i> <span data-i18n="hero_phone">התקשרו אלינו</span></a>
+                    <a href="https://wa.me/972501234567" target="_blank" class="btn btn-outline" style="border-color: #25D366; color: #25D366;"><i class="fab fa-whatsapp"></i> <span data-i18n="hero_whatsapp">WhatsApp</span></a>
+                    <a href="mailto:rocky.team.il@gmail.com" class="btn btn-outline"><i class="fas fa-envelope"></i> <span data-i18n="hero_email">שלחו מייל</span></a>
+                </div>
+                <div style="margin-top: 16px;">
+                    <a href="#" class="btn btn-outline" style="font-size:0.95rem; padding:12px 28px;" onclick="event.preventDefault(); openModal('loginModal')"><i class="fas fa-sign-in-alt"></i> <span data-i18n="hero_enter">כניסת מתחרים</span></a>
                 </div>
             </div>
         </section>
@@ -2721,7 +2725,7 @@
                 hero_subtitle: 'קבוצת מתחרים',
                 hero_desc: 'מסגרת אימונים מקצועית למתחרים בענף הלחימה. פתוח לכל מתחרה מכל מכון ומכל איגוד בישראל. יחד נהפוך למרכז הידע, התמיכה וההשראה ללוחמים ולוחמות.',
                 hero_coach: 'מאמן: גדי שור', hero_hours: 'אימונים כל בוקר 9:00-12:00', hero_address: 'תפוצות ישראל 4, גבעתיים',
-                hero_discover: 'גלה עוד', hero_enter: 'כניסת מתחרים',
+                hero_phone: 'התקשרו אלינו', hero_whatsapp: 'WhatsApp', hero_email: 'שלחו מייל', hero_enter: 'כניסת מתחרים',
                 // About
                 about_title: 'אודות הקבוצה', about_sub: 'Rocky - קבוצת מתחרים ישראלית בענף הלחימה',
                 about_open: 'פתוח לכולם', about_open_desc: 'הקבוצה נגישה לכל מתחרה מכל מכון ומכל איגוד בארץ. אנחנו מאמינים שלחימה מאחדת מעבר לגבולות ארגוניים.',
@@ -2810,7 +2814,7 @@
                 hero_subtitle: 'Competition Team',
                 hero_desc: 'Professional training framework for fighters. Open to every competitor from any gym and any federation in Israel. Together we become the center of knowledge, support and inspiration.',
                 hero_coach: 'Coach: Gadi Shor', hero_hours: 'Training every morning 9:00-12:00', hero_address: 'Tfutsot Israel 4, Givatayim',
-                hero_discover: 'Learn More', hero_enter: 'Login',
+                hero_phone: 'Call Us', hero_whatsapp: 'WhatsApp', hero_email: 'Email Us', hero_enter: 'Login',
                 about_title: 'About The Team', about_sub: 'Rocky - Israeli competition team in combat sports',
                 about_open: 'Open To All', about_open_desc: 'The team is accessible to every competitor from any gym and federation. We believe fighting unites beyond organizational borders.',
                 about_pro: 'Professionalism', about_pro_desc: 'Professional and comfortable training for competitors, with personal guidance, fight analysis, and strategic planning.',
@@ -2886,7 +2890,7 @@
                 hero_subtitle: 'Wettkampfteam',
                 hero_desc: 'Professionelles Trainingskonzept für Kämpfer. Offen für jeden Wettkämpfer aus jedem Studio und Verband in Israel. Gemeinsam werden wir zum Zentrum des Wissens und der Inspiration.',
                 hero_coach: 'Trainer: Gadi Shor', hero_hours: 'Training jeden Morgen 9:00-12:00', hero_address: 'Tfutsot Israel 4, Givatayim',
-                hero_discover: 'Mehr erfahren', hero_enter: 'Anmelden',
+                hero_phone: 'Anrufen', hero_whatsapp: 'WhatsApp', hero_email: 'E-Mail senden', hero_enter: 'Anmelden',
                 about_title: 'Über das Team', about_sub: 'Rocky - Israelisches Wettkampfteam im Kampfsport',
                 about_open: 'Offen für alle', about_open_desc: 'Das Team ist für jeden Wettkämpfer zugänglich. Wir glauben, dass Kampfsport über organisatorische Grenzen hinaus verbindet.',
                 about_pro: 'Professionalität', about_pro_desc: 'Professionelles Training mit persönlicher Betreuung, Kampfanalyse und strategischer Planung.',
@@ -3019,9 +3023,11 @@
             if (heroSpans[0]) heroSpans[0].innerHTML = `<i class="fas fa-user-tie" style="color:var(--accent);"></i> ${t.hero_coach}`;
             if (heroSpans[1]) heroSpans[1].innerHTML = `<i class="fas fa-clock" style="color:var(--accent);"></i> ${t.hero_hours}`;
             if (heroSpans[2]) heroSpans[2].innerHTML = `<i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> ${t.hero_address}`;
-            const heroBtns = document.querySelectorAll('.hero-buttons .btn');
-            if (heroBtns[0]) heroBtns[0].innerHTML = `<i class="fas fa-info-circle"></i> ${t.hero_discover}`;
-            if (heroBtns[1]) heroBtns[1].innerHTML = `<i class="fas fa-sign-in-alt"></i> ${t.hero_enter}`;
+            // Hero CTA buttons
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.textContent = t[key];
+            });
 
             // About
             const aboutHeader = document.querySelector('#about .section-header h2');
