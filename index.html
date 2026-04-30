@@ -1085,6 +1085,7 @@
 
         @media (max-width: 480px) {
             .hero { padding-top: calc(70px + env(safe-area-inset-top)); padding-bottom: 20px; min-height: auto; }
+            .hero::after { display: none; }
             .hero-logo { width: 210px; margin-bottom: 8px; }
             .hero h1 { font-size: 2.7rem; }
             .hero .subtitle { font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 10px; }
@@ -1093,6 +1094,7 @@
             .hero-buttons { gap: 10px; }
             .section-header h2 { font-size: 2rem; }
             .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            #about { padding-top: 40px; }
         }
 
         /* Scrollbar */
