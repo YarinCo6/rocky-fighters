@@ -1084,8 +1084,13 @@
         }
 
         @media (max-width: 480px) {
+            .hero { padding-top: calc(70px + env(safe-area-inset-top)); padding-bottom: 20px; }
+            .hero-logo { width: 160px; margin-bottom: 8px; }
             .hero h1 { font-size: 2.7rem; }
-            .hero .subtitle { font-size: 1.7rem; letter-spacing: 1px; }
+            .hero .subtitle { font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 10px; }
+            .hero .description { font-size: 0.95rem; margin-bottom: 16px; line-height: 1.6; }
+            .hero-content > div { margin-bottom: 16px !important; font-size: 0.88rem !important; gap: 10px !important; }
+            .hero-buttons { gap: 10px; }
             .section-header h2 { font-size: 2rem; }
             .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
         }
