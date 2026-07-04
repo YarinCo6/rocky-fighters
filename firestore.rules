@@ -1,13 +1,38 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Admin is identified ONLY by a hardcoded email from the auth token.
+    // It can never be granted from the client, so it can't be self-assigned.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'yarin5cohen@gmail.com';
+    }
+
+    function isCoach() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
+    }
+
     match /users/{userId} {
-      // Users can read and write their own data
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      // Coaches can read all competitor data
-      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
-      // Admins can read and write ALL user data
-      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      // Admin: full read/write on everyone.
+      allow read, write: if isAdmin();
+
+      // Coach: read all competitor docs.
+      allow read: if isCoach();
+
+      // Owner: read own doc.
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Owner create: only own doc, and role is forced to 'competitor'.
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.role == 'competitor';
+
+      // Owner update: own doc, but role can NOT be changed (only admin can).
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role;
     }
   }
 }
