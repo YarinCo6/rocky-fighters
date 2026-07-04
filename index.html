@@ -1898,15 +1898,7 @@
                             </div>
                             <div class="form-group">
                                 <label>קטגוריית משקל</label>
-                                <select id="categoryInput">
-                                    <option value="">בחר קטגוריה</option>
-                                    <option>-57 ק"ג</option>
-                                    <option>-63 ק"ג</option>
-                                    <option>-70 ק"ג</option>
-                                    <option>-78 ק"ג</option>
-                                    <option>-86 ק"ג</option>
-                                    <option>+86 ק"ג</option>
-                                </select>
+                                <input type="text" id="categoryInput" placeholder="למשל: -70 ק&quot;ג">
                             </div>
                             <div class="form-group">
                                 <label>מכון / מועדון</label>
@@ -1961,15 +1953,7 @@
                     </div>
                     <div class="form-group">
                         <label>קטגוריית משקל</label>
-                        <select id="compWeight">
-                            <option value="">בחר קטגוריה</option>
-                            <option>-57 ק"ג</option>
-                            <option>-63 ק"ג</option>
-                            <option>-70 ק"ג</option>
-                            <option>-78 ק"ג</option>
-                            <option>-86 ק"ג</option>
-                            <option>+86 ק"ג</option>
-                        </select>
+                        <input type="text" id="compWeight" placeholder="למשל: -70 ק&quot;ג">
                     </div>
                     <button class="form-submit" onclick="registerComp()">שלח הרשמה</button>
                 </div>
@@ -3318,7 +3302,7 @@
                 dash_prof_fights: 'קרבות', dash_prof_record: 'מאזן (W-L-D)',
                 dash_update_details: 'עדכון פרטים', dash_save_changes: 'שמור שינויים',
                 dash_weight_kg: 'משקל (ק"ג)', dash_height_cm: 'גובה (ס"מ)',
-                dash_weight_cat: 'קטגוריית משקל', dash_select_cat: 'בחר קטגוריה',
+                dash_weight_cat: 'קטגוריית משקל', dash_select_cat: 'בחר קטגוריה', dash_weight_cat_ph: 'למשל: -70 ק"ג',
                 dash_exp_years: 'שנות ניסיון', dash_gym_name: 'מכון / מועדון',
                 dash_wins: 'ניצחונות', dash_losses: 'הפסדים', dash_draws: 'תיקו',
                 dash_tech_skills: 'יכולות טכניות', dash_update_skills: 'עדכון יכולות',
@@ -3431,7 +3415,7 @@
                 dash_prof_fights: 'Fights', dash_prof_record: 'Record (W-L-D)',
                 dash_update_details: 'Update Details', dash_save_changes: 'Save Changes',
                 dash_weight_kg: 'Weight (kg)', dash_height_cm: 'Height (cm)',
-                dash_weight_cat: 'Weight Category', dash_select_cat: 'Select category',
+                dash_weight_cat: 'Weight Category', dash_select_cat: 'Select category', dash_weight_cat_ph: 'e.g. -70 kg',
                 dash_exp_years: 'Years of Experience', dash_gym_name: 'Gym / Club',
                 dash_wins: 'Wins', dash_losses: 'Losses', dash_draws: 'Draws',
                 dash_tech_skills: 'Technical Skills', dash_update_skills: 'Update Skills',
@@ -3542,7 +3526,7 @@
                 dash_prof_fights: 'Kämpfe', dash_prof_record: 'Bilanz (S-N-U)',
                 dash_update_details: 'Details aktualisieren', dash_save_changes: 'Änderungen speichern',
                 dash_weight_kg: 'Gewicht (kg)', dash_height_cm: 'Größe (cm)',
-                dash_weight_cat: 'Gewichtsklasse', dash_select_cat: 'Kategorie wählen',
+                dash_weight_cat: 'Gewichtsklasse', dash_select_cat: 'Kategorie wählen', dash_weight_cat_ph: 'z.B. -70 kg',
                 dash_exp_years: 'Jahre Erfahrung', dash_gym_name: 'Studio / Verein',
                 dash_wins: 'Siege', dash_losses: 'Niederlagen', dash_draws: 'Unentschieden',
                 dash_tech_skills: 'Technische Fähigkeiten', dash_update_skills: 'Fähigkeiten aktualisieren',
@@ -3871,7 +3855,7 @@
             }
             // Category select placeholder
             const catSelect = document.getElementById('categoryInput');
-            if (catSelect && catSelect.options[0]) catSelect.options[0].textContent = t.dash_select_cat;
+            if (catSelect) catSelect.placeholder = t.dash_weight_cat_ph;
 
             // Weight history card
             if (profileCards[2]) {
@@ -3903,7 +3887,7 @@
                 const compSubmit = compCards[1].querySelector('.form-submit');
                 if (compSubmit) compSubmit.textContent = t.dash_comp_submit;
                 const compWeightSel = document.getElementById('compWeight');
-                if (compWeightSel && compWeightSel.options[0]) compWeightSel.options[0].textContent = t.dash_select_cat;
+                if (compWeightSel) compWeightSel.placeholder = t.dash_weight_cat_ph;
             }
             if (compCards[2]) {
                 const histH4 = compCards[2].querySelector('h4');
