@@ -3053,22 +3053,27 @@
             const list = document.getElementById('competitorList');
             list.innerHTML = '<p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען משתמשים...</p>';
 
+            const myUid = currentUser ? currentUser.uid : null;
             let snapshot;
             try {
-                if (isAdmin) {
-                    // Admin sees everyone
-                    snapshot = await db.collection('users').get();
-                } else {
-                    // Coach sees only competitors
-                    snapshot = await db.collection('users').where('role', '==', 'competitor').get();
-                }
+                const query = isAdmin
+                    ? db.collection('users')                              // Admin sees everyone
+                    : db.collection('users').where('role', '==', 'competitor'); // Coach sees competitors
+                // Never hang: if the fetch takes too long, surface a message instead of spinning forever.
+                snapshot = await Promise.race([
+                    query.get(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000)),
+                ]);
             } catch (e) {
-                list.innerHTML = `<p style="color:var(--accent);">שגיאה בטעינת המשתמשים: ${sanitize(e.message)}</p>`;
+                const msg = e.message === 'timeout'
+                    ? 'הטעינה נמשכה יותר מדי זמן. נסה לרענן את הדף.'
+                    : `שגיאה בטעינת המשתמשים: ${sanitize(e.message)}`;
+                list.innerHTML = `<p style="color:var(--accent);">${msg}</p>`;
                 return;
             }
 
             const allDocs = [];
-            snapshot.forEach(doc => { if (doc.id !== currentUser.uid) allDocs.push({ id: doc.id, ...doc.data() }); });
+            snapshot.forEach(doc => { if (doc.id !== myUid) allDocs.push({ id: doc.id, ...doc.data() }); });
 
             if (allDocs.length === 0) {
                 list.innerHTML = '<p style="color:var(--text-secondary);">אין משתמשים רשומים עדיין.</p>';
