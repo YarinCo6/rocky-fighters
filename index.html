@@ -1279,6 +1279,37 @@
             background: none; border: none; color: var(--accent);
             cursor: pointer; font-size: 1rem; padding: 4px 8px;
         }
+        /* ===== Weekly schedule board (columns per day) ===== */
+        .sched-board-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+        .sched-board {
+            width: 100%; min-width: 720px; border-collapse: separate; border-spacing: 0;
+            table-layout: fixed;
+        }
+        .sched-board th {
+            background: var(--accent); color: #fff; font-weight: 800; font-size: 0.92rem;
+            padding: 10px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.12);
+        }
+        .sched-board th:first-child { border-top-right-radius: 10px; }
+        .sched-board th:last-child { border-top-left-radius: 10px; }
+        .sched-board td {
+            vertical-align: top; padding: 8px; width: 14.28%;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+        }
+        .sched-block-cell {
+            position: relative; background: rgba(230,57,70,0.10);
+            border: 1px solid rgba(230,57,70,0.25); border-radius: 8px;
+            padding: 8px 10px; margin-bottom: 8px;
+        }
+        .sched-block-cell:last-child { margin-bottom: 0; }
+        .sched-block-cell .sched-time { font-weight: 800; color: var(--white); font-size: 0.9rem; white-space: nowrap; }
+        .sched-block-cell .sched-type { color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px; }
+        .sched-block-del {
+            position: absolute; top: 4px; left: 4px;
+            background: none; border: none; color: var(--accent);
+            cursor: pointer; font-size: 0.85rem; padding: 2px 5px; line-height: 1;
+        }
+        .sched-empty-cell { color: rgba(255,255,255,0.2); text-align: center; padding: 8px 0; }
         .strength-item {
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px; padding: 16px 18px; margin-bottom: 12px;
@@ -1763,20 +1794,10 @@
 
                 <div class="profile-card" style="margin-bottom: 24px;">
                     <h4 style="margin-bottom: 16px;"><i class="fas fa-bell" style="color: var(--accent);"></i> עדכונים אחרונים</h4>
-                    <div style="display:flex; flex-direction:column; gap:12px;">
-                        <div class="update-item">
-                            <i class="fas fa-calendar" style="color: var(--gold); font-size:1.2rem;"></i>
-                            <div>
-                                <strong>תחרות קרובה</strong>
-                                <p>אליפות ישראל - נא לוודא שכל המסמכים מעודכנים</p>
-                            </div>
-                        </div>
-                        <div class="update-item">
-                            <i class="fas fa-check-circle" style="color: var(--success); font-size:1.2rem;"></i>
-                            <div>
-                                <strong>אישור רפואי</strong>
-                                <p>האישור הרפואי שלך אושר בהצלחה</p>
-                            </div>
+                    <div style="display:flex; flex-direction:column; gap:12px;" id="updatesList">
+                        <div class="empty-state" style="padding:20px; text-align:center; color: var(--text-secondary);">
+                            <i class="fas fa-inbox" style="font-size:1.6rem; opacity:0.5;"></i>
+                            <p style="margin-top:8px;">אין עדכונים חדשים</p>
                         </div>
                     </div>
                 </div>
@@ -1806,38 +1827,7 @@
                 </div>
 
                 <h3 style="margin: 30px 0 16px; color: var(--white);"><i class="fas fa-folder" style="color: var(--accent);"></i> המסמכים שלי</h3>
-                <div class="file-list" id="fileList">
-                    <div class="file-item">
-                        <div class="file-info">
-                            <i class="fas fa-file-pdf file-icon"></i>
-                            <div>
-                                <div class="file-name">אישור_רופא_2026.pdf</div>
-                                <div class="file-date">הועלה: 01/03/2026</div>
-                            </div>
-                        </div>
-                        <span class="file-status status-approved">אושר</span>
-                    </div>
-                    <div class="file-item">
-                        <div class="file-info">
-                            <i class="fas fa-file-image file-icon"></i>
-                            <div>
-                                <div class="file-name">פספורט.jpg</div>
-                                <div class="file-date">הועלה: 15/02/2026</div>
-                            </div>
-                        </div>
-                        <span class="file-status status-approved">אושר</span>
-                    </div>
-                    <div class="file-item">
-                        <div class="file-info">
-                            <i class="fas fa-file-pdf file-icon"></i>
-                            <div>
-                                <div class="file-name">ביטוח_ספורט_2026.pdf</div>
-                                <div class="file-date">הועלה: 20/03/2026</div>
-                            </div>
-                        </div>
-                        <span class="file-status status-pending">בבדיקה</span>
-                    </div>
-                </div>
+                <div class="file-list" id="fileList"></div>
             </div>
 
             <!-- Videos -->
@@ -1859,36 +1849,7 @@
                     <input type="file" id="videoInput" style="display:none" accept="video/*" onchange="handleVideoUpload(this)">
                 </div>
 
-                <div class="videos-grid" id="videosGrid">
-                    <div class="video-card">
-                        <div class="video-thumbnail"><i class="fas fa-play-circle"></i></div>
-                        <div class="video-info">
-                            <h4>קרב חצי גמר - אליפות הצפון</h4>
-                            <p><i class="fas fa-calendar-alt"></i> 15/02/2026 &nbsp; <i class="fas fa-clock"></i> 3:24</p>
-                        </div>
-                    </div>
-                    <div class="video-card">
-                        <div class="video-thumbnail"><i class="fas fa-play-circle"></i></div>
-                        <div class="video-info">
-                            <h4>אימון ספארינג - הכנה לאליפות</h4>
-                            <p><i class="fas fa-calendar-alt"></i> 28/02/2026 &nbsp; <i class="fas fa-clock"></i> 5:12</p>
-                        </div>
-                    </div>
-                    <div class="video-card">
-                        <div class="video-thumbnail"><i class="fas fa-play-circle"></i></div>
-                        <div class="video-info">
-                            <h4>גמר אליפות ישראל 2025</h4>
-                            <p><i class="fas fa-calendar-alt"></i> 10/12/2025 &nbsp; <i class="fas fa-clock"></i> 4:47</p>
-                        </div>
-                    </div>
-                    <div class="video-card">
-                        <div class="video-thumbnail"><i class="fas fa-play-circle"></i></div>
-                        <div class="video-info">
-                            <h4>ניתוח טכניקה - עבודת רגליים</h4>
-                            <p><i class="fas fa-calendar-alt"></i> 05/03/2026 &nbsp; <i class="fas fa-clock"></i> 8:30</p>
-                        </div>
-                    </div>
-                </div>
+                <div class="videos-grid" id="videosGrid"></div>
             </div>
 
             <!-- Profile -->
@@ -1989,12 +1950,7 @@
 
                         <div class="profile-card" style="margin-top:20px;">
                             <h4 style="margin-bottom:14px;">היסטוריית משקל</h4>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap;" id="weightHistory">
-                                <div class="weight-chip"><div class="month">ינואר</div><div class="kg">72.5</div></div>
-                                <div class="weight-chip"><div class="month">פברואר</div><div class="kg">71.8</div></div>
-                                <div class="weight-chip"><div class="month">מרץ</div><div class="kg">70.2</div></div>
-                                <div class="weight-chip"><div class="month">אפריל</div><div class="kg">69.8</div></div>
-                            </div>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;" id="weightHistory"></div>
                         </div>
                     </div>
                 </div>
@@ -2015,19 +1971,8 @@
                                 <th>סטטוס</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>אליפות ישראל 2026</strong></td>
-                                <td>15/05/2026</td>
-                                <td>תל אביב</td>
-                                <td><span class="file-status status-pending">נרשם</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>גביע הצפון</strong></td>
-                                <td>20/06/2026</td>
-                                <td>חיפה</td>
-                                <td><span class="file-status status-approved">אושר</span></td>
-                            </tr>
+                        <tbody id="upcomingCompBody">
+                            <tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">אין תחרויות קרובות</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -2072,25 +2017,8 @@
                                 <th>מיקום</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>אליפות ישראל 2025</td>
-                                <td>10/12/2025</td>
-                                <td><span style="color: var(--gold);"><i class="fas fa-medal"></i> מקום 1</span></td>
-                                <td>תל אביב</td>
-                            </tr>
-                            <tr>
-                                <td>גביע הצפון 2025</td>
-                                <td>15/09/2025</td>
-                                <td><span style="color: #c0c0c0;"><i class="fas fa-medal"></i> מקום 2</span></td>
-                                <td>חיפה</td>
-                            </tr>
-                            <tr>
-                                <td>אליפות המרכז 2025</td>
-                                <td>20/06/2025</td>
-                                <td><span style="color: #cd7f32;"><i class="fas fa-medal"></i> מקום 3</span></td>
-                                <td>ראשון לציון</td>
-                            </tr>
+                        <tbody id="compHistoryBody">
+                            <tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">אין היסטוריית תחרויות</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -3025,6 +2953,32 @@
             startSel.value = '17:00';
             endSel.value = '18:00';
         }
+        function scheduleBoardHtml(blocks, editable) {
+            const names = dayNames();
+            let head = '', body = '';
+            for (let day = 0; day < 7; day++) {
+                const dayBlocks = blocks.filter(b => b.day === day).sort((a, b) => a.start.localeCompare(b.start));
+                head += `<th>${names[day]}</th>`;
+                let cell = '';
+                if (dayBlocks.length === 0) {
+                    cell = `<div class="sched-empty-cell">—</div>`;
+                } else {
+                    dayBlocks.forEach(b => {
+                        const idx = blocks.indexOf(b);
+                        const del = editable
+                            ? `<button class="sched-block-del" onclick="removeScheduleBlock(${idx})" title="${T('remove')}"><i class="fas fa-times"></i></button>`
+                            : '';
+                        cell += `<div class="sched-block-cell">
+                            <div class="sched-time">${b.start}–${b.end}</div>
+                            ${b.type ? `<div class="sched-type">${sanitize(b.type)}</div>` : ''}
+                            ${del}
+                        </div>`;
+                    });
+                }
+                body += `<td>${cell}</td>`;
+            }
+            return `<div class="sched-board-wrap"><table class="sched-board"><thead><tr>${head}</tr></thead><tbody><tr>${body}</tr></tbody></table></div>`;
+        }
         function renderSchedule() {
             const grid = document.getElementById('scheduleGrid');
             if (!grid) return;
@@ -3033,23 +2987,7 @@
                 grid.innerHTML = `<p style="color:var(--text-secondary);">${T('sched_empty')}</p>`;
                 return;
             }
-            const names = dayNames();
-            let html = '';
-            for (let day = 0; day < 7; day++) {
-                const dayBlocks = blocks.filter(b => b.day === day).sort((a, b) => a.start.localeCompare(b.start));
-                if (dayBlocks.length === 0) continue;
-                html += `<div class="sched-day-card"><h4>${names[day]}</h4>`;
-                dayBlocks.forEach(b => {
-                    const idx = blocks.indexOf(b);
-                    html += `<div class="sched-block">
-                        <span class="time">${b.start} - ${b.end}</span>
-                        <span class="type">${sanitize(b.type || '')}</span>
-                        <button class="item-del-btn" onclick="removeScheduleBlock(${idx})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
-                    </div>`;
-                });
-                html += `</div>`;
-            }
-            grid.innerHTML = html;
+            grid.innerHTML = scheduleBoardHtml(blocks, true);
         }
         async function addScheduleBlock() {
             if (!currentUser) return;
@@ -3198,18 +3136,7 @@
         // ===== COACH: read-only renderers for a competitor's data =====
         function cdScheduleHtml(blocks) {
             if (!blocks || blocks.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_schedule')}</p>`;
-            const names = dayNames();
-            let html = '';
-            for (let day = 0; day < 7; day++) {
-                const dayBlocks = blocks.filter(b => b.day === day).sort((a, b) => a.start.localeCompare(b.start));
-                if (dayBlocks.length === 0) continue;
-                html += `<div class="sched-day-card"><h4>${names[day]}</h4>`;
-                dayBlocks.forEach(b => {
-                    html += `<div class="sched-block"><span class="time">${b.start} - ${b.end}</span><span class="type">${sanitize(b.type || '')}</span></div>`;
-                });
-                html += `</div>`;
-            }
-            return html;
+            return scheduleBoardHtml(blocks, false);
         }
         function cdStrengthHtml(items) {
             if (!items || items.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_strength')}</p>`;
