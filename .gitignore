@@ -1,0 +1,12 @@
+# Secrets — NEVER commit
+serviceAccount.json
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+.env
+.env.*
+
+# Local tooling
+.claude/
+node_modules/
+firebase-debug.log
+users-export.json
