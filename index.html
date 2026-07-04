@@ -1775,14 +1775,6 @@
             <div class="dash-panel active" id="panel-overview">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-value" id="statFights">0</div>
-                        <div class="stat-label">קרבות</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="statWins">0</div>
-                        <div class="stat-label">ניצחונות</div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-value" id="statWeight">--</div>
                         <div class="stat-label">משקל (ק"ג)</div>
                     </div>
@@ -1874,20 +1866,8 @@
                                     <span class="value" id="profileCategory">--</span>
                                 </div>
                                 <div class="profile-stat">
-                                    <span class="label">ניסיון</span>
-                                    <span class="value" id="profileExp">--</span>
-                                </div>
-                                <div class="profile-stat">
                                     <span class="label">מכון / מועדון</span>
                                     <span class="value" id="profileGym">--</span>
-                                </div>
-                                <div class="profile-stat">
-                                    <span class="label">קרבות</span>
-                                    <span class="value" id="profileFights">0</span>
-                                </div>
-                                <div class="profile-stat">
-                                    <span class="label">מאזן (W-L-D)</span>
-                                    <span class="value" id="profileRecord">0-0-0</span>
                                 </div>
                             </div>
                         </div>
@@ -1915,40 +1895,14 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>שנות ניסיון</label>
-                                <input type="number" id="expInput" placeholder="מספר שנות ניסיון" step="0.5" min="0" max="40">
-                            </div>
-                            <div class="form-group">
                                 <label>מכון / מועדון</label>
                                 <input type="text" id="gymInput" placeholder="שם המכון">
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label>ניצחונות</label>
-                                    <input type="number" id="winsInput" placeholder="W" min="0">
-                                </div>
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label>הפסדים</label>
-                                    <input type="number" id="lossesInput" placeholder="L" min="0">
-                                </div>
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label>תיקו</label>
-                                    <input type="number" id="drawsInput" placeholder="D" min="0">
-                                </div>
                             </div>
                             <button class="form-submit" style="margin-top:18px;" onclick="updateProfile()">שמור שינויים</button>
                         </div>
                     </div>
                     <div>
                         <div class="profile-card">
-                            <h4 style="margin-bottom:18px;">יכולות טכניות</h4>
-                            <div id="skillBarsDisplay"></div>
-                            <h4 style="margin:24px 0 14px; font-size:1.05rem;">עדכון יכולות</h4>
-                            <div id="skillSlidersArea"></div>
-                            <button class="form-submit" style="margin-top:12px;" onclick="saveSkills()">שמור יכולות</button>
-                        </div>
-
-                        <div class="profile-card" style="margin-top:20px;">
                             <h4 style="margin-bottom:14px;">היסטוריית משקל</h4>
                             <div style="display:flex; gap:8px; flex-wrap:wrap;" id="weightHistory"></div>
                         </div>
@@ -2454,11 +2408,6 @@
                     weight: null,
                     height: null,
                     category: '',
-                    experience: null,
-                    wins: 0,
-                    losses: 0,
-                    draws: 0,
-                    skills: { 'בעיטות': 50, 'אגרוף': 50, 'היאבקות': 50, 'הגנה': 50, 'סיבולת': 50, 'עבודת רגליים': 50 },
                     documents: [],
                     videos: [],
                     competitions: [],
@@ -2557,10 +2506,6 @@
             document.getElementById('profileName').textContent = name;
 
             // Stats
-            const w = userData.wins || 0, l = userData.losses || 0, d = userData.draws || 0;
-            const fights = w + l + d;
-            document.getElementById('statFights').textContent = fights;
-            document.getElementById('statWins').textContent = w;
             document.getElementById('statWeight').textContent = userData.weight || '--';
             document.getElementById('statDocs').textContent = (userData.documents || []).length;
 
@@ -2568,10 +2513,7 @@
             document.getElementById('profileWeight').textContent = userData.weight ? userData.weight + ' ק"ג' : '-- ק"ג';
             document.getElementById('profileHeight').textContent = userData.height ? userData.height + ' ס"מ' : '-- ס"מ';
             document.getElementById('profileCategory').textContent = userData.category || '--';
-            document.getElementById('profileExp').textContent = userData.experience != null ? userData.experience + ' שנים' : '--';
             document.getElementById('profileGym').textContent = userData.gym || '--';
-            document.getElementById('profileFights').textContent = fights;
-            document.getElementById('profileRecord').textContent = `${w}-${l}-${d}`;
 
             document.querySelectorAll('.nav-public').forEach(el => el.style.display = 'none');
 
@@ -2586,8 +2528,8 @@
                 document.getElementById('coachPanelBtn').style.display = 'none';
             }
 
-            // Render skills
-            renderSkills();
+            // Render weight history
+            renderWeightHistory();
 
             // Render saved documents
             renderDocuments();
@@ -2780,11 +2722,7 @@
             const weight = parseFloat(document.getElementById('weightInput').value);
             const height = parseInt(document.getElementById('heightInput').value);
             const category = document.getElementById('categoryInput').value;
-            const exp = parseFloat(document.getElementById('expInput').value);
             const gym = document.getElementById('gymInput').value.trim();
-            const wins = parseInt(document.getElementById('winsInput').value) || 0;
-            const losses = parseInt(document.getElementById('lossesInput').value) || 0;
-            const draws = parseInt(document.getElementById('drawsInput').value) || 0;
 
             const updates = {};
             let updated = false;
@@ -2801,14 +2739,7 @@
             }
             if (height && height >= 100 && height <= 230) { updates.height = height; updated = true; }
             if (category) { updates.category = category; updated = true; }
-            if (exp >= 0 && document.getElementById('expInput').value) { updates.experience = exp; updated = true; }
             if (gym) { updates.gym = gym; updated = true; }
-            if (document.getElementById('winsInput').value || document.getElementById('lossesInput').value || document.getElementById('drawsInput').value) {
-                updates.wins = wins;
-                updates.losses = losses;
-                updates.draws = draws;
-                updated = true;
-            }
 
             if (!updated) { showToast('נא למלא לפחות שדה אחד'); return; }
 
@@ -2824,55 +2755,19 @@
             enterDashboard();
 
             // Clear form
-            ['weightInput','heightInput','categoryInput','expInput','gymInput','winsInput','lossesInput','drawsInput'].forEach(id => {
+            ['weightInput','heightInput','categoryInput','gymInput'].forEach(id => {
                 document.getElementById(id).value = '';
             });
 
             showToast('הפרופיל עודכן בהצלחה');
         }
 
-        // ===== SKILLS =====
-        const defaultSkills = { 'בעיטות': 50, 'אגרוף': 50, 'היאבקות': 50, 'הגנה': 50, 'סיבולת': 50, 'עבודת רגליים': 50 };
-
-        function getSkills() {
-            return (userData && userData.skills) ? userData.skills : { ...defaultSkills };
-        }
-
-        function renderSkills() {
-            const skills = getSkills();
-            const display = document.getElementById('skillBarsDisplay');
-            const sliders = document.getElementById('skillSlidersArea');
-
-            display.innerHTML = Object.entries(skills).map(([name, val]) => `
-                <div class="skill-bar">
-                    <div class="skill-header"><span>${name}</span><span>${val}%</span></div>
-                    <div class="bar-bg"><div class="bar-fill" style="width: ${val}%"></div></div>
-                </div>
-            `).join('');
-
-            sliders.innerHTML = Object.entries(skills).map(([name, val]) => `
-                <div class="skill-slider-row">
-                    <label>${name}</label>
-                    <input type="range" min="0" max="100" value="${val}" data-skill="${name}"
-                           oninput="this.nextElementSibling.textContent=this.value+'%'">
-                    <span class="skill-val">${val}%</span>
-                </div>
-            `).join('');
-
-            // Weight history
+        // ===== WEIGHT HISTORY =====
+        function renderWeightHistory() {
             const histContainer = document.getElementById('weightHistory');
-            const wh = userData.weightHistory || [];
+            if (!histContainer) return;
+            const wh = (userData && userData.weightHistory) || [];
             histContainer.innerHTML = wh.map(h => `<div class="weight-chip"><div class="month">${sanitize(h.month)}</div><div class="kg">${h.value}</div></div>`).join('');
-        }
-
-        async function saveSkills() {
-            if (!currentUser) return;
-            const sliders = document.querySelectorAll('#skillSlidersArea input[type="range"]');
-            const skills = {};
-            sliders.forEach(s => { skills[s.dataset.skill] = parseInt(s.value); });
-            await saveUserData({ skills });
-            renderSkills();
-            showToast('היכולות הטכניות עודכנו בהצלחה');
         }
 
         // ===== COMPETITIONS =====
@@ -3180,7 +3075,6 @@
             const roleLabels = { admin: 'אדמין', coach: 'מאמן', competitor: 'מתחרה' };
             const roleColors = { admin: 'var(--gold)', coach: '#8ecae6', competitor: 'var(--accent)' };
             allDocs.forEach(d => {
-                const w = d.wins || 0, l = d.losses || 0, dr = d.draws || 0;
                 const roleBadge = isAdmin ? `<span style="color:${roleColors[d.role]||'var(--text-secondary)'};font-size:0.85rem;font-weight:700;"> (${roleLabels[d.role] || d.role})</span>` : '';
                 const card = document.createElement('div');
                 card.className = 'competitor-card';
@@ -3195,8 +3089,7 @@
                     </div>
                     <div class="comp-stats">
                         <div class="comp-stat-item"><div class="val">${d.weight || '--'}</div><div class="lbl">משקל</div></div>
-                        <div class="comp-stat-item"><div class="val">${w + l + dr}</div><div class="lbl">קרבות</div></div>
-                        <div class="comp-stat-item"><div class="val">${w}</div><div class="lbl">ניצחונות</div></div>
+                        <div class="comp-stat-item"><div class="val">${d.height || '--'}</div><div class="lbl">גובה</div></div>
                     </div>
                 `;
                 list.appendChild(card);
@@ -3207,8 +3100,6 @@
             const doc = await db.collection('users').doc(uid).get();
             if (!doc.exists) return;
             const d = doc.data();
-            const w = d.wins || 0, l = d.losses || 0, dr = d.draws || 0;
-            const skills = d.skills || defaultSkills;
 
             const body = document.getElementById('competitorDetailBody');
             body.innerHTML = `
@@ -3217,25 +3108,14 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
                     <div class="stat-card"><div class="stat-value">${d.weight || '--'}</div><div class="stat-label">משקל (ק"ג)</div></div>
                     <div class="stat-card"><div class="stat-value">${d.height || '--'}</div><div class="stat-label">גובה (ס"מ)</div></div>
-                    <div class="stat-card"><div class="stat-value">${w + l + dr}</div><div class="stat-label">קרבות</div></div>
-                    <div class="stat-card"><div class="stat-value">${w}-${l}-${dr}</div><div class="stat-label">W-L-D</div></div>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
                     <div class="profile-stat"><span class="label">קטגוריה</span><span class="value">${d.category || '--'}</span></div>
-                    <div class="profile-stat"><span class="label">ניסיון</span><span class="value">${d.experience != null ? d.experience + ' שנים' : '--'}</span></div>
                     <div class="profile-stat"><span class="label">מכון</span><span class="value">${sanitize(d.gym || '--')}</span></div>
                     <div class="profile-stat"><span class="label">אימייל</span><span class="value" style="font-size:0.92rem;">${sanitize(d.email || '--')}</span></div>
                     <div class="profile-stat"><span class="label">טלפון</span><span class="value">${sanitize(d.phone || '--')}</span></div>
                 </div>
-
-                <h4 style="color:var(--white); margin-bottom:12px;">יכולות טכניות</h4>
-                ${Object.entries(skills).map(([name, val]) => `
-                    <div class="skill-bar">
-                        <div class="skill-header"><span>${name}</span><span>${val}%</span></div>
-                        <div class="bar-bg"><div class="bar-fill" style="width: ${val}%"></div></div>
-                    </div>
-                `).join('')}
 
                 <h4 style="color:var(--white); margin:20px 0 12px;">${T('cd_documents')} (${(d.documents || []).length})</h4>
                 ${(d.documents || []).length ? d.documents.map(doc => `
@@ -3876,10 +3756,8 @@
 
             // Stats labels
             const statLabels = document.querySelectorAll('.stat-label');
-            if (statLabels[0]) statLabels[0].textContent = t.stat_fights;
-            if (statLabels[1]) statLabels[1].textContent = t.stat_wins;
-            if (statLabels[2]) statLabels[2].textContent = t.stat_weight;
-            if (statLabels[3]) statLabels[3].textContent = t.stat_docs;
+            if (statLabels[0]) statLabels[0].textContent = t.stat_weight;
+            if (statLabels[1]) statLabels[1].textContent = t.stat_docs;
 
             // Overview updates
             const updateItems = document.querySelectorAll('#panel-overview .update-item');
@@ -3935,10 +3813,7 @@
             if (profStatLabels[0]) profStatLabels[0].textContent = t.dash_prof_weight;
             if (profStatLabels[1]) profStatLabels[1].textContent = t.dash_prof_height;
             if (profStatLabels[2]) profStatLabels[2].textContent = t.dash_prof_category;
-            if (profStatLabels[3]) profStatLabels[3].textContent = t.dash_prof_exp;
-            if (profStatLabels[4]) profStatLabels[4].textContent = t.dash_prof_gym;
-            if (profStatLabels[5]) profStatLabels[5].textContent = t.dash_prof_fights;
-            if (profStatLabels[6]) profStatLabels[6].textContent = t.dash_prof_record;
+            if (profStatLabels[3]) profStatLabels[3].textContent = t.dash_prof_gym;
 
             // Profile form
             const profileCards = document.querySelectorAll('#panel-profile .profile-card');
@@ -3949,11 +3824,7 @@
                 if (pfLabels[0]) pfLabels[0].textContent = t.dash_weight_kg;
                 if (pfLabels[1]) pfLabels[1].textContent = t.dash_height_cm;
                 if (pfLabels[2]) pfLabels[2].textContent = t.dash_weight_cat;
-                if (pfLabels[3]) pfLabels[3].textContent = t.dash_exp_years;
-                if (pfLabels[4]) pfLabels[4].textContent = t.dash_gym_name;
-                if (pfLabels[5]) pfLabels[5].textContent = t.dash_wins;
-                if (pfLabels[6]) pfLabels[6].textContent = t.dash_losses;
-                if (pfLabels[7]) pfLabels[7].textContent = t.dash_draws;
+                if (pfLabels[3]) pfLabels[3].textContent = t.dash_gym_name;
                 const pfSubmit = profileCards[1].querySelector('.form-submit');
                 if (pfSubmit) pfSubmit.textContent = t.dash_save_changes;
             }
@@ -3961,17 +3832,9 @@
             const catSelect = document.getElementById('categoryInput');
             if (catSelect && catSelect.options[0]) catSelect.options[0].textContent = t.dash_select_cat;
 
-            // Skills card
-            if (profileCards[2]) {
-                const skillsH4s = profileCards[2].querySelectorAll('h4');
-                if (skillsH4s[0]) skillsH4s[0].textContent = t.dash_tech_skills;
-                if (skillsH4s[1]) skillsH4s[1].textContent = t.dash_update_skills;
-                const skillSubmit = profileCards[2].querySelector('.form-submit');
-                if (skillSubmit) skillSubmit.textContent = t.dash_save_skills;
-            }
             // Weight history card
-            if (profileCards[3]) {
-                const whH4 = profileCards[3].querySelector('h4');
+            if (profileCards[2]) {
+                const whH4 = profileCards[2].querySelector('h4');
                 if (whH4) whH4.textContent = t.dash_weight_history;
             }
 
@@ -4020,7 +3883,7 @@
             // Dashboard input placeholders
             const phMap = {
                 weightInput: t.dash_weight_ph, heightInput: t.dash_height_ph,
-                expInput: t.dash_exp_ph, gymInput: t.dash_gym_ph,
+                gymInput: t.dash_gym_ph,
                 compName: t.dash_comp_name_ph, compLocation: t.dash_comp_loc_ph
             };
             Object.entries(phMap).forEach(([id, val]) => {
