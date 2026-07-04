@@ -1383,6 +1383,20 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        .load-progress-wrap { padding: 24px 8px; }
+        .load-progress-track {
+            width: 100%; height: 10px; background: rgba(255,255,255,0.08);
+            border-radius: 6px; overflow: hidden;
+        }
+        .load-progress-fill {
+            height: 100%; width: 0%; background: var(--accent);
+            border-radius: 6px; transition: width 0.15s ease;
+        }
+        .load-progress-pct {
+            margin-top: 10px; text-align: center; font-weight: 800;
+            color: var(--white); font-size: 0.95rem;
+        }
+
         .competitor-detail-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 3000;
@@ -3077,10 +3091,22 @@
                 return;
             }
 
-            list.innerHTML = '';
+            // Progress bar while building the cards
+            list.innerHTML = `
+                <div class="load-progress-wrap">
+                    <div class="load-progress-track"><div class="load-progress-fill" id="loadProgressFill" style="width:0%"></div></div>
+                    <div class="load-progress-pct" id="loadProgressPct">0%</div>
+                </div>`;
+            const fill = document.getElementById('loadProgressFill');
+            const pct = document.getElementById('loadProgressPct');
+
             const roleLabels = { admin: 'אדמין', coach: 'מאמן', competitor: 'מתחרה' };
             const roleColors = { admin: 'var(--gold)', coach: '#8ecae6', competitor: 'var(--accent)' };
-            allDocs.forEach(d => {
+            const frag = document.createDocumentFragment();
+            const total = allDocs.length;
+
+            for (let i = 0; i < total; i++) {
+                const d = allDocs[i];
                 const roleBadge = isAdmin ? `<span style="color:${roleColors[d.role]||'var(--text-secondary)'};font-size:0.85rem;font-weight:700;"> (${roleLabels[d.role] || d.role})</span>` : '';
                 const card = document.createElement('div');
                 card.className = 'competitor-card';
@@ -3098,8 +3124,17 @@
                         <div class="comp-stat-item"><div class="val">${d.height || '--'}</div><div class="lbl">גובה</div></div>
                     </div>
                 `;
-                list.appendChild(card);
-            });
+                frag.appendChild(card);
+
+                const percent = Math.round(((i + 1) / total) * 100);
+                if (fill) fill.style.width = percent + '%';
+                if (pct) pct.textContent = percent + '%';
+                // Yield so the browser paints the updated progress bar
+                await new Promise(r => requestAnimationFrame(r));
+            }
+
+            list.innerHTML = '';
+            list.appendChild(frag);
         }
 
         async function showCompetitorDetail(uid) {
