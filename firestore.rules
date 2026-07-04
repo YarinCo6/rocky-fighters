@@ -21,6 +21,11 @@ service cloud.firestore {
       // Coach: read all competitor docs.
       allow read: if isCoach();
 
+      // Coach: may write ONLY the coachFeedback field on a competitor doc.
+      // Cannot touch role, profile, or any other field.
+      allow update: if isCoach()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coachFeedback']);
+
       // Owner: read own doc.
       allow read: if request.auth != null && request.auth.uid == userId;
 

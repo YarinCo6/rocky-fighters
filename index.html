@@ -1257,6 +1257,48 @@
         .competitor-card .comp-stat-item .val { font-weight: 900; color: var(--accent); }
         .competitor-card .comp-stat-item .lbl { color: var(--text-secondary); font-size: 0.85rem; }
 
+        .fb-badge {
+            display: inline-block; min-width: 18px; padding: 0 5px;
+            background: var(--accent); color: #fff; border-radius: 10px;
+            font-size: 0.72rem; font-weight: 800; text-align: center; line-height: 18px;
+        }
+        .sched-day-card {
+            background: var(--card-bg, rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+            padding: 16px 18px; margin-bottom: 14px;
+        }
+        .sched-day-card h4 { color: var(--accent); margin-bottom: 12px; }
+        .sched-block {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 10px 14px; margin-bottom: 8px;
+            background: rgba(255,255,255,0.04); border-radius: 8px;
+        }
+        .sched-block .time { font-weight: 800; color: var(--white); white-space: nowrap; }
+        .sched-block .type { color: var(--text-secondary); flex: 1; }
+        .item-del-btn {
+            background: none; border: none; color: var(--accent);
+            cursor: pointer; font-size: 1rem; padding: 4px 8px;
+        }
+        .strength-item {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 16px 18px; margin-bottom: 12px;
+        }
+        .strength-item .ex-name { font-weight: 800; color: var(--white); font-size: 1.08rem; margin-bottom: 8px; }
+        .strength-item .ex-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .strength-item .ex-chip {
+            background: rgba(230,57,70,0.12); color: var(--accent);
+            border-radius: 6px; padding: 3px 10px; font-size: 0.86rem; font-weight: 700;
+        }
+        .strength-item .ex-includes { color: var(--text-secondary); font-size: 0.94rem; }
+        .fb-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 16px 18px; margin-bottom: 12px;
+        }
+        .fb-card.unread { border-color: var(--accent); background: rgba(230,57,70,0.06); }
+        .fb-card .fb-meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 6px; }
+        .fb-card .fb-text { color: var(--white); margin-bottom: 10px; white-space: pre-wrap; }
+        .fb-ack { color: var(--success); font-size: 0.9rem; font-weight: 700; }
+
         .coach-checkbox-group {
             display: flex; align-items: center; gap: 10px;
             margin-bottom: 18px; padding: 12px 16px;
@@ -1317,6 +1359,38 @@
             overflow-y: auto; padding: 20px;
         }
         .competitor-detail-modal.active { display: flex; }
+
+        .auth-page {
+            position: fixed; inset: 0; z-index: 4000;
+            background:
+                radial-gradient(1200px 600px at 50% -10%, rgba(230,57,70,0.18), transparent 60%),
+                var(--bg-primary);
+            display: none; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            overflow-y: auto; padding: 24px 20px 48px;
+        }
+        .auth-page.active { display: flex; }
+        .auth-topbar {
+            width: 100%; max-width: 460px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .auth-back {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 1rem; cursor: pointer; display: flex; align-items: center;
+            gap: 8px; padding: 8px 4px;
+        }
+        .auth-back:hover { color: var(--text-primary); }
+        .auth-card {
+            width: 100%; max-width: 460px; margin-top: 4vh;
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 20px; padding: 40px 32px;
+        }
+        .auth-logo {
+            width: 84px; height: 84px; border-radius: 50%;
+            object-fit: cover; display: block; margin: 0 auto 20px;
+        }
+        .auth-card h2 { text-align: center; margin-bottom: 24px; }
 
         #bootLoader {
             position: fixed; inset: 0; z-index: 5000;
@@ -1381,7 +1455,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#" class="btn-login" onclick="event.preventDefault(); openModal('loginModal')">כניסת מתחרים</a></li>
+                <li><a href="#" class="btn-login" onclick="event.preventDefault(); showLoginPage()">כניסת מתחרים</a></li>
                 <li><a href="#contact" class="nav-public">צור קשר</a></li>
                 <li><a href="#features" class="nav-public">שירותים</a></li>
                 <li><a href="#about" class="nav-public">אודות</a></li>
@@ -1416,7 +1490,7 @@
                 </div>
                 <div class="hero-buttons">
                     <button class="btn btn-primary" onclick="openContactModal()"><span data-i18n="hero_contact">צור קשר</span></button>
-                    <a href="#" class="btn btn-outline" onclick="event.preventDefault(); openModal('loginModal')"><i class="fas fa-sign-in-alt"></i> <span data-i18n="hero_enter">כניסת מתחרים</span></a>
+                    <a href="#" class="btn btn-outline" onclick="event.preventDefault(); showLoginPage()"><i class="fas fa-sign-in-alt"></i> <span data-i18n="hero_enter">כניסת מתחרים</span></a>
                 </div>
             </div>
         </section>
@@ -1646,7 +1720,7 @@
         <div class="dashboard-header">
             <div class="dashboard-header-inner">
                 <div class="welcome-text">
-                    <h2>שלום, <span id="dashName">מתחרה</span> <i class="fas fa-fire" style="color: var(--accent);"></i></h2>
+                    <h2><span data-i18n="dash_hello">שלום</span>, <span id="dashName">מתחרה</span> <i class="fas fa-fire" style="color: var(--accent);"></i></h2>
                     <p>ברוך הבא לאזור האישי שלך</p>
                 </div>
                 <div class="dashboard-nav">
@@ -1654,6 +1728,9 @@
                     <button onclick="switchPanel('documents', this)"><i class="fas fa-folder-open"></i> מסמכים</button>
                     <button onclick="switchPanel('videos', this)"><i class="fas fa-play-circle"></i> סרטונים</button>
                     <button onclick="switchPanel('profile', this)"><i class="fas fa-user"></i> פרופיל</button>
+                    <button onclick="switchPanel('schedule', this)"><i class="fas fa-calendar-week"></i> לוח אימונים</button>
+                    <button onclick="switchPanel('strength', this)"><i class="fas fa-dumbbell"></i> תכנית כוח</button>
+                    <button onclick="switchPanel('feedback', this)"><i class="fas fa-comments"></i> משוב מאמן <span id="feedbackBadge" class="fb-badge" style="display:none;">0</span></button>
                     <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> תחרויות</button>
                     <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> ניהול מתחרים</button>
                     <button onclick="logout()" style="color: var(--accent);"><i class="fas fa-sign-out-alt"></i> יציאה</button>
@@ -2019,6 +2096,79 @@
                 </div>
             </div>
 
+            <!-- Weekly Schedule -->
+            <div class="dash-panel" id="panel-schedule">
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-calendar-week" style="color: var(--accent);"></i> <span id="scheduleTitle">לוח אימונים שבועי</span></h3>
+                <p id="scheduleDesc" style="color:var(--text-secondary); margin-bottom:20px;">הוסף בלוקים של אימון לכל יום, בקפיצות של רבע שעה.</p>
+                <div class="profile-card" style="margin-bottom:22px;">
+                    <h4 id="scheduleAddTitle" style="margin-bottom:14px;">הוספת בלוק אימון</h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="schedDayLabel">יום</label>
+                            <select id="schedDay"></select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="schedStartLabel">התחלה</label>
+                            <select id="schedStart"></select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="schedEndLabel">סיום</label>
+                            <select id="schedEnd"></select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:10px;">
+                        <label id="schedTypeLabel">סוג האימון</label>
+                        <input type="text" id="schedType" placeholder="למשל: ריצה, ספארינג, טכניקה">
+                    </div>
+                    <button class="form-submit" onclick="addScheduleBlock()"><i class="fas fa-plus"></i> <span id="schedAddBtn">הוסף בלוק</span></button>
+                </div>
+                <div id="scheduleGrid"></div>
+            </div>
+
+            <!-- Strength Program -->
+            <div class="dash-panel" id="panel-strength">
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-dumbbell" style="color: var(--accent);"></i> <span id="strengthTitle">תכנית כוח</span></h3>
+                <p id="strengthDesc" style="color:var(--text-secondary); margin-bottom:20px;">הוסף תרגילי כוח עם כל הפרטים.</p>
+                <div class="profile-card" style="margin-bottom:22px;">
+                    <h4 id="strengthAddTitle" style="margin-bottom:14px;">הוספת תרגיל</h4>
+                    <div class="form-group">
+                        <label id="exNameLabel">שם התרגיל</label>
+                        <input type="text" id="exName" placeholder="למשל: סקוואט">
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="exWeightLabel">משקל (ק"ג)</label>
+                            <input type="number" id="exWeight" placeholder="80" min="0" step="0.5">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="exRepsLabel">חזרות</label>
+                            <input type="number" id="exReps" placeholder="חזרות" min="0">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="exSetsLabel">סטים</label>
+                            <input type="number" id="exSets" placeholder="סטים" min="0">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="exDaysLabel">ימים בשבוע</label>
+                            <input type="number" id="exDays" placeholder="ימים" min="0" max="7">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:10px;">
+                        <label id="exIncludesLabel">מה כולל האימון</label>
+                        <textarea id="exIncludes" rows="2" placeholder="תיאור האימון, דגשים..."></textarea>
+                    </div>
+                    <button class="form-submit" onclick="addStrengthEx()"><i class="fas fa-plus"></i> <span id="exAddBtn">הוסף תרגיל</span></button>
+                </div>
+                <div id="strengthList"></div>
+            </div>
+
+            <!-- Coach Feedback -->
+            <div class="dash-panel" id="panel-feedback">
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-comments" style="color: var(--accent);"></i> <span id="feedbackTitle">משוב מהמאמן</span></h3>
+                <p id="feedbackDesc" style="color:var(--text-secondary); margin-bottom:20px;">כאן תראה הצעות ושינויים מהמאמן. אשר קבלה כדי שהמאמן ידע שראית.</p>
+                <div id="feedbackList"></div>
+            </div>
+
             <!-- Coach Panel -->
             <div class="dash-panel" id="panel-coach">
                 <h3 style="margin-bottom: 20px; color: var(--white);"><i class="fas fa-users-cog" style="color: var(--accent);"></i> ניהול מתחרים</h3>
@@ -2031,11 +2181,14 @@
         </div>
     </div>
 
-    <!-- Login Modal -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal">
-            <button class="close-btn" onclick="closeModal('loginModal')"><i class="fas fa-times"></i></button>
-            <h2><i class="fas fa-fist-raised" style="color: var(--accent);"></i> כניסה</h2>
+    <!-- Login page -->
+    <div class="auth-page" id="loginPage">
+        <div class="auth-topbar">
+            <button class="auth-back" onclick="hideLoginPage()"><i class="fas fa-arrow-right"></i> <span data-i18n="login_back">חזרה</span></button>
+        </div>
+        <div class="auth-card">
+            <img src="images/rocky-icon.png" alt="Rocky" class="auth-logo">
+            <h2>כניסה</h2>
             <div class="form-group">
                 <label>אימייל</label>
                 <input type="email" id="loginEmail" placeholder="your@email.com">
@@ -2046,19 +2199,22 @@
             </div>
             <button class="form-submit" id="loginBtn" onclick="login()">כניסה</button>
             <p style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:0.95rem;">
-                <a href="#" onclick="event.preventDefault(); resetPassword();" style="color:var(--accent);">שכחתי סיסמה</a>
+                <a href="#" onclick="event.preventDefault(); resetPassword();" style="color:var(--accent);" data-i18n="login_forgot">שכחתי סיסמה</a>
             </p>
             <p style="text-align:center; margin-top:8px; color:var(--text-secondary); font-size:0.95rem;">
-                עדיין לא רשום? <a href="#" onclick="event.preventDefault(); openModal('registerModal'); closeModal('loginModal');" style="color:var(--accent);">הרשמה</a>
+                <span data-i18n="login_no_account">עדיין לא רשום?</span> <a href="#" onclick="event.preventDefault(); showRegisterPage();" style="color:var(--accent);" data-i18n="login_register_link">הרשמה</a>
             </p>
         </div>
     </div>
 
-    <!-- Register Modal -->
-    <div class="modal-overlay" id="registerModal">
-        <div class="modal">
-            <button class="close-btn" onclick="closeModal('registerModal')"><i class="fas fa-times"></i></button>
-            <h2><i class="fas fa-user-plus" style="color: var(--accent);"></i> הרשמה</h2>
+    <!-- Register page -->
+    <div class="auth-page" id="registerPage">
+        <div class="auth-topbar">
+            <button class="auth-back" onclick="hideRegisterPage()"><i class="fas fa-arrow-right"></i> <span data-i18n="login_back">חזרה</span></button>
+        </div>
+        <div class="auth-card">
+            <img src="images/rocky-icon.png" alt="Rocky" class="auth-logo">
+            <h2>הרשמה</h2>
             <div class="form-group">
                 <label>שם מלא</label>
                 <input type="text" id="regName" placeholder="השם שלך">
@@ -2081,7 +2237,7 @@
             </div>
             <button class="form-submit" id="regBtn" onclick="register()">הרשמה</button>
             <p style="text-align:center; margin-top:16px; color:var(--text-secondary); font-size:0.95rem;">
-                כבר רשום? <a href="#" onclick="event.preventDefault(); openModal('loginModal'); closeModal('registerModal');" style="color:var(--accent);">התחברות</a>
+                <span data-i18n="reg_has_account">כבר רשום?</span> <a href="#" onclick="event.preventDefault(); showLoginPage();" style="color:var(--accent);" data-i18n="reg_login_link">התחברות</a>
             </p>
         </div>
     </div>
@@ -2155,6 +2311,33 @@
             document.body.style.overflow = '';
         }
 
+        // ===== AUTH PAGES (dedicated full-screen login / register) =====
+        function showLoginPage() {
+            document.getElementById('registerPage').classList.remove('active');
+            document.getElementById('loginPage').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+            document.getElementById('loginEmail').focus();
+        }
+
+        function hideLoginPage() {
+            document.getElementById('loginPage').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function showRegisterPage() {
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('registerPage').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+            document.getElementById('regName').focus();
+        }
+
+        function hideRegisterPage() {
+            document.getElementById('registerPage').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
@@ -2209,7 +2392,7 @@
                 await auth.signInWithEmailAndPassword(email, pass);
                 document.getElementById('loginEmail').value = '';
                 document.getElementById('loginPass').value = '';
-                closeModal('loginModal');
+                hideLoginPage();
             } catch (err) {
                 const msgs = {
                     'auth/user-not-found': 'משתמש לא נמצא',
@@ -2286,6 +2469,9 @@
                     videos: [],
                     competitions: [],
                     weightHistory: [],
+                    weeklySchedule: [],
+                    strengthProgram: [],
+                    coachFeedback: [],
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
@@ -2296,7 +2482,7 @@
                 document.getElementById('regGym').value = '';
                 document.getElementById('regPass').value = '';
 
-                closeModal('registerModal');
+                hideRegisterPage();
                 showToast('נרשמת בהצלחה! נשלח אימייל אימות');
             } catch (err) {
                 const msgs = {
@@ -2356,6 +2542,8 @@
         });
 
         function enterDashboard() {
+            hideLoginPage();
+            hideRegisterPage();
             document.getElementById('publicContent').classList.add('hidden');
             document.getElementById('dashboard').classList.add('active');
 
@@ -2402,6 +2590,10 @@
             // Render saved videos
             renderVideos();
 
+            // Training features
+            initScheduleSelects();
+            updateFeedbackBadge();
+
             window.scrollTo(0, 0);
         }
 
@@ -2434,6 +2626,9 @@
             document.querySelectorAll('.dashboard-nav button').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
             if (panel === 'coach' && (isCoach || isAdmin)) loadCompetitors();
+            if (panel === 'schedule') renderSchedule();
+            if (panel === 'strength') renderStrength();
+            if (panel === 'feedback') renderFeedback();
         }
 
         // ===== DRAG & DROP =====
@@ -2720,6 +2915,241 @@
             document.getElementById('compWeight').value = '';
         }
 
+        // ===== i18n helper (safe at call time) =====
+        function T(key) {
+            const lang = (typeof currentLang !== 'undefined') ? currentLang : 'he';
+            const dict = translations[lang] || translations.he;
+            return dict[key] || translations.he[key] || key;
+        }
+
+        // ===== WEEKLY SCHEDULE =====
+        function dayNames() {
+            return [T('day_sun'), T('day_mon'), T('day_tue'), T('day_wed'), T('day_thu'), T('day_fri'), T('day_sat')];
+        }
+        function timeOptions() {
+            const opts = [];
+            for (let h = 6; h <= 23; h++) {
+                for (let m = 0; m < 60; m += 15) {
+                    opts.push(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'));
+                }
+            }
+            return opts;
+        }
+        function initScheduleSelects() {
+            const daySel = document.getElementById('schedDay');
+            const startSel = document.getElementById('schedStart');
+            const endSel = document.getElementById('schedEnd');
+            if (!daySel) return;
+            daySel.innerHTML = dayNames().map((d, i) => `<option value="${i}">${d}</option>`).join('');
+            const times = timeOptions();
+            const timeHtml = times.map(t => `<option value="${t}">${t}</option>`).join('');
+            startSel.innerHTML = timeHtml;
+            endSel.innerHTML = timeHtml;
+            startSel.value = '17:00';
+            endSel.value = '18:00';
+        }
+        function renderSchedule() {
+            const grid = document.getElementById('scheduleGrid');
+            if (!grid) return;
+            const blocks = (userData && userData.weeklySchedule) ? userData.weeklySchedule.slice() : [];
+            if (blocks.length === 0) {
+                grid.innerHTML = `<p style="color:var(--text-secondary);">${T('sched_empty')}</p>`;
+                return;
+            }
+            const names = dayNames();
+            let html = '';
+            for (let day = 0; day < 7; day++) {
+                const dayBlocks = blocks.filter(b => b.day === day).sort((a, b) => a.start.localeCompare(b.start));
+                if (dayBlocks.length === 0) continue;
+                html += `<div class="sched-day-card"><h4>${names[day]}</h4>`;
+                dayBlocks.forEach(b => {
+                    const idx = blocks.indexOf(b);
+                    html += `<div class="sched-block">
+                        <span class="time">${b.start} - ${b.end}</span>
+                        <span class="type">${sanitize(b.type || '')}</span>
+                        <button class="item-del-btn" onclick="removeScheduleBlock(${idx})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+            grid.innerHTML = html;
+        }
+        async function addScheduleBlock() {
+            if (!currentUser) return;
+            const day = parseInt(document.getElementById('schedDay').value);
+            const start = document.getElementById('schedStart').value;
+            const end = document.getElementById('schedEnd').value;
+            const type = document.getElementById('schedType').value.trim();
+            if (end <= start) { showToast(T('sched_time_err')); return; }
+            if (!type) { showToast(T('sched_type_err')); return; }
+            const block = { day, start, end, type };
+            await db.collection('users').doc(currentUser.uid).update({
+                weeklySchedule: firebase.firestore.FieldValue.arrayUnion(block)
+            });
+            userData.weeklySchedule = userData.weeklySchedule || [];
+            userData.weeklySchedule.push(block);
+            document.getElementById('schedType').value = '';
+            renderSchedule();
+            showToast(T('sched_added'));
+        }
+        async function removeScheduleBlock(idx) {
+            if (!currentUser) return;
+            userData.weeklySchedule.splice(idx, 1);
+            await db.collection('users').doc(currentUser.uid).update({ weeklySchedule: userData.weeklySchedule });
+            renderSchedule();
+            showToast(T('removed'));
+        }
+
+        // ===== STRENGTH PROGRAM =====
+        function renderStrength() {
+            const list = document.getElementById('strengthList');
+            if (!list) return;
+            const items = (userData && userData.strengthProgram) ? userData.strengthProgram : [];
+            if (items.length === 0) {
+                list.innerHTML = `<p style="color:var(--text-secondary);">${T('str_empty')}</p>`;
+                return;
+            }
+            list.innerHTML = items.map((ex, i) => `
+                <div class="strength-item">
+                    <div class="ex-name">${sanitize(ex.name)}
+                        <button class="item-del-btn" style="float:${currentLang==='he'?'left':'right'};" onclick="removeStrengthEx(${i})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="ex-meta">
+                        ${ex.weight ? `<span class="ex-chip">${ex.weight} ${T('str_kg')}</span>` : ''}
+                        ${ex.reps ? `<span class="ex-chip">${ex.reps} ${T('str_reps')}</span>` : ''}
+                        ${ex.sets ? `<span class="ex-chip">${ex.sets} ${T('str_sets')}</span>` : ''}
+                        ${ex.days ? `<span class="ex-chip">${ex.days} ${T('str_days')}</span>` : ''}
+                    </div>
+                    ${ex.includes ? `<div class="ex-includes">${sanitize(ex.includes)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+        async function addStrengthEx() {
+            if (!currentUser) return;
+            const name = document.getElementById('exName').value.trim();
+            if (!name) { showToast(T('str_name_err')); return; }
+            const ex = {
+                name,
+                weight: parseFloat(document.getElementById('exWeight').value) || 0,
+                reps: parseInt(document.getElementById('exReps').value) || 0,
+                sets: parseInt(document.getElementById('exSets').value) || 0,
+                days: parseInt(document.getElementById('exDays').value) || 0,
+                includes: document.getElementById('exIncludes').value.trim()
+            };
+            await db.collection('users').doc(currentUser.uid).update({
+                strengthProgram: firebase.firestore.FieldValue.arrayUnion(ex)
+            });
+            userData.strengthProgram = userData.strengthProgram || [];
+            userData.strengthProgram.push(ex);
+            ['exName','exWeight','exReps','exSets','exDays','exIncludes'].forEach(id => document.getElementById(id).value = '');
+            renderStrength();
+            showToast(T('str_added'));
+        }
+        async function removeStrengthEx(idx) {
+            if (!currentUser) return;
+            userData.strengthProgram.splice(idx, 1);
+            await db.collection('users').doc(currentUser.uid).update({ strengthProgram: userData.strengthProgram });
+            renderStrength();
+            showToast(T('removed'));
+        }
+
+        // ===== COACH FEEDBACK (competitor side) =====
+        function updateFeedbackBadge() {
+            const badge = document.getElementById('feedbackBadge');
+            if (!badge) return;
+            const fb = (userData && userData.coachFeedback) ? userData.coachFeedback : [];
+            const unread = fb.filter(f => !f.ack).length;
+            if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
+            else badge.style.display = 'none';
+        }
+        function renderFeedback() {
+            const list = document.getElementById('feedbackList');
+            if (!list) return;
+            const fb = (userData && userData.coachFeedback) ? userData.coachFeedback : [];
+            if (fb.length === 0) {
+                list.innerHTML = `<p style="color:var(--text-secondary);">${T('fb_empty')}</p>`;
+                updateFeedbackBadge();
+                return;
+            }
+            list.innerHTML = fb.slice().reverse().map((f) => {
+                const realIdx = fb.indexOf(f);
+                return `<div class="fb-card ${f.ack ? '' : 'unread'}">
+                    <div class="fb-meta"><i class="fas fa-user-tie" style="color:var(--accent);"></i> ${sanitize(f.coach || T('fb_coach'))} · ${f.date || ''}</div>
+                    <div class="fb-text">${sanitize(f.text)}</div>
+                    ${f.ack
+                        ? `<span class="fb-ack"><i class="fas fa-check-circle"></i> ${T('fb_acked')}</span>`
+                        : `<button class="form-submit" style="width:auto; padding:8px 18px; margin:0;" onclick="acknowledgeFeedback(${realIdx})"><i class="fas fa-check"></i> ${T('fb_ack_btn')}</button>`}
+                </div>`;
+            }).join('');
+            updateFeedbackBadge();
+        }
+        async function acknowledgeFeedback(idx) {
+            if (!currentUser || !userData.coachFeedback || !userData.coachFeedback[idx]) return;
+            userData.coachFeedback[idx].ack = true;
+            await db.collection('users').doc(currentUser.uid).update({ coachFeedback: userData.coachFeedback });
+            renderFeedback();
+            showToast(T('fb_acked_toast'));
+        }
+
+        // ===== COACH: add feedback / promote (write to a competitor doc) =====
+        async function addCoachFeedback(uid) {
+            const input = document.getElementById('coachFbInput');
+            const text = input.value.trim();
+            if (!text) { showToast(T('fb_write_err')); return; }
+            const coachDoc = await db.collection('users').doc(uid).get();
+            const existing = (coachDoc.data() && coachDoc.data().coachFeedback) ? coachDoc.data().coachFeedback : [];
+            const entry = {
+                text,
+                coach: (userData && userData.name) || (currentUser && currentUser.displayName) || T('fb_coach'),
+                date: new Date().toLocaleDateString('he-IL'),
+                ack: false
+            };
+            existing.push(entry);
+            await db.collection('users').doc(uid).update({ coachFeedback: existing });
+            input.value = '';
+            showToast(T('fb_sent'));
+            showCompetitorDetail(uid);
+        }
+        async function promoteToCoach(uid, makeCoach) {
+            if (!isAdmin) return;
+            await db.collection('users').doc(uid).update({ role: makeCoach ? 'coach' : 'competitor' });
+            showToast(makeCoach ? T('promote_done') : T('demote_done'));
+            showCompetitorDetail(uid);
+            loadCompetitors();
+        }
+
+        // ===== COACH: read-only renderers for a competitor's data =====
+        function cdScheduleHtml(blocks) {
+            if (!blocks || blocks.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_schedule')}</p>`;
+            const names = dayNames();
+            let html = '';
+            for (let day = 0; day < 7; day++) {
+                const dayBlocks = blocks.filter(b => b.day === day).sort((a, b) => a.start.localeCompare(b.start));
+                if (dayBlocks.length === 0) continue;
+                html += `<div class="sched-day-card"><h4>${names[day]}</h4>`;
+                dayBlocks.forEach(b => {
+                    html += `<div class="sched-block"><span class="time">${b.start} - ${b.end}</span><span class="type">${sanitize(b.type || '')}</span></div>`;
+                });
+                html += `</div>`;
+            }
+            return html;
+        }
+        function cdStrengthHtml(items) {
+            if (!items || items.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_strength')}</p>`;
+            return items.map(ex => `
+                <div class="strength-item">
+                    <div class="ex-name">${sanitize(ex.name)}</div>
+                    <div class="ex-meta">
+                        ${ex.weight ? `<span class="ex-chip">${ex.weight} ${T('str_kg')}</span>` : ''}
+                        ${ex.reps ? `<span class="ex-chip">${ex.reps} ${T('str_reps')}</span>` : ''}
+                        ${ex.sets ? `<span class="ex-chip">${ex.sets} ${T('str_sets')}</span>` : ''}
+                        ${ex.days ? `<span class="ex-chip">${ex.days} ${T('str_days')}</span>` : ''}
+                    </div>
+                    ${ex.includes ? `<div class="ex-includes">${sanitize(ex.includes)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
         // ===== COACH: LOAD COMPETITORS =====
         async function loadCompetitors() {
             if (!isCoach && !isAdmin) return;
@@ -2803,16 +3233,51 @@
                     </div>
                 `).join('')}
 
-                <h4 style="color:var(--white); margin:20px 0 12px;">מסמכים (${(d.documents || []).length})</h4>
+                <h4 style="color:var(--white); margin:20px 0 12px;">${T('cd_documents')} (${(d.documents || []).length})</h4>
                 ${(d.documents || []).length ? d.documents.map(doc => `
                     <div class="file-item" style="margin-bottom:8px;">
                         <div class="file-info">
                             <i class="fas fa-file file-icon"></i>
                             <div><div class="file-name">${sanitize(doc.name)}</div><div class="file-date">${doc.date} | ${sanitize(doc.typeName)}</div></div>
                         </div>
-                        <span class="file-status ${doc.status === 'approved' ? 'status-approved' : 'status-pending'}">${doc.status === 'approved' ? 'אושר' : 'בבדיקה'}</span>
+                        <span class="file-status ${doc.status === 'approved' ? 'status-approved' : 'status-pending'}">${doc.status === 'approved' ? T('cd_approved') : T('cd_pending')}</span>
                     </div>
-                `).join('') : '<p style="color:var(--text-secondary);">אין מסמכים</p>'}
+                `).join('') : `<p style="color:var(--text-secondary);">${T('cd_no_docs')}</p>`}
+
+                <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-calendar-week" style="color:var(--accent);"></i> ${T('cd_schedule')}</h4>
+                ${cdScheduleHtml(d.weeklySchedule || [])}
+
+                <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-dumbbell" style="color:var(--accent);"></i> ${T('cd_strength')}</h4>
+                ${cdStrengthHtml(d.strengthProgram || [])}
+
+                <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-comments" style="color:var(--accent);"></i> ${T('cd_feedback')}</h4>
+                ${(d.coachFeedback || []).length ? (d.coachFeedback).slice().reverse().map(f => `
+                    <div class="fb-card ${f.ack ? '' : 'unread'}">
+                        <div class="fb-meta"><i class="fas fa-user-tie" style="color:var(--accent);"></i> ${sanitize(f.coach || T('fb_coach'))} · ${f.date || ''}</div>
+                        <div class="fb-text">${sanitize(f.text)}</div>
+                        <span class="fb-ack" style="color:${f.ack ? 'var(--success)' : 'var(--text-secondary)'};">
+                            <i class="fas ${f.ack ? 'fa-check-circle' : 'fa-clock'}"></i> ${f.ack ? T('cd_fb_seen') : T('cd_fb_unseen')}
+                        </span>
+                    </div>
+                `).join('') : `<p style="color:var(--text-secondary);">${T('cd_no_fb')}</p>`}
+
+                <div class="profile-card" style="margin-top:16px;">
+                    <h4 style="margin-bottom:12px;">${T('cd_add_fb')}</h4>
+                    <div class="form-group">
+                        <textarea id="coachFbInput" rows="3" placeholder="${T('cd_fb_ph')}"></textarea>
+                    </div>
+                    <button class="form-submit" onclick="addCoachFeedback('${uid}')"><i class="fas fa-paper-plane"></i> ${T('cd_send_fb')}</button>
+                </div>
+
+                ${isAdmin && d.role !== 'admin' ? `
+                <div class="profile-card" style="margin-top:16px; border:1px solid rgba(230,57,70,0.3);">
+                    <h4 style="margin-bottom:12px;"><i class="fas fa-crown" style="color:var(--gold);"></i> ${T('cd_role_mgmt')}</h4>
+                    ${d.role === 'coach'
+                        ? `<p style="color:var(--text-secondary); margin-bottom:12px;">${T('cd_is_coach')}</p>
+                           <button class="form-submit" style="background:var(--text-secondary);" onclick="promoteToCoach('${uid}', false)"><i class="fas fa-user-minus"></i> ${T('cd_demote')}</button>`
+                        : `<p style="color:var(--text-secondary); margin-bottom:12px;">${T('cd_is_competitor')}</p>
+                           <button class="form-submit" onclick="promoteToCoach('${uid}', true)"><i class="fas fa-user-plus"></i> ${T('cd_promote')}</button>`}
+                </div>` : ''}
             `;
 
             document.getElementById('competitorDetailModal').classList.add('active');
@@ -2880,14 +3345,16 @@
                 // Footer
                 footer: '© 2026 Rocky - קבוצת מתחרים | כל הזכויות שמורות',
                 // Auth
-                login_title: 'כניסה', login_email: 'אימייל', login_pass: 'סיסמה', login_btn: 'כניסה',
+                login_title: 'כניסה', login_email: 'אימייל', login_pass: 'סיסמה', login_btn: 'כניסה', login_back: 'חזרה',
                 login_forgot: 'שכחתי סיסמה', login_no_account: 'עדיין לא רשום?', login_register_link: 'הרשמה',
                 reg_title: 'הרשמה', reg_name: 'שם מלא', reg_email: 'אימייל', reg_phone: 'טלפון',
                 reg_gym: 'מכון / מועדון', reg_pass: 'סיסמה (לפחות 6 תווים)', reg_coach: 'אני מאמן',
                 admin_label: 'אני אדמין', admin_code: 'קוד אדמין', reg_btn: 'הרשמה',
                 reg_has_account: 'כבר רשום?', reg_login_link: 'התחברות',
+                login_pass_ph: 'הסיסמה שלך', reg_name_ph: 'השם שלך', reg_gym_ph: 'שם המכון', reg_pass_ph: 'בחר סיסמה',
+                dash_weight_ph: 'הכנס משקל', dash_height_ph: 'הכנס גובה', dash_exp_ph: 'מספר שנות ניסיון', dash_gym_ph: 'שם המכון', dash_comp_name_ph: 'שם התחרות', dash_comp_loc_ph: 'עיר / אולם',
                 // Dashboard
-                dash_welcome: 'ברוך הבא לאזור האישי שלך',
+                dash_hello: 'שלום', dash_welcome: 'ברוך הבא לאזור האישי שלך',
                 dash_overview: 'סקירה', dash_documents: 'מסמכים', dash_videos: 'סרטונים',
                 dash_profile: 'פרופיל', dash_competitions: 'תחרויות',
                 dash_manage: 'ניהול מתחרים', dash_manage_admin: 'ניהול משתמשים', dash_logout: 'יציאה',
@@ -2935,6 +3402,30 @@
                 // Coach panel
                 dash_coach_title: 'ניהול מתחרים', dash_coach_desc: 'לחץ על מתחרה לצפייה בפרטים המלאים שלו.',
                 dash_loading: 'טוען מתחרים...',
+                // Training features
+                nav_schedule: 'לוח אימונים', nav_strength: 'תכנית כוח', nav_feedback: 'משוב מאמן',
+                day_sun: 'ראשון', day_mon: 'שני', day_tue: 'שלישי', day_wed: 'רביעי', day_thu: 'חמישי', day_fri: 'שישי', day_sat: 'שבת',
+                sched_title: 'לוח אימונים שבועי', sched_desc: 'הוסף בלוקים של אימון לכל יום, בקפיצות של רבע שעה.',
+                sched_add_title: 'הוספת בלוק אימון', sched_day: 'יום', sched_start: 'התחלה', sched_end: 'סיום',
+                sched_type: 'סוג האימון', sched_type_ph: 'למשל: ריצה, ספארינג, טכניקה', sched_add_btn: 'הוסף בלוק',
+                sched_empty: 'עדיין אין אימונים בלוח. הוסף בלוק ראשון.',
+                sched_time_err: 'שעת הסיום חייבת להיות אחרי ההתחלה', sched_type_err: 'נא למלא סוג אימון',
+                sched_added: 'הבלוק נוסף בהצלחה',
+                str_title: 'תכנית כוח', str_desc: 'הוסף תרגילי כוח עם כל הפרטים.', str_add_title: 'הוספת תרגיל',
+                ex_name: 'שם התרגיל', ex_name_ph: 'למשל: סקוואט', ex_weight: 'משקל (ק"ג)', ex_reps: 'חזרות', ex_sets: 'סטים',
+                ex_days: 'ימים בשבוע', ex_includes: 'מה כולל האימון', ex_includes_ph: 'תיאור האימון, דגשים...', ex_add_btn: 'הוסף תרגיל',
+                str_empty: 'עדיין אין תרגילים. הוסף תרגיל ראשון.', str_name_err: 'נא למלא שם תרגיל', str_added: 'התרגיל נוסף בהצלחה',
+                str_kg: 'ק"ג', str_reps: 'חזרות', str_sets: 'סטים', str_days: 'ימים/שבוע',
+                fb_title: 'משוב מהמאמן', fb_desc: 'כאן תראה הצעות ושינויים מהמאמן. אשר קבלה כדי שהמאמן ידע שראית.',
+                fb_empty: 'עדיין אין משוב מהמאמן.', fb_coach: 'מאמן', fb_ack_btn: 'אשר קבלה', fb_acked: 'אישרת קבלה',
+                fb_acked_toast: 'אישרת שקיבלת את המשוב', fb_write_err: 'נא לכתוב משוב',
+                remove: 'הסר', removed: 'הוסר',
+                cd_documents: 'מסמכים', cd_approved: 'אושר', cd_pending: 'בבדיקה', cd_no_docs: 'אין מסמכים',
+                cd_schedule: 'לוח אימונים', cd_no_schedule: 'אין לוח אימונים', cd_strength: 'תכנית כוח', cd_no_strength: 'אין תכנית כוח',
+                cd_feedback: 'משוב', cd_no_fb: 'עדיין לא נשלח משוב', cd_fb_seen: 'המתחרה ראה', cd_fb_unseen: 'טרם נצפה',
+                cd_add_fb: 'שליחת משוב / הצעה', cd_fb_ph: 'כתוב הצעה או שינוי למתחרה...', cd_send_fb: 'שלח משוב', fb_sent: 'המשוב נשלח',
+                cd_role_mgmt: 'ניהול הרשאות', cd_is_coach: 'משתמש זה הוא מאמן.', cd_is_competitor: 'משתמש זה הוא מתחרה.',
+                cd_promote: 'הפוך למאמן', cd_demote: 'הורד למתחרה', promote_done: 'המשתמש הפך למאמן', demote_done: 'המשתמש הפך למתחרה',
                 // Coach cards
                 coach_gadi_name: 'גדי שור', coach_gadi_role: 'מאמן ראשי - לחימה', coach_gadi_bio: 'מאמן ומנהל קבוצת Rocky. מוביל את המתחרים לתוצאות ברמה הגבוהה ביותר.',
                 coach_omer_name: 'עומר עמנואלי', coach_omer_role: 'מאמן בכיר ומתחרה פעיל', coach_omer_bio: 'מייסד קבוצת Rocky בשיתוף עם גדי, המאמן הראשי. מאמן בכיר ומתחרה פעיל שמוביל בדוגמה אישית.',
@@ -2964,14 +3455,16 @@
                 contact_name: 'Full Name', contact_phone: 'Phone', contact_msg: 'Message', contact_send: 'Send Message',
                 contact_name_ph: 'Your name', contact_phone_ph: '050-0000000', contact_msg_ph: 'What would you like to ask?',
                 footer: '© 2026 Rocky - Competition Team | All rights reserved',
-                login_title: 'Login', login_email: 'Email', login_pass: 'Password', login_btn: 'Login',
+                login_title: 'Login', login_email: 'Email', login_pass: 'Password', login_btn: 'Login', login_back: 'Back',
                 login_forgot: 'Forgot password', login_no_account: 'Not registered yet?', login_register_link: 'Register',
                 reg_title: 'Register', reg_name: 'Full Name', reg_email: 'Email', reg_phone: 'Phone',
                 reg_gym: 'Gym / Club', reg_pass: 'Password (min 6 chars)', reg_coach: 'I am a coach',
                 admin_label: 'I am an admin', admin_code: 'Admin code', reg_btn: 'Register',
                 reg_has_account: 'Already registered?', reg_login_link: 'Login',
+                login_pass_ph: 'Your password', reg_name_ph: 'Your name', reg_gym_ph: 'Gym name', reg_pass_ph: 'Choose a password',
+                dash_weight_ph: 'Enter weight', dash_height_ph: 'Enter height', dash_exp_ph: 'Years of experience', dash_gym_ph: 'Gym name', dash_comp_name_ph: 'Competition name', dash_comp_loc_ph: 'City / Venue',
                 // Dashboard
-                dash_welcome: 'Welcome to your personal area',
+                dash_hello: 'Hello', dash_welcome: 'Welcome to your personal area',
                 dash_overview: 'Overview', dash_documents: 'Documents', dash_videos: 'Videos',
                 dash_profile: 'Profile', dash_competitions: 'Competitions',
                 dash_manage: 'Manage Competitors', dash_manage_admin: 'Manage Users', dash_logout: 'Logout',
@@ -3012,6 +3505,30 @@
                 dash_registered: 'Registered',
                 dash_coach_title: 'Manage Competitors', dash_coach_desc: 'Click on a competitor to view their full details.',
                 dash_loading: 'Loading competitors...',
+                // Training features
+                nav_schedule: 'Schedule', nav_strength: 'Strength', nav_feedback: 'Coach Feedback',
+                day_sun: 'Sunday', day_mon: 'Monday', day_tue: 'Tuesday', day_wed: 'Wednesday', day_thu: 'Thursday', day_fri: 'Friday', day_sat: 'Saturday',
+                sched_title: 'Weekly Training Schedule', sched_desc: 'Add training blocks for each day, in 15-minute steps.',
+                sched_add_title: 'Add Training Block', sched_day: 'Day', sched_start: 'Start', sched_end: 'End',
+                sched_type: 'Training Type', sched_type_ph: 'e.g. Running, Sparring, Technique', sched_add_btn: 'Add Block',
+                sched_empty: 'No training yet. Add your first block.',
+                sched_time_err: 'End time must be after start time', sched_type_err: 'Please enter a training type',
+                sched_added: 'Block added successfully',
+                str_title: 'Strength Program', str_desc: 'Add strength exercises with all details.', str_add_title: 'Add Exercise',
+                ex_name: 'Exercise Name', ex_name_ph: 'e.g. Squat', ex_weight: 'Weight (kg)', ex_reps: 'Reps', ex_sets: 'Sets',
+                ex_days: 'Days per week', ex_includes: 'What the workout includes', ex_includes_ph: 'Workout description, notes...', ex_add_btn: 'Add Exercise',
+                str_empty: 'No exercises yet. Add your first one.', str_name_err: 'Please enter an exercise name', str_added: 'Exercise added successfully',
+                str_kg: 'kg', str_reps: 'reps', str_sets: 'sets', str_days: 'days/week',
+                fb_title: 'Coach Feedback', fb_desc: 'See suggestions and changes from your coach. Acknowledge so the coach knows you saw it.',
+                fb_empty: 'No feedback from coach yet.', fb_coach: 'Coach', fb_ack_btn: 'Acknowledge', fb_acked: 'Acknowledged',
+                fb_acked_toast: 'You acknowledged the feedback', fb_write_err: 'Please write feedback',
+                remove: 'Remove', removed: 'Removed',
+                cd_documents: 'Documents', cd_approved: 'Approved', cd_pending: 'Pending', cd_no_docs: 'No documents',
+                cd_schedule: 'Training Schedule', cd_no_schedule: 'No schedule', cd_strength: 'Strength Program', cd_no_strength: 'No strength program',
+                cd_feedback: 'Feedback', cd_no_fb: 'No feedback sent yet', cd_fb_seen: 'Seen by competitor', cd_fb_unseen: 'Not seen yet',
+                cd_add_fb: 'Send Feedback / Suggestion', cd_fb_ph: 'Write a suggestion or change for the competitor...', cd_send_fb: 'Send Feedback', fb_sent: 'Feedback sent',
+                cd_role_mgmt: 'Role Management', cd_is_coach: 'This user is a coach.', cd_is_competitor: 'This user is a competitor.',
+                cd_promote: 'Make Coach', cd_demote: 'Demote to Competitor', promote_done: 'User is now a coach', demote_done: 'User is now a competitor',
                 // Coach cards
                 coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Head Coach - Fighting', coach_gadi_bio: 'Coach and manager of Rocky team. Leading competitors to top results.',
                 coach_omer_name: 'Omer Emanueli', coach_omer_role: 'Senior Coach & Active Competitor', coach_omer_bio: 'Co-founder of Rocky team with Gadi, the head coach. Senior coach and active competitor leading by example.',
@@ -3041,14 +3558,16 @@
                 contact_name: 'Vollständiger Name', contact_phone: 'Telefon', contact_msg: 'Nachricht', contact_send: 'Nachricht senden',
                 contact_name_ph: 'Dein Name', contact_phone_ph: '050-0000000', contact_msg_ph: 'Was möchtest du fragen?',
                 footer: '© 2026 Rocky - Wettkampfteam | Alle Rechte vorbehalten',
-                login_title: 'Anmelden', login_email: 'E-Mail', login_pass: 'Passwort', login_btn: 'Anmelden',
+                login_title: 'Anmelden', login_email: 'E-Mail', login_pass: 'Passwort', login_btn: 'Anmelden', login_back: 'Zurück',
                 login_forgot: 'Passwort vergessen', login_no_account: 'Noch nicht registriert?', login_register_link: 'Registrieren',
                 reg_title: 'Registrieren', reg_name: 'Vollständiger Name', reg_email: 'E-Mail', reg_phone: 'Telefon',
                 reg_gym: 'Studio / Verein', reg_pass: 'Passwort (mind. 6 Zeichen)', reg_coach: 'Ich bin Trainer',
                 admin_label: 'Ich bin Admin', admin_code: 'Admin-Code', reg_btn: 'Registrieren',
                 reg_has_account: 'Bereits registriert?', reg_login_link: 'Anmelden',
+                login_pass_ph: 'Dein Passwort', reg_name_ph: 'Dein Name', reg_gym_ph: 'Name des Studios', reg_pass_ph: 'Passwort wählen',
+                dash_weight_ph: 'Gewicht eingeben', dash_height_ph: 'Größe eingeben', dash_exp_ph: 'Jahre Erfahrung', dash_gym_ph: 'Name des Studios', dash_comp_name_ph: 'Name des Wettkampfs', dash_comp_loc_ph: 'Stadt / Halle',
                 // Dashboard
-                dash_welcome: 'Willkommen in deinem persoenlichen Bereich',
+                dash_hello: 'Hallo', dash_welcome: 'Willkommen in deinem persoenlichen Bereich',
                 dash_overview: 'Uebersicht', dash_documents: 'Dokumente', dash_videos: 'Videos',
                 dash_profile: 'Profil', dash_competitions: 'Wettkaempfe',
                 dash_manage: 'Wettkämpfer verwalten', dash_manage_admin: 'Benutzer verwalten', dash_logout: 'Abmelden',
@@ -3089,6 +3608,30 @@
                 dash_registered: 'Angemeldet',
                 dash_coach_title: 'Wettkämpfer verwalten', dash_coach_desc: 'Klicke auf einen Wettkämpfer für Details.',
                 dash_loading: 'Wettkämpfer werden geladen...',
+                // Training features
+                nav_schedule: 'Trainingsplan', nav_strength: 'Kraftplan', nav_feedback: 'Trainer-Feedback',
+                day_sun: 'Sonntag', day_mon: 'Montag', day_tue: 'Dienstag', day_wed: 'Mittwoch', day_thu: 'Donnerstag', day_fri: 'Freitag', day_sat: 'Samstag',
+                sched_title: 'Wöchentlicher Trainingsplan', sched_desc: 'Füge Trainingsblöcke pro Tag hinzu, in 15-Minuten-Schritten.',
+                sched_add_title: 'Trainingsblock hinzufügen', sched_day: 'Tag', sched_start: 'Beginn', sched_end: 'Ende',
+                sched_type: 'Trainingsart', sched_type_ph: 'z.B. Laufen, Sparring, Technik', sched_add_btn: 'Block hinzufügen',
+                sched_empty: 'Noch kein Training. Füge deinen ersten Block hinzu.',
+                sched_time_err: 'Die Endzeit muss nach der Startzeit liegen', sched_type_err: 'Bitte Trainingsart eingeben',
+                sched_added: 'Block erfolgreich hinzugefügt',
+                str_title: 'Kraftprogramm', str_desc: 'Füge Kraftübungen mit allen Details hinzu.', str_add_title: 'Übung hinzufügen',
+                ex_name: 'Übungsname', ex_name_ph: 'z.B. Kniebeuge', ex_weight: 'Gewicht (kg)', ex_reps: 'Wdh.', ex_sets: 'Sätze',
+                ex_days: 'Tage pro Woche', ex_includes: 'Was das Training umfasst', ex_includes_ph: 'Trainingsbeschreibung, Hinweise...', ex_add_btn: 'Übung hinzufügen',
+                str_empty: 'Noch keine Übungen. Füge deine erste hinzu.', str_name_err: 'Bitte Übungsnamen eingeben', str_added: 'Übung erfolgreich hinzugefügt',
+                str_kg: 'kg', str_reps: 'Wdh.', str_sets: 'Sätze', str_days: 'Tage/Woche',
+                fb_title: 'Trainer-Feedback', fb_desc: 'Sieh Vorschläge und Änderungen vom Trainer. Bestätige, damit der Trainer weiß, dass du es gesehen hast.',
+                fb_empty: 'Noch kein Feedback vom Trainer.', fb_coach: 'Trainer', fb_ack_btn: 'Bestätigen', fb_acked: 'Bestätigt',
+                fb_acked_toast: 'Du hast das Feedback bestätigt', fb_write_err: 'Bitte Feedback schreiben',
+                remove: 'Entfernen', removed: 'Entfernt',
+                cd_documents: 'Dokumente', cd_approved: 'Genehmigt', cd_pending: 'In Prüfung', cd_no_docs: 'Keine Dokumente',
+                cd_schedule: 'Trainingsplan', cd_no_schedule: 'Kein Trainingsplan', cd_strength: 'Kraftprogramm', cd_no_strength: 'Kein Kraftprogramm',
+                cd_feedback: 'Feedback', cd_no_fb: 'Noch kein Feedback gesendet', cd_fb_seen: 'Vom Wettkämpfer gesehen', cd_fb_unseen: 'Noch nicht gesehen',
+                cd_add_fb: 'Feedback / Vorschlag senden', cd_fb_ph: 'Schreibe einen Vorschlag oder eine Änderung...', cd_send_fb: 'Feedback senden', fb_sent: 'Feedback gesendet',
+                cd_role_mgmt: 'Rollenverwaltung', cd_is_coach: 'Dieser Benutzer ist Trainer.', cd_is_competitor: 'Dieser Benutzer ist Wettkämpfer.',
+                cd_promote: 'Zum Trainer machen', cd_demote: 'Zu Wettkämpfer herabstufen', promote_done: 'Benutzer ist jetzt Trainer', demote_done: 'Benutzer ist jetzt Wettkämpfer',
                 // Coach cards
                 coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Cheftrainer - Kampfsport', coach_gadi_bio: 'Trainer und Leiter des Rocky-Teams. Führt die Wettkämpfer zu Spitzenleistungen.',
                 coach_omer_name: 'Omer Emanueli', coach_omer_role: 'Senior-Trainer & aktiver Wettkämpfer', coach_omer_bio: 'Mitgründer des Rocky-Teams mit Gadi. Senior-Trainer der mit persönlichem Beispiel vorangeht.',
@@ -3247,19 +3790,22 @@
             const footer = document.querySelector('footer p');
             if (footer) footer.textContent = t.footer;
 
-            // Login modal
-            const loginH2 = document.querySelector('#loginModal h2');
-            if (loginH2) loginH2.innerHTML = `<i class="fas fa-fist-raised" style="color:var(--accent);"></i> ${t.login_title}`;
-            const loginLabels = document.querySelectorAll('#loginModal .form-group label');
+            // Login page
+            const loginH2 = document.querySelector('#loginPage h2');
+            if (loginH2) loginH2.textContent = t.login_title;
+            const loginLabels = document.querySelectorAll('#loginPage .form-group label');
             if (loginLabels[0]) loginLabels[0].textContent = t.login_email;
             if (loginLabels[1]) loginLabels[1].textContent = t.login_pass;
+            document.querySelectorAll('.auth-page [data-i18n="login_back"]').forEach(el => el.textContent = t.login_back);
             const loginBtnEl = document.getElementById('loginBtn');
             if (loginBtnEl && !loginBtnEl.disabled) loginBtnEl.textContent = t.login_btn;
+            const loginPassInput = document.getElementById('loginPass');
+            if (loginPassInput) loginPassInput.placeholder = t.login_pass_ph;
 
-            // Register modal
-            const regH2 = document.querySelector('#registerModal h2');
-            if (regH2) regH2.innerHTML = `<i class="fas fa-user-plus" style="color:var(--accent);"></i> ${t.reg_title}`;
-            const regLabels = document.querySelectorAll('#registerModal .form-group label');
+            // Register page
+            const regH2 = document.querySelector('#registerPage h2');
+            if (regH2) regH2.textContent = t.reg_title;
+            const regLabels = document.querySelectorAll('#registerPage .form-group label');
             if (regLabels[0]) regLabels[0].textContent = t.reg_name;
             if (regLabels[1]) regLabels[1].textContent = t.reg_email;
             if (regLabels[2]) regLabels[2].textContent = t.reg_phone;
@@ -3267,6 +3813,12 @@
             if (regLabels[4]) regLabels[4].textContent = t.reg_pass;
             const regBtnEl = document.getElementById('regBtn');
             if (regBtnEl && !regBtnEl.disabled) regBtnEl.textContent = t.reg_btn;
+            const regNameInput = document.getElementById('regName');
+            if (regNameInput) regNameInput.placeholder = t.reg_name_ph;
+            const regGymInput = document.getElementById('regGym');
+            if (regGymInput) regGymInput.placeholder = t.reg_gym_ph;
+            const regPassInput = document.getElementById('regPass');
+            if (regPassInput) regPassInput.placeholder = t.reg_pass_ph;
 
             // ===== DASHBOARD TRANSLATIONS =====
             // Welcome text
@@ -3281,6 +3833,9 @@
                 else if (onclick.includes("'documents'")) btn.innerHTML = `<i class="fas fa-folder-open"></i> ${t.dash_documents}`;
                 else if (onclick.includes("'videos'")) btn.innerHTML = `<i class="fas fa-play-circle"></i> ${t.dash_videos}`;
                 else if (onclick.includes("'profile'")) btn.innerHTML = `<i class="fas fa-user"></i> ${t.dash_profile}`;
+                else if (onclick.includes("'schedule'")) btn.innerHTML = `<i class="fas fa-calendar-week"></i> ${t.nav_schedule}`;
+                else if (onclick.includes("'strength'")) btn.innerHTML = `<i class="fas fa-dumbbell"></i> ${t.nav_strength}`;
+                else if (onclick.includes("'feedback'")) { const unread = (userData && userData.coachFeedback) ? userData.coachFeedback.filter(f => !f.ack).length : 0; btn.innerHTML = `<i class="fas fa-comments"></i> ${t.nav_feedback} <span id="feedbackBadge" class="fb-badge" style="display:${unread ? '' : 'none'};">${unread}</span>`; }
                 else if (onclick.includes("'competitions'")) btn.innerHTML = `<i class="fas fa-medal"></i> ${t.dash_competitions}`;
                 else if (onclick.includes("'coach'")) btn.innerHTML = isAdmin ? `<i class="fas fa-crown"></i> ${t.dash_manage_admin}` : `<i class="fas fa-users-cog"></i> ${t.dash_manage}`;
                 else if (onclick.includes('logout')) { btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${t.dash_logout}`; btn.style.color = 'var(--accent)'; }
@@ -3428,6 +3983,42 @@
             if (coachH3) coachH3.innerHTML = `<i class="fas fa-users-cog" style="color: var(--accent);"></i> ${t.dash_coach_title}`;
             const coachDesc = document.querySelector('#panel-coach > p');
             if (coachDesc) coachDesc.textContent = t.dash_coach_desc;
+
+            // Dashboard input placeholders
+            const phMap = {
+                weightInput: t.dash_weight_ph, heightInput: t.dash_height_ph,
+                expInput: t.dash_exp_ph, gymInput: t.dash_gym_ph,
+                compName: t.dash_comp_name_ph, compLocation: t.dash_comp_loc_ph
+            };
+            Object.entries(phMap).forEach(([id, val]) => {
+                const el = document.getElementById(id);
+                if (el && val) el.placeholder = val;
+            });
+
+            // ===== Training feature panels =====
+            const setTxt = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
+            const setPh = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.placeholder = val; };
+            // Schedule panel
+            setTxt('scheduleTitle', t.sched_title); setTxt('scheduleDesc', t.sched_desc);
+            setTxt('scheduleAddTitle', t.sched_add_title); setTxt('schedDayLabel', t.sched_day);
+            setTxt('schedStartLabel', t.sched_start); setTxt('schedEndLabel', t.sched_end);
+            setTxt('schedTypeLabel', t.sched_type); setPh('schedType', t.sched_type_ph); setTxt('schedAddBtn', t.sched_add_btn);
+            // Strength panel
+            setTxt('strengthTitle', t.str_title); setTxt('strengthDesc', t.str_desc);
+            setTxt('strengthAddTitle', t.str_add_title); setTxt('exNameLabel', t.ex_name); setPh('exName', t.ex_name_ph);
+            setTxt('exWeightLabel', t.ex_weight); setTxt('exRepsLabel', t.ex_reps); setTxt('exSetsLabel', t.ex_sets);
+            setTxt('exDaysLabel', t.ex_days); setTxt('exIncludesLabel', t.ex_includes); setPh('exIncludes', t.ex_includes_ph);
+            setTxt('exAddBtn', t.ex_add_btn);
+            // Feedback panel
+            setTxt('feedbackTitle', t.fb_title); setTxt('feedbackDesc', t.fb_desc);
+
+            // Re-render dynamic content in the new language (only if logged in)
+            if (typeof currentUser !== 'undefined' && currentUser && userData) {
+                const dayVal = document.getElementById('schedDay') ? document.getElementById('schedDay').value : null;
+                initScheduleSelects();
+                if (dayVal != null && document.getElementById('schedDay')) document.getElementById('schedDay').value = dayVal;
+                renderSchedule(); renderStrength(); renderFeedback();
+            }
         }
 
         // Apply saved language on load
