@@ -2242,6 +2242,24 @@
         </div>
     </div>
 
+    <!-- Verify email page -->
+    <div class="auth-page" id="verifyPage">
+        <div class="auth-topbar">
+            <button class="auth-back" onclick="logout()"><i class="fas fa-arrow-right"></i> <span data-i18n="login_back">חזרה</span></button>
+        </div>
+        <div class="auth-card">
+            <img src="images/rocky-icon.png" alt="Rocky" class="auth-logo">
+            <h2 id="verifyTitle">אימות מייל</h2>
+            <p style="color:var(--text-secondary); margin:8px 0 4px; line-height:1.5;" id="verifyDesc">שלחנו קישור אימות לכתובת:</p>
+            <p style="color:var(--white); font-weight:700; margin-bottom:16px;" id="verifyEmail"></p>
+            <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:20px; line-height:1.5;" id="verifyHint">לחץ על הקישור במייל, ואז חזור לכאן ולחץ "בדקתי, המשך". בדוק גם בתיקיית ספאם.</p>
+            <button class="form-submit" id="verifyCheckBtn" onclick="checkVerified()"><i class="fas fa-rotate"></i> <span id="verifyCheckTxt">בדקתי, המשך</span></button>
+            <p style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:0.95rem;">
+                <span id="verifyResendPre">לא קיבלת מייל?</span> <a href="#" onclick="event.preventDefault(); resendVerification();" style="color:var(--accent);" id="verifyResendLink">שלח שוב</a>
+            </p>
+        </div>
+    </div>
+
     <!-- Competitor Detail Modal (for coaches) -->
     <div class="competitor-detail-modal" id="competitorDetailModal">
         <div class="competitor-detail-content">
@@ -2413,13 +2431,61 @@
         // Password reset
         async function resetPassword() {
             const email = document.getElementById('loginEmail').value.trim();
-            if (!email) { showToast('הזן אימייל קודם'); return; }
+            if (!email) { showToast(T('reset_need_email')); return; }
             try {
                 await auth.sendPasswordResetEmail(email);
-                showToast('נשלח קישור לאיפוס סיסמה למייל שלך');
+                showToast(T('reset_sent'));
             } catch (err) {
-                if (err.code === 'auth/user-not-found') showToast('אימייל לא נמצא במערכת');
-                else showToast('שגיאה בשליחת המייל');
+                console.error('resetPassword failed:', err.code, err.message);
+                const m = {
+                    'auth/user-not-found': T('reset_not_found'),
+                    'auth/invalid-email': T('reset_bad_email'),
+                    'auth/unauthorized-domain': T('reset_bad_domain'),
+                    'auth/too-many-requests': T('reset_too_many')
+                };
+                showToast(m[err.code] || T('reset_err'));
+            }
+        }
+
+        // ===== EMAIL VERIFICATION =====
+        function showVerifyPage(email) {
+            document.getElementById('publicContent').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('verifyEmail').textContent = email || '';
+            document.getElementById('verifyPage').classList.add('active');
+            hideBootLoader();
+            window.scrollTo(0, 0);
+        }
+        function hideVerifyPage() {
+            document.getElementById('verifyPage').classList.remove('active');
+        }
+        async function checkVerified() {
+            if (!auth.currentUser) return;
+            setBtnLoading('verifyCheckBtn', true);
+            try {
+                await auth.currentUser.reload();
+                if (auth.currentUser.emailVerified) {
+                    showToast(T('verify_ok'));
+                    setTimeout(() => window.location.reload(), 700);
+                } else {
+                    showToast(T('verify_not_yet'));
+                    setBtnLoading('verifyCheckBtn', false);
+                }
+            } catch (e) {
+                console.error('checkVerified failed:', e);
+                showToast(T('verify_check_err'));
+                setBtnLoading('verifyCheckBtn', false);
+            }
+        }
+        async function resendVerification() {
+            if (!auth.currentUser) return;
+            try {
+                await auth.currentUser.sendEmailVerification();
+                showToast(T('verify_resent'));
+            } catch (err) {
+                console.error('resendVerification failed:', err.code, err.message);
+                if (err.code === 'auth/too-many-requests') showToast(T('verify_too_many'));
+                else showToast(T('verify_resend_err'));
             }
         }
 
@@ -2509,6 +2575,16 @@
                     currentUser = user;
                     // Admin is decided by email (matches firestore.rules), never by the role field.
                     isAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL;
+
+                    // Block un-verified accounts (admin exempt). Must confirm from their email first.
+                    if (!user.emailVerified && !isAdmin) {
+                        hideLoginPage();
+                        hideRegisterPage();
+                        showVerifyPage(user.email);
+                        return;
+                    }
+                    hideVerifyPage();
+
                     try {
                         const doc = await db.collection('users').doc(user.uid).get();
                         if (doc.exists) {
@@ -2544,6 +2620,7 @@
         function enterDashboard() {
             hideLoginPage();
             hideRegisterPage();
+            hideVerifyPage();
             document.getElementById('publicContent').classList.add('hidden');
             document.getElementById('dashboard').classList.add('active');
 
@@ -3347,6 +3424,14 @@
                 // Auth
                 login_title: 'כניסה', login_email: 'אימייל', login_pass: 'סיסמה', login_btn: 'כניסה', login_back: 'חזרה',
                 login_forgot: 'שכחתי סיסמה', login_no_account: 'עדיין לא רשום?', login_register_link: 'הרשמה',
+                reset_need_email: 'הזן אימייל קודם', reset_sent: 'נשלח קישור לאיפוס סיסמה למייל שלך',
+                reset_not_found: 'אימייל לא נמצא במערכת', reset_bad_email: 'אימייל לא תקין',
+                reset_bad_domain: 'הדומיין לא מאושר ב-Firebase — יש להוסיף אותו', reset_too_many: 'יותר מדי ניסיונות, נסה מאוחר יותר', reset_err: 'שגיאה בשליחת המייל',
+                verify_title: 'אימות מייל', verify_desc: 'שלחנו קישור אימות לכתובת:',
+                verify_hint: 'לחץ על הקישור במייל, ואז חזור לכאן ולחץ "בדקתי, המשך". בדוק גם בתיקיית ספאם.',
+                verify_check: 'בדקתי, המשך', verify_resend_pre: 'לא קיבלת מייל?', verify_resend_link: 'שלח שוב',
+                verify_ok: 'המייל אומת! מתחבר...', verify_not_yet: 'המייל עדיין לא אומת. בדוק את תיבת הדואר.',
+                verify_check_err: 'שגיאה בבדיקה, נסה שוב', verify_resent: 'מייל אימות נשלח שוב', verify_too_many: 'יותר מדי ניסיונות, נסה מאוחר יותר', verify_resend_err: 'שגיאה בשליחת המייל',
                 reg_title: 'הרשמה', reg_name: 'שם מלא', reg_email: 'אימייל', reg_phone: 'טלפון',
                 reg_gym: 'מכון / מועדון', reg_pass: 'סיסמה (לפחות 6 תווים)', reg_coach: 'אני מאמן',
                 admin_label: 'אני אדמין', admin_code: 'קוד אדמין', reg_btn: 'הרשמה',
@@ -3457,6 +3542,14 @@
                 footer: '© 2026 Rocky - Competition Team | All rights reserved',
                 login_title: 'Login', login_email: 'Email', login_pass: 'Password', login_btn: 'Login', login_back: 'Back',
                 login_forgot: 'Forgot password', login_no_account: 'Not registered yet?', login_register_link: 'Register',
+                reset_need_email: 'Enter your email first', reset_sent: 'A password reset link was sent to your email',
+                reset_not_found: 'Email not found in the system', reset_bad_email: 'Invalid email',
+                reset_bad_domain: 'Domain not authorized in Firebase — please add it', reset_too_many: 'Too many attempts, try later', reset_err: 'Error sending the email',
+                verify_title: 'Verify Email', verify_desc: 'We sent a verification link to:',
+                verify_hint: 'Click the link in the email, then come back here and press "I verified, continue". Check your spam folder too.',
+                verify_check: 'I verified, continue', verify_resend_pre: "Didn't get an email?", verify_resend_link: 'Resend',
+                verify_ok: 'Email verified! Signing in...', verify_not_yet: 'Email not verified yet. Check your inbox.',
+                verify_check_err: 'Check failed, try again', verify_resent: 'Verification email sent again', verify_too_many: 'Too many attempts, try later', verify_resend_err: 'Error sending the email',
                 reg_title: 'Register', reg_name: 'Full Name', reg_email: 'Email', reg_phone: 'Phone',
                 reg_gym: 'Gym / Club', reg_pass: 'Password (min 6 chars)', reg_coach: 'I am a coach',
                 admin_label: 'I am an admin', admin_code: 'Admin code', reg_btn: 'Register',
@@ -3560,6 +3653,14 @@
                 footer: '© 2026 Rocky - Wettkampfteam | Alle Rechte vorbehalten',
                 login_title: 'Anmelden', login_email: 'E-Mail', login_pass: 'Passwort', login_btn: 'Anmelden', login_back: 'Zurück',
                 login_forgot: 'Passwort vergessen', login_no_account: 'Noch nicht registriert?', login_register_link: 'Registrieren',
+                reset_need_email: 'Zuerst E-Mail eingeben', reset_sent: 'Ein Link zum Zurücksetzen wurde an deine E-Mail gesendet',
+                reset_not_found: 'E-Mail nicht im System gefunden', reset_bad_email: 'Ungültige E-Mail',
+                reset_bad_domain: 'Domain in Firebase nicht autorisiert — bitte hinzufügen', reset_too_many: 'Zu viele Versuche, später erneut', reset_err: 'Fehler beim Senden der E-Mail',
+                verify_title: 'E-Mail bestätigen', verify_desc: 'Wir haben einen Bestätigungslink gesendet an:',
+                verify_hint: 'Klicke auf den Link in der E-Mail, komm dann zurück und drücke "Ich habe bestätigt, weiter". Prüfe auch den Spam-Ordner.',
+                verify_check: 'Ich habe bestätigt, weiter', verify_resend_pre: 'Keine E-Mail erhalten?', verify_resend_link: 'Erneut senden',
+                verify_ok: 'E-Mail bestätigt! Anmeldung...', verify_not_yet: 'E-Mail noch nicht bestätigt. Prüfe dein Postfach.',
+                verify_check_err: 'Prüfung fehlgeschlagen, erneut versuchen', verify_resent: 'Bestätigungs-E-Mail erneut gesendet', verify_too_many: 'Zu viele Versuche, später erneut', verify_resend_err: 'Fehler beim Senden der E-Mail',
                 reg_title: 'Registrieren', reg_name: 'Vollständiger Name', reg_email: 'E-Mail', reg_phone: 'Telefon',
                 reg_gym: 'Studio / Verein', reg_pass: 'Passwort (mind. 6 Zeichen)', reg_coach: 'Ich bin Trainer',
                 admin_label: 'Ich bin Admin', admin_code: 'Admin-Code', reg_btn: 'Registrieren',
@@ -3819,6 +3920,11 @@
             if (regGymInput) regGymInput.placeholder = t.reg_gym_ph;
             const regPassInput = document.getElementById('regPass');
             if (regPassInput) regPassInput.placeholder = t.reg_pass_ph;
+
+            // Verify page
+            const vSet = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
+            vSet('verifyTitle', t.verify_title); vSet('verifyDesc', t.verify_desc); vSet('verifyHint', t.verify_hint);
+            vSet('verifyCheckTxt', t.verify_check); vSet('verifyResendPre', t.verify_resend_pre); vSet('verifyResendLink', t.verify_resend_link);
 
             // ===== DASHBOARD TRANSLATIONS =====
             // Welcome text
