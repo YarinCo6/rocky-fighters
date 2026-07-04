@@ -3056,13 +3056,19 @@
             list.innerHTML = '<p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען משתמשים...</p>';
 
             let snapshot;
-            if (isAdmin) {
-                // Admin sees everyone
-                snapshot = await db.collection('users').get();
-            } else {
-                // Coach sees only competitors
-                snapshot = await db.collection('users').where('role', '==', 'competitor').get();
+            try {
+                if (isAdmin) {
+                    // Admin sees everyone
+                    snapshot = await db.collection('users').get();
+                } else {
+                    // Coach sees only competitors
+                    snapshot = await db.collection('users').where('role', '==', 'competitor').get();
+                }
+            } catch (e) {
+                list.innerHTML = `<p style="color:var(--accent);">שגיאה בטעינת המשתמשים: ${sanitize(e.message)}</p>`;
+                return;
             }
+
             const allDocs = [];
             snapshot.forEach(doc => { if (doc.id !== currentUser.uid) allDocs.push({ id: doc.id, ...doc.data() }); });
 
