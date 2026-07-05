@@ -2199,6 +2199,8 @@
         let userData = null;
         let isCoach = false;
         let isAdmin = false;
+        let userDocUnsub = null;   // realtime listener teardown
+        let lastUnreadCount = 0;   // to detect NEW incoming feedback
 
         // ===== HELPERS =====
         function sanitize(str) {
@@ -2524,8 +2526,10 @@
                         showToast('לא הצלחנו לטעון את הנתונים, נסה לרענן');
                     }
                     enterDashboard();
+                    setupUserDocListener(user.uid);
                 } else {
                     if (currentUser) {
+                        teardownUserDocListener();
                         currentUser = null;
                         userData = null;
                         isCoach = false;
@@ -3027,6 +3031,37 @@
             if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
             else badge.style.display = 'none';
         }
+
+        function unreadFeedbackCount() {
+            const fb = (userData && userData.coachFeedback) ? userData.coachFeedback : [];
+            return fb.filter(f => !f.ack).length;
+        }
+
+        // Live listener on the user's own doc: new coach feedback triggers an
+        // instant alert + numeric badge without needing a page refresh.
+        function setupUserDocListener(uid) {
+            teardownUserDocListener();
+            lastUnreadCount = unreadFeedbackCount();
+            userDocUnsub = db.collection('users').doc(uid).onSnapshot((snap) => {
+                if (!snap.exists) return;
+                userData = snap.data();
+                isCoach = userData.role === 'coach';
+                const unread = unreadFeedbackCount();
+                if (unread > lastUnreadCount) {
+                    showToast(T('fb_new_toast'));
+                }
+                lastUnreadCount = unread;
+                updateFeedbackBadge();
+                // Refresh the feedback panel if the user is currently viewing it.
+                const fbPanel = document.getElementById('panel-feedback');
+                if (fbPanel && fbPanel.classList.contains('active')) renderFeedback();
+            }, (err) => { console.error('user doc listener failed:', err); });
+        }
+
+        function teardownUserDocListener() {
+            if (userDocUnsub) { try { userDocUnsub(); } catch (e) {} userDocUnsub = null; }
+            lastUnreadCount = 0;
+        }
         function renderFeedback() {
             const list = document.getElementById('feedbackList');
             if (!list) return;
@@ -3399,6 +3434,7 @@
                 fb_title: 'משוב מהמאמן', fb_desc: 'כאן תראה הצעות ושינויים מהמאמן. אשר קבלה כדי שהמאמן ידע שראית.',
                 fb_empty: 'עדיין אין משוב מהמאמן.', fb_coach: 'מאמן', fb_ack_btn: 'אשר קבלה', fb_acked: 'אישרת קבלה',
                 fb_acked_toast: 'אישרת שקיבלת את המשוב', fb_write_err: 'נא לכתוב משוב',
+                fb_new_toast: 'קיבלת משוב חדש מהמאמן!',
                 remove: 'הסר', removed: 'הוסר',
                 cd_documents: 'מסמכים', cd_approved: 'אושר', cd_pending: 'בבדיקה', cd_no_docs: 'אין מסמכים',
                 cd_schedule: 'לוח אימונים', cd_no_schedule: 'אין לוח אימונים', cd_strength: 'תכנית כוח', cd_no_strength: 'אין תכנית כוח',
@@ -3510,6 +3546,7 @@
                 fb_title: 'Coach Feedback', fb_desc: 'See suggestions and changes from your coach. Acknowledge so the coach knows you saw it.',
                 fb_empty: 'No feedback from coach yet.', fb_coach: 'Coach', fb_ack_btn: 'Acknowledge', fb_acked: 'Acknowledged',
                 fb_acked_toast: 'You acknowledged the feedback', fb_write_err: 'Please write feedback',
+                fb_new_toast: 'New feedback from your coach!',
                 remove: 'Remove', removed: 'Removed',
                 cd_documents: 'Documents', cd_approved: 'Approved', cd_pending: 'Pending', cd_no_docs: 'No documents',
                 cd_schedule: 'Training Schedule', cd_no_schedule: 'No schedule', cd_strength: 'Strength Program', cd_no_strength: 'No strength program',
@@ -3621,6 +3658,7 @@
                 fb_title: 'Trainer-Feedback', fb_desc: 'Sieh Vorschläge und Änderungen vom Trainer. Bestätige, damit der Trainer weiß, dass du es gesehen hast.',
                 fb_empty: 'Noch kein Feedback vom Trainer.', fb_coach: 'Trainer', fb_ack_btn: 'Bestätigen', fb_acked: 'Bestätigt',
                 fb_acked_toast: 'Du hast das Feedback bestätigt', fb_write_err: 'Bitte Feedback schreiben',
+                fb_new_toast: 'Neues Feedback von deinem Trainer!',
                 remove: 'Entfernen', removed: 'Entfernt',
                 cd_documents: 'Dokumente', cd_approved: 'Genehmigt', cd_pending: 'In Prüfung', cd_no_docs: 'Keine Dokumente',
                 cd_schedule: 'Trainingsplan', cd_no_schedule: 'Kein Trainingsplan', cd_strength: 'Kraftprogramm', cd_no_strength: 'Kein Kraftprogramm',
