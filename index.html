@@ -709,14 +709,43 @@
             transition: margin 0.25s; min-height: calc(100vh - 80px);
         }
 
+        /* Header hamburger: mobile only (desktop uses sidebar collapse button) */
         .sidebar-toggle {
             background: var(--bg-card); border: 1px solid var(--border);
             color: var(--white); width: 40px; height: 40px; border-radius: 10px;
             cursor: pointer; font-size: 1.05rem; flex: 0 0 auto;
-            display: flex; align-items: center; justify-content: center;
+            display: none; align-items: center; justify-content: center;
             transition: all 0.2s;
         }
         .sidebar-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Header logout */
+        .header-logout {
+            margin-inline-start: auto; flex: 0 0 auto;
+            display: flex; align-items: center; gap: 8px;
+            background: transparent; border: 1px solid rgba(230,57,70,0.4);
+            color: var(--accent); border-radius: 10px;
+            padding: 9px 16px; cursor: pointer; font-family: 'Heebo', sans-serif;
+            font-size: 0.98rem; font-weight: 600; white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .header-logout:hover { background: rgba(230,57,70,0.12); }
+
+        /* Sidebar collapse control (bottom, desktop) */
+        .sidebar-collapse-btn {
+            display: flex; align-items: center; gap: 12px;
+            margin-top: 8px; padding: 11px 14px; border-radius: 10px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--text-secondary); cursor: pointer;
+            font-family: 'Heebo', sans-serif; font-size: 0.95rem; font-weight: 500;
+            white-space: nowrap; width: 100%; transition: all 0.2s;
+        }
+        .sidebar-collapse-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .sidebar-collapse-btn .collapse-icon { width: 20px; text-align: center; transition: transform 0.25s; }
+        [dir="rtl"] .sidebar-collapse-btn .collapse-icon { transform: rotate(180deg); }
+        #dashboard.sidebar-collapsed .sidebar-collapse-btn { justify-content: center; padding: 11px 0; gap: 0; }
+        #dashboard.sidebar-collapsed .sidebar-collapse-btn .collapse-icon { transform: rotate(180deg); }
+        [dir="rtl"] #dashboard.sidebar-collapsed .sidebar-collapse-btn .collapse-icon { transform: rotate(0deg); }
 
         /* Home dashboard widgets */
         .home-grid {
@@ -1143,6 +1172,9 @@
             #dashboard.sidebar-open .sidebar-overlay { display: block; }
             #dashboard.sidebar-collapsed .sidebar { width: 250px; }
             #dashboard.sidebar-collapsed .sidebar-label { display: inline; }
+            /* Mobile: header hamburger opens drawer; no bottom collapse control */
+            .sidebar-toggle { display: flex; }
+            .sidebar-collapse-btn { display: none; }
             .dash-main,
             #dashboard.sidebar-collapsed .dash-main { margin-inline-start: 0; }
             .home-grid { grid-template-columns: 1fr; }
@@ -1868,8 +1900,10 @@
                 <button onclick="switchPanel('feedback', this)"><i class="fas fa-comments"></i> <span class="sidebar-label">משוב מאמן</span> <span id="feedbackBadge" class="fb-badge" style="display:none;">0</span></button>
                 <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> <span class="sidebar-label">תחרויות</span></button>
                 <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> <span class="sidebar-label">ניהול מתחרים</span></button>
-                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span class="sidebar-label">יציאה</span></button>
             </div>
+            <button class="sidebar-collapse-btn" onclick="toggleSidebar()" aria-label="כווץ תפריט">
+                <i class="fas fa-angles-left collapse-icon"></i> <span class="sidebar-label" id="collapseLabel">כווץ תפריט</span>
+            </button>
         </aside>
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
@@ -1881,6 +1915,7 @@
                     <h2><span data-i18n="dash_hello">שלום</span>, <span id="dashName">מתחרה</span> <i class="fas fa-fire" style="color: var(--accent);"></i></h2>
                     <p>ברוך הבא לאזור האישי שלך</p>
                 </div>
+                <button class="header-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span id="headerLogoutLabel">יציאה</span></button>
             </div>
         </div>
 
@@ -3539,7 +3574,7 @@
                 dash_overview: 'סקירה', dash_home: 'בית', dash_documents: 'מסמכים', dash_videos: 'סרטונים',
                 home_new: 'חדש', home_no_fb: 'אין משוב עדיין', home_sched_has: 'לחץ לצפייה בלוח האימונים השבועי', home_sched_empty: 'עדיין לא הוגדר לוח אימונים', home_no_comp: 'אין תחרויות רשומות', home_stats: 'נתונים מהירים', home_manage_hint: 'צפייה וניהול המתחרים ומשובים',
                 dash_profile: 'פרופיל', dash_competitions: 'תחרויות',
-                dash_manage: 'ניהול מתחרים', dash_manage_admin: 'ניהול משתמשים', dash_logout: 'יציאה',
+                dash_manage: 'ניהול מתחרים', dash_manage_admin: 'ניהול משתמשים', dash_logout: 'יציאה', dash_collapse: 'כווץ תפריט',
                 // Stats
                 stat_fights: 'קרבות', stat_wins: 'ניצחונות', stat_weight: 'משקל (ק"ג)', stat_docs: 'מסמכים',
                 // Overview
@@ -3659,7 +3694,7 @@
                 dash_overview: 'Overview', dash_home: 'Home', dash_documents: 'Documents', dash_videos: 'Videos',
                 home_new: 'new', home_no_fb: 'No feedback yet', home_sched_has: 'Tap to view your weekly training board', home_sched_empty: 'No training schedule set yet', home_no_comp: 'No competitions registered', home_stats: 'Quick stats', home_manage_hint: 'View and manage competitors and feedback',
                 dash_profile: 'Profile', dash_competitions: 'Competitions',
-                dash_manage: 'Manage Competitors', dash_manage_admin: 'Manage Users', dash_logout: 'Logout',
+                dash_manage: 'Manage Competitors', dash_manage_admin: 'Manage Users', dash_logout: 'Logout', dash_collapse: 'Collapse menu',
                 stat_fights: 'Fights', stat_wins: 'Wins', stat_weight: 'Weight (kg)', stat_docs: 'Documents',
                 dash_updates: 'Recent Updates', dash_upcoming_comp: 'Upcoming Competition',
                 dash_upcoming_comp_desc: 'Israel Championship - please ensure all documents are up to date',
@@ -3772,7 +3807,7 @@
                 dash_overview: 'Uebersicht', dash_home: 'Start', dash_documents: 'Dokumente', dash_videos: 'Videos',
                 home_new: 'neu', home_no_fb: 'Noch kein Feedback', home_sched_has: 'Zum Wochen-Trainingsplan tippen', home_sched_empty: 'Noch kein Trainingsplan festgelegt', home_no_comp: 'Keine Wettkaempfe eingetragen', home_stats: 'Schnelluebersicht', home_manage_hint: 'Wettkaempfer und Feedback verwalten',
                 dash_profile: 'Profil', dash_competitions: 'Wettkaempfe',
-                dash_manage: 'Wettkämpfer verwalten', dash_manage_admin: 'Benutzer verwalten', dash_logout: 'Abmelden',
+                dash_manage: 'Wettkämpfer verwalten', dash_manage_admin: 'Benutzer verwalten', dash_logout: 'Abmelden', dash_collapse: 'Menü einklappen',
                 stat_fights: 'Kämpfe', stat_wins: 'Siege', stat_weight: 'Gewicht (kg)', stat_docs: 'Dokumente',
                 dash_updates: 'Letzte Aktualisierungen', dash_upcoming_comp: 'Bevorstehender Wettkampf',
                 dash_upcoming_comp_desc: 'Israel-Meisterschaft - bitte alle Dokumente aktualisieren',
@@ -4047,8 +4082,11 @@
                 else if (onclick.includes("'feedback'")) { const unread = (userData && userData.coachFeedback) ? userData.coachFeedback.filter(f => !f.ack).length : 0; btn.innerHTML = `<i class="fas fa-comments"></i> ${L(t.nav_feedback)} <span id="feedbackBadge" class="fb-badge" style="display:${unread ? '' : 'none'};">${unread}</span>`; }
                 else if (onclick.includes("'competitions'")) btn.innerHTML = `<i class="fas fa-medal"></i> ${L(t.dash_competitions)}`;
                 else if (onclick.includes("'coach'")) btn.innerHTML = isAdmin ? `<i class="fas fa-crown"></i> ${L(t.dash_manage_admin)}` : `<i class="fas fa-users-cog"></i> ${L(t.dash_manage)}`;
-                else if (onclick.includes('logout')) { btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${L(t.dash_logout)}`; }
             });
+            const headerLogoutLbl = document.getElementById('headerLogoutLabel');
+            if (headerLogoutLbl) headerLogoutLbl.textContent = t.dash_logout;
+            const collapseLbl = document.getElementById('collapseLabel');
+            if (collapseLbl) collapseLbl.textContent = t.dash_collapse || 'כווץ תפריט';
             if (typeof renderHome === 'function' && document.getElementById('dashboard').classList.contains('active')) renderHome();
 
             // Stats labels
