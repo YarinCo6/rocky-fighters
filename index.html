@@ -1106,6 +1106,38 @@
         .notif-dot.green { background: var(--success); }
         .notif-dot.yellow { background: var(--gold); }
 
+        /* Empty state */
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 32px 20px; gap: 10px;
+        }
+        .empty-state .empty-icon {
+            width: 56px; height: 56px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(229,56,77,0.10); color: var(--accent); font-size: 1.5rem;
+        }
+        .empty-state .empty-title { color: var(--text-primary); font-weight: 700; font-size: 1.02rem; }
+        .empty-state .empty-hint { color: var(--text-secondary); font-size: 0.92rem; max-width: 320px; }
+
+        /* Skeleton loaders */
+        @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.3s ease-in-out infinite;
+            border-radius: 8px;
+        }
+        .skeleton-row {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 16px; margin-bottom: 10px;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+        }
+        .skeleton-avatar { width: 44px; height: 44px; border-radius: 12px; flex: 0 0 auto; }
+        .skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .skeleton-line { height: 12px; }
+        .skeleton-line.w60 { width: 60%; }
+        .skeleton-line.w40 { width: 40%; }
+
         /* Update item */
         .update-item {
             padding: 14px;
@@ -2803,6 +2835,28 @@
             window.scrollTo(0, 0);
         }
 
+        // ===== UI HELPERS =====
+        function emptyState(icon, title, hint) {
+            return `<div class="empty-state">
+                <div class="empty-icon"><i class="fas ${icon}"></i></div>
+                <div class="empty-title">${title}</div>
+                ${hint ? `<div class="empty-hint">${hint}</div>` : ''}
+            </div>`;
+        }
+        function skeletonRows(n) {
+            let html = '';
+            for (let i = 0; i < n; i++) {
+                html += `<div class="skeleton-row">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div class="skeleton-lines">
+                        <div class="skeleton skeleton-line w60"></div>
+                        <div class="skeleton skeleton-line w40"></div>
+                    </div>
+                </div>`;
+            }
+            return html;
+        }
+
         // ===== HOME DASHBOARD =====
         function renderHome() {
             const grid = document.getElementById('homeGrid');
@@ -2922,7 +2976,7 @@
             const list = document.getElementById('fileList');
             const docs = userData.documents || [];
             if (docs.length === 0) {
-                list.innerHTML = '<p style="color:var(--text-secondary);">אין מסמכים עדיין. העלה את המסמך הראשון שלך!</p>';
+                list.innerHTML = emptyState('fa-folder-open', T('doc_empty_title'), T('doc_empty_hint'));
                 return;
             }
             list.innerHTML = docs.map(d => {
@@ -2977,7 +3031,7 @@
             const grid = document.getElementById('videosGrid');
             const videos = userData.videos || [];
             if (videos.length === 0) {
-                grid.innerHTML = '<p style="color:var(--text-secondary);">אין סרטונים עדיין. העלה סרטון קרב ראשון!</p>';
+                grid.innerHTML = emptyState('fa-video', T('vid_empty_title'), T('vid_empty_hint'));
                 return;
             }
             grid.innerHTML = videos.map(v => `
@@ -3167,7 +3221,7 @@
             if (!grid) return;
             const blocks = (userData && userData.weeklySchedule) ? userData.weeklySchedule.slice() : [];
             if (blocks.length === 0) {
-                grid.innerHTML = `<p style="color:var(--text-secondary);">${T('sched_empty')}</p>`;
+                grid.innerHTML = emptyState('fa-calendar-plus', T('sched_empty'), '');
                 return;
             }
             grid.innerHTML = scheduleBoardHtml(blocks, true);
@@ -3204,7 +3258,7 @@
             if (!list) return;
             const items = (userData && userData.strengthProgram) ? userData.strengthProgram : [];
             if (items.length === 0) {
-                list.innerHTML = `<p style="color:var(--text-secondary);">${T('str_empty')}</p>`;
+                list.innerHTML = emptyState('fa-dumbbell', T('str_empty'), '');
                 return;
             }
             list.innerHTML = items.map((ex, i) => `
@@ -3296,7 +3350,7 @@
             if (!list) return;
             const fb = (userData && userData.coachFeedback) ? userData.coachFeedback : [];
             if (fb.length === 0) {
-                list.innerHTML = `<p style="color:var(--text-secondary);">${T('fb_empty')}</p>`;
+                list.innerHTML = emptyState('fa-comment-dots', T('fb_empty'), '');
                 updateFeedbackBadge();
                 return;
             }
@@ -3372,7 +3426,7 @@
         async function loadCompetitors() {
             if (!isCoach && !isAdmin) return;
             const list = document.getElementById('competitorList');
-            list.innerHTML = '<p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען משתמשים...</p>';
+            list.innerHTML = skeletonRows(4);
 
             const myUid = currentUser ? currentUser.uid : null;
             let snapshot;
@@ -3397,7 +3451,7 @@
             snapshot.forEach(doc => { if (doc.id !== myUid) allDocs.push({ id: doc.id, ...doc.data() }); });
 
             if (allDocs.length === 0) {
-                list.innerHTML = '<p style="color:var(--text-secondary);">אין משתמשים רשומים עדיין.</p>';
+                list.innerHTML = emptyState('fa-users', T('cmp_empty_title'), T('cmp_empty_hint'));
                 return;
             }
 
@@ -3601,6 +3655,7 @@
                 dash_hello: 'שלום', dash_welcome: 'ברוך הבא לאזור האישי שלך',
                 dash_overview: 'סקירה', dash_home: 'בית', dash_documents: 'מסמכים', dash_videos: 'סרטונים',
                 home_new: 'חדש', home_no_fb: 'אין משוב עדיין', home_sched_has: 'לחץ לצפייה בלוח האימונים השבועי', home_sched_empty: 'עדיין לא הוגדר לוח אימונים', home_no_comp: 'אין תחרויות רשומות', home_stats: 'נתונים מהירים', home_manage_hint: 'צפייה וניהול המתחרים ומשובים',
+                doc_empty_title: 'אין מסמכים עדיין', doc_empty_hint: 'העלה את המסמך הראשון שלך', vid_empty_title: 'אין סרטונים עדיין', vid_empty_hint: 'העלה סרטון קרב ראשון', cmp_empty_title: 'אין משתמשים רשומים', cmp_empty_hint: 'מתחרים שיירשמו יופיעו כאן',
                 dash_profile: 'פרופיל', dash_competitions: 'תחרויות',
                 dash_manage: 'ניהול מתחרים', dash_manage_admin: 'ניהול משתמשים', dash_logout: 'יציאה', dash_collapse: 'כווץ תפריט',
                 // Stats
@@ -3721,6 +3776,7 @@
                 dash_hello: 'Hello', dash_welcome: 'Welcome to your personal area',
                 dash_overview: 'Overview', dash_home: 'Home', dash_documents: 'Documents', dash_videos: 'Videos',
                 home_new: 'new', home_no_fb: 'No feedback yet', home_sched_has: 'Tap to view your weekly training board', home_sched_empty: 'No training schedule set yet', home_no_comp: 'No competitions registered', home_stats: 'Quick stats', home_manage_hint: 'View and manage competitors and feedback',
+                doc_empty_title: 'No documents yet', doc_empty_hint: 'Upload your first document', vid_empty_title: 'No videos yet', vid_empty_hint: 'Upload your first fight video', cmp_empty_title: 'No users registered', cmp_empty_hint: 'Competitors who sign up will appear here',
                 dash_profile: 'Profile', dash_competitions: 'Competitions',
                 dash_manage: 'Manage Competitors', dash_manage_admin: 'Manage Users', dash_logout: 'Logout', dash_collapse: 'Collapse menu',
                 stat_fights: 'Fights', stat_wins: 'Wins', stat_weight: 'Weight (kg)', stat_docs: 'Documents',
@@ -3834,6 +3890,7 @@
                 dash_hello: 'Hallo', dash_welcome: 'Willkommen in deinem persoenlichen Bereich',
                 dash_overview: 'Uebersicht', dash_home: 'Start', dash_documents: 'Dokumente', dash_videos: 'Videos',
                 home_new: 'neu', home_no_fb: 'Noch kein Feedback', home_sched_has: 'Zum Wochen-Trainingsplan tippen', home_sched_empty: 'Noch kein Trainingsplan festgelegt', home_no_comp: 'Keine Wettkaempfe eingetragen', home_stats: 'Schnelluebersicht', home_manage_hint: 'Wettkaempfer und Feedback verwalten',
+                doc_empty_title: 'Noch keine Dokumente', doc_empty_hint: 'Lade dein erstes Dokument hoch', vid_empty_title: 'Noch keine Videos', vid_empty_hint: 'Lade dein erstes Kampfvideo hoch', cmp_empty_title: 'Keine Benutzer registriert', cmp_empty_hint: 'Registrierte Wettkaempfer erscheinen hier',
                 dash_profile: 'Profil', dash_competitions: 'Wettkaempfe',
                 dash_manage: 'Wettkämpfer verwalten', dash_manage_admin: 'Benutzer verwalten', dash_logout: 'Abmelden', dash_collapse: 'Menü einklappen',
                 stat_fights: 'Kämpfe', stat_wins: 'Siege', stat_weight: 'Gewicht (kg)', stat_docs: 'Dokumente',
