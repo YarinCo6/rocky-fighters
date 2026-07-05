@@ -2168,6 +2168,10 @@
                 <label>סיסמה</label>
                 <input type="password" id="loginPass" placeholder="הסיסמה שלך">
             </div>
+            <label style="display:flex; align-items:center; gap:8px; margin-bottom:16px; color:var(--text-secondary); font-size:0.95rem; cursor:pointer; user-select:none;">
+                <input type="checkbox" id="rememberMe" checked style="width:16px; height:16px; accent-color:var(--accent); cursor:pointer;">
+                <span id="rememberMeLabel">השאר אותי מחובר</span>
+            </label>
             <button class="form-submit" id="loginBtn" onclick="login()">כניסה</button>
             <p style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:0.95rem;">
                 <a href="#" onclick="event.preventDefault(); resetPassword();" style="color:var(--accent);" data-i18n="login_forgot">שכחתי סיסמה</a>
@@ -2393,6 +2397,12 @@
 
             setBtnLoading('loginBtn', true);
             try {
+                // "Stay logged in" → LOCAL persistence (survives browser restart);
+                // unchecked → SESSION persistence (cleared when tab/browser closes).
+                const remember = document.getElementById('rememberMe').checked;
+                await auth.setPersistence(remember
+                    ? firebase.auth.Auth.Persistence.LOCAL
+                    : firebase.auth.Auth.Persistence.SESSION);
                 await auth.signInWithEmailAndPassword(email, pass);
                 document.getElementById('loginEmail').value = '';
                 document.getElementById('loginPass').value = '';
@@ -3509,7 +3519,7 @@
                 footer: '© 2026 Rocky - קבוצת מתחרים | כל הזכויות שמורות',
                 // Auth
                 login_title: 'כניסה', login_email: 'אימייל', login_pass: 'סיסמה', login_btn: 'כניסה', login_back: 'חזרה',
-                login_forgot: 'שכחתי סיסמה', login_no_account: 'עדיין לא רשום?', login_register_link: 'הרשמה',
+                login_forgot: 'שכחתי סיסמה', login_no_account: 'עדיין לא רשום?', login_register_link: 'הרשמה', login_remember: 'השאר אותי מחובר',
                 reset_need_email: 'הזן אימייל קודם', reset_sent: 'נשלח קישור לאיפוס סיסמה למייל שלך',
                 reset_not_found: 'אימייל לא נמצא במערכת', reset_bad_email: 'אימייל לא תקין',
                 reset_bad_domain: 'הדומיין לא מאושר ב-Firebase — יש להוסיף אותו', reset_too_many: 'יותר מדי ניסיונות, נסה מאוחר יותר', reset_err: 'שגיאה בשליחת המייל',
@@ -3629,7 +3639,7 @@
                 contact_name_ph: 'Your name', contact_phone_ph: '050-0000000', contact_msg_ph: 'What would you like to ask?',
                 footer: '© 2026 Rocky - Competition Team | All rights reserved',
                 login_title: 'Login', login_email: 'Email', login_pass: 'Password', login_btn: 'Login', login_back: 'Back',
-                login_forgot: 'Forgot password', login_no_account: 'Not registered yet?', login_register_link: 'Register',
+                login_forgot: 'Forgot password', login_no_account: 'Not registered yet?', login_register_link: 'Register', login_remember: 'Keep me signed in',
                 reset_need_email: 'Enter your email first', reset_sent: 'A password reset link was sent to your email',
                 reset_not_found: 'Email not found in the system', reset_bad_email: 'Invalid email',
                 reset_bad_domain: 'Domain not authorized in Firebase — please add it', reset_too_many: 'Too many attempts, try later', reset_err: 'Error sending the email',
@@ -3742,7 +3752,7 @@
                 contact_name_ph: 'Dein Name', contact_phone_ph: '050-0000000', contact_msg_ph: 'Was möchtest du fragen?',
                 footer: '© 2026 Rocky - Wettkampfteam | Alle Rechte vorbehalten',
                 login_title: 'Anmelden', login_email: 'E-Mail', login_pass: 'Passwort', login_btn: 'Anmelden', login_back: 'Zurück',
-                login_forgot: 'Passwort vergessen', login_no_account: 'Noch nicht registriert?', login_register_link: 'Registrieren',
+                login_forgot: 'Passwort vergessen', login_no_account: 'Noch nicht registriert?', login_register_link: 'Registrieren', login_remember: 'Angemeldet bleiben',
                 reset_need_email: 'Zuerst E-Mail eingeben', reset_sent: 'Ein Link zum Zurücksetzen wurde an deine E-Mail gesendet',
                 reset_not_found: 'E-Mail nicht im System gefunden', reset_bad_email: 'Ungültige E-Mail',
                 reset_bad_domain: 'Domain in Firebase nicht autorisiert — bitte hinzufügen', reset_too_many: 'Zu viele Versuche, später erneut', reset_err: 'Fehler beim Senden der E-Mail',
@@ -3994,6 +4004,8 @@
             if (loginBtnEl && !loginBtnEl.disabled) loginBtnEl.textContent = t.login_btn;
             const loginPassInput = document.getElementById('loginPass');
             if (loginPassInput) loginPassInput.placeholder = t.login_pass_ph;
+            const rememberLbl = document.getElementById('rememberMeLabel');
+            if (rememberLbl) rememberLbl.textContent = t.login_remember;
 
             // Register page
             const regH2 = document.querySelector('#registerPage h2');
