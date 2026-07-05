@@ -627,17 +627,16 @@
         .dashboard-header {
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
-            padding: 20px 24px;
-            margin-top: 80px;
+            padding: 16px 24px;
         }
 
         .dashboard-header-inner {
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .welcome-text h2 {
@@ -652,35 +651,94 @@
             font-size: 0.98rem;
         }
 
-        .dashboard-nav {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+        /* ===== CRM SIDEBAR ===== */
+        .sidebar {
+            position: fixed; top: 80px; inset-inline-start: 0;
+            width: 240px; height: calc(100vh - 80px);
+            background: var(--bg-secondary);
+            border-inline-end: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 16px 12px; gap: 6px;
+            z-index: 900; overflow-y: auto;
+            transition: width 0.25s, transform 0.25s;
+        }
+        .sidebar-brand {
+            display: flex; align-items: center; gap: 10px;
+            padding: 4px 8px 14px; margin-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+            color: var(--white); font-weight: 700; white-space: nowrap;
+        }
+        .sidebar-brand img { width: 32px; height: 32px; flex: 0 0 auto; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+        .sidebar-nav button {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 14px; border-radius: 10px;
+            border: 1px solid transparent; background: transparent;
+            color: var(--text-secondary); cursor: pointer;
+            font-family: 'Heebo', sans-serif; font-size: 1rem; font-weight: 500;
+            white-space: nowrap; text-align: start; width: 100%;
+            transition: all 0.2s; position: relative;
+        }
+        .sidebar-nav button i { width: 20px; text-align: center; font-size: 1.05rem; flex: 0 0 auto; }
+        .sidebar-nav button:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+        .sidebar-nav button.active {
+            background: rgba(230,57,70,0.12); color: var(--accent);
+            border-color: rgba(230,57,70,0.4);
+        }
+        .sidebar-nav button.logout-btn { color: var(--accent); margin-top: auto; }
+        .sidebar-nav .fb-badge { margin-inline-start: auto; }
+
+        /* Collapsed rail (desktop) */
+        #dashboard.sidebar-collapsed .sidebar { width: 68px; padding: 16px 8px; }
+        #dashboard.sidebar-collapsed .sidebar-label,
+        #dashboard.sidebar-collapsed .sidebar-brand span { display: none; }
+        #dashboard.sidebar-collapsed .sidebar-brand { justify-content: center; }
+        #dashboard.sidebar-collapsed .sidebar-nav button { justify-content: center; padding: 11px 0; gap: 0; }
+        #dashboard.sidebar-collapsed .sidebar-nav .fb-badge {
+            position: absolute; top: 2px; inset-inline-end: 6px; margin: 0;
+        }
+        #dashboard.sidebar-collapsed .dash-main { margin-inline-start: 68px; }
+
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 80px 0 0 0;
+            background: rgba(0,0,0,0.5); z-index: 890;
         }
 
-        .dashboard-nav button {
-            padding: 9px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-family: 'Heebo', sans-serif;
-            font-size: 0.98rem;
-            font-weight: 500;
-            transition: all 0.25s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
+        .dash-main {
+            margin-inline-start: 240px; padding-top: 80px;
+            transition: margin 0.25s; min-height: calc(100vh - 80px);
         }
 
-        .dashboard-nav button:hover,
-        .dashboard-nav button.active {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(230, 57, 70, 0.1);
+        .sidebar-toggle {
+            background: var(--bg-card); border: 1px solid var(--border);
+            color: var(--white); width: 40px; height: 40px; border-radius: 10px;
+            cursor: pointer; font-size: 1.05rem; flex: 0 0 auto;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
         }
+        .sidebar-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Home dashboard widgets */
+        .home-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 18px; margin-bottom: 24px;
+        }
+        .home-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 20px 22px; cursor: pointer;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .home-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .home-card-head {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 14px; color: var(--white); font-weight: 700; font-size: 1.05rem;
+        }
+        .home-card-head i { color: var(--accent); }
+        .home-card-head .count-pill {
+            margin-right: auto; background: var(--accent); color: #fff;
+            border-radius: 20px; padding: 2px 10px; font-size: 0.85rem; font-weight: 700;
+        }
+        .home-card-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
 
         .dashboard-content {
             max-width: 1200px;
@@ -1073,8 +1131,21 @@
 
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .profile-grid { grid-template-columns: 1fr; }
-            .dashboard-nav { overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
-            .dashboard-nav button { flex: 0 0 auto; white-space: nowrap; }
+
+            /* Sidebar → off-canvas drawer on mobile (direction-aware) */
+            .sidebar {
+                width: 250px;
+                box-shadow: 0 0 40px rgba(0,0,0,0.6);
+            }
+            [dir="ltr"] .sidebar { transform: translateX(-100%); }
+            [dir="rtl"] .sidebar { transform: translateX(100%); }
+            #dashboard.sidebar-open .sidebar { transform: translateX(0); }
+            #dashboard.sidebar-open .sidebar-overlay { display: block; }
+            #dashboard.sidebar-collapsed .sidebar { width: 250px; }
+            #dashboard.sidebar-collapsed .sidebar-label { display: inline; }
+            .dash-main,
+            #dashboard.sidebar-collapsed .dash-main { margin-inline-start: 0; }
+            .home-grid { grid-template-columns: 1fr; }
 
             .comp-table { font-size: 0.92rem; }
             .comp-table th, .comp-table td { padding: 10px 12px; }
@@ -1782,51 +1853,42 @@
 
     <!-- DASHBOARD -->
     <div class="dashboard" id="dashboard">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="images/rocky-icon.png" alt="Rocky">
+                <span>ROCKY</span>
+            </div>
+            <div class="sidebar-nav">
+                <button class="active" onclick="switchPanel('overview', this)"><i class="fas fa-th-large"></i> <span class="sidebar-label">בית</span></button>
+                <button onclick="switchPanel('documents', this)"><i class="fas fa-folder-open"></i> <span class="sidebar-label">מסמכים</span></button>
+                <button onclick="switchPanel('videos', this)"><i class="fas fa-play-circle"></i> <span class="sidebar-label">סרטונים</span></button>
+                <button onclick="switchPanel('profile', this)"><i class="fas fa-user"></i> <span class="sidebar-label">פרופיל</span></button>
+                <button onclick="switchPanel('schedule', this)"><i class="fas fa-calendar-week"></i> <span class="sidebar-label">לוח אימונים</span></button>
+                <button onclick="switchPanel('strength', this)"><i class="fas fa-dumbbell"></i> <span class="sidebar-label">תכנית כוח</span></button>
+                <button onclick="switchPanel('feedback', this)"><i class="fas fa-comments"></i> <span class="sidebar-label">משוב מאמן</span> <span id="feedbackBadge" class="fb-badge" style="display:none;">0</span></button>
+                <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> <span class="sidebar-label">תחרויות</span></button>
+                <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> <span class="sidebar-label">ניהול מתחרים</span></button>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span class="sidebar-label">יציאה</span></button>
+            </div>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <div class="dash-main">
         <div class="dashboard-header">
             <div class="dashboard-header-inner">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="תפריט"><i class="fas fa-bars"></i></button>
                 <div class="welcome-text">
                     <h2><span data-i18n="dash_hello">שלום</span>, <span id="dashName">מתחרה</span> <i class="fas fa-fire" style="color: var(--accent);"></i></h2>
                     <p>ברוך הבא לאזור האישי שלך</p>
-                </div>
-                <div class="dashboard-nav">
-                    <button class="active" onclick="switchPanel('overview', this)"><i class="fas fa-th-large"></i> סקירה</button>
-                    <button onclick="switchPanel('documents', this)"><i class="fas fa-folder-open"></i> מסמכים</button>
-                    <button onclick="switchPanel('videos', this)"><i class="fas fa-play-circle"></i> סרטונים</button>
-                    <button onclick="switchPanel('profile', this)"><i class="fas fa-user"></i> פרופיל</button>
-                    <button onclick="switchPanel('schedule', this)"><i class="fas fa-calendar-week"></i> לוח אימונים</button>
-                    <button onclick="switchPanel('strength', this)"><i class="fas fa-dumbbell"></i> תכנית כוח</button>
-                    <button onclick="switchPanel('feedback', this)"><i class="fas fa-comments"></i> משוב מאמן <span id="feedbackBadge" class="fb-badge" style="display:none;">0</span></button>
-                    <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> תחרויות</button>
-                    <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> ניהול מתחרים</button>
-                    <button onclick="logout()" style="color: var(--accent);"><i class="fas fa-sign-out-alt"></i> יציאה</button>
                 </div>
             </div>
         </div>
 
         <div class="dashboard-content">
 
-            <!-- Overview -->
+            <!-- Overview / Home -->
             <div class="dash-panel active" id="panel-overview">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="statWeight">--</div>
-                        <div class="stat-label">משקל (ק"ג)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="statDocs">0</div>
-                        <div class="stat-label">מסמכים</div>
-                    </div>
-                </div>
-
-                <div class="profile-card" style="margin-bottom: 24px;">
-                    <h4 style="margin-bottom: 16px;"><i class="fas fa-bell" style="color: var(--accent);"></i> עדכונים אחרונים</h4>
-                    <div style="display:flex; flex-direction:column; gap:12px;" id="updatesList">
-                        <div class="empty-state" style="padding:20px; text-align:center; color: var(--text-secondary);">
-                            <i class="fas fa-inbox" style="font-size:1.6rem; opacity:0.5;"></i>
-                            <p style="margin-top:8px;">אין עדכונים חדשים</p>
-                        </div>
-                    </div>
-                </div>
+                <div class="home-grid" id="homeGrid"></div>
             </div>
 
             <!-- Documents -->
@@ -2086,6 +2148,7 @@
                 </div>
             </div>
 
+        </div>
         </div>
     </div>
 
@@ -2595,6 +2658,10 @@
             initScheduleSelects();
             updateFeedbackBadge();
 
+            // Sidebar + home dashboard
+            restoreSidebar();
+            renderHome();
+
             window.scrollTo(0, 0);
         }
 
@@ -2604,9 +2671,33 @@
             document.querySelectorAll('.nav-public').forEach(el => el.style.display = '');
             document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-overview').classList.add('active');
-            document.querySelectorAll('.dashboard-nav button').forEach(b => b.classList.remove('active'));
-            document.querySelector('.dashboard-nav button').classList.add('active');
+            document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('active'));
+            document.querySelector('.sidebar-nav button').classList.add('active');
+            closeSidebar();
             window.scrollTo(0, 0);
+        }
+
+        // ===== SIDEBAR =====
+        function toggleSidebar() {
+            const dash = document.getElementById('dashboard');
+            if (window.innerWidth <= 768) {
+                dash.classList.toggle('sidebar-open');
+            } else {
+                dash.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('rocky_sidebar', dash.classList.contains('sidebar-collapsed') ? 'collapsed' : 'open');
+            }
+        }
+        function closeSidebar() {
+            document.getElementById('dashboard').classList.remove('sidebar-open');
+        }
+        function restoreSidebar() {
+            const dash = document.getElementById('dashboard');
+            dash.classList.remove('sidebar-open');
+            if (window.innerWidth > 768 && localStorage.getItem('rocky_sidebar') === 'collapsed') {
+                dash.classList.add('sidebar-collapsed');
+            } else {
+                dash.classList.remove('sidebar-collapsed');
+            }
         }
 
         async function logout() {
@@ -2624,12 +2715,77 @@
         function switchPanel(panel, btn) {
             document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-' + panel).classList.add('active');
-            document.querySelectorAll('.dashboard-nav button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
+            else {
+                const target = document.querySelector(`.sidebar-nav button[onclick*="'${panel}'"]`);
+                if (target) target.classList.add('active');
+            }
+            if (window.innerWidth <= 768) closeSidebar();
+            if (panel === 'overview') renderHome();
             if (panel === 'coach' && (isCoach || isAdmin)) loadCompetitors();
             if (panel === 'schedule') renderSchedule();
             if (panel === 'strength') renderStrength();
             if (panel === 'feedback') renderFeedback();
+            window.scrollTo(0, 0);
+        }
+
+        // ===== HOME DASHBOARD =====
+        function renderHome() {
+            const grid = document.getElementById('homeGrid');
+            if (!grid) return;
+            const cards = [];
+
+            // 1. Coach feedback
+            const fb = (userData && userData.coachFeedback) ? userData.coachFeedback : [];
+            const unread = fb.filter(f => !f.ack).length;
+            const lastFb = fb.length ? fb[fb.length - 1] : null;
+            cards.push(`<div class="home-card" onclick="switchPanel('feedback')">
+                <div class="home-card-head"><i class="fas fa-comments"></i> ${T('nav_feedback')}
+                    ${unread ? `<span class="count-pill">${unread} ${T('home_new')}</span>` : ''}</div>
+                <div class="home-card-body">${lastFb
+                    ? `<strong>${sanitize(lastFb.coach || T('fb_coach'))}:</strong> ${sanitize((lastFb.text || '').slice(0, 90))}${(lastFb.text || '').length > 90 ? '…' : ''}`
+                    : T('home_no_fb')}</div>
+            </div>`);
+
+            // 2. Weekly schedule
+            const blocks = (userData && userData.weeklySchedule) ? userData.weeklySchedule : [];
+            const blkCount = blocks.length;
+            cards.push(`<div class="home-card" onclick="switchPanel('schedule')">
+                <div class="home-card-head"><i class="fas fa-calendar-week"></i> ${T('nav_schedule')}
+                    ${blkCount ? `<span class="count-pill">${blkCount}</span>` : ''}</div>
+                <div class="home-card-body">${blkCount ? T('home_sched_has') : T('home_sched_empty')}</div>
+            </div>`);
+
+            // 3. Upcoming competitions
+            const comps = (userData && userData.competitions) ? userData.competitions : [];
+            const nextComp = comps.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''))[0];
+            cards.push(`<div class="home-card" onclick="switchPanel('competitions')">
+                <div class="home-card-head"><i class="fas fa-medal"></i> ${T('dash_competitions')}
+                    ${comps.length ? `<span class="count-pill">${comps.length}</span>` : ''}</div>
+                <div class="home-card-body">${nextComp
+                    ? `${sanitize(nextComp.name || '')} · ${sanitize(nextComp.date || '')}`
+                    : T('home_no_comp')}</div>
+            </div>`);
+
+            // 4. Quick stats
+            const w = (userData && userData.weight) ? userData.weight : '--';
+            const docs = (userData && userData.documents) ? userData.documents.length : 0;
+            const vids = (userData && userData.videos) ? userData.videos.length : 0;
+            cards.push(`<div class="home-card" onclick="switchPanel('profile')">
+                <div class="home-card-head"><i class="fas fa-chart-simple"></i> ${T('home_stats')}</div>
+                <div class="home-card-body">${T('stat_weight')}: <strong>${sanitize(String(w))}</strong> · ${T('dash_documents')}: <strong>${docs}</strong> · ${T('dash_videos')}: <strong>${vids}</strong></div>
+            </div>`);
+
+            // 5. Coach/admin summary
+            if (isCoach || isAdmin) {
+                cards.push(`<div class="home-card" onclick="switchPanel('coach')">
+                    <div class="home-card-head"><i class="fas fa-users-cog"></i> ${isAdmin ? T('dash_manage_admin') : T('dash_manage')}</div>
+                    <div class="home-card-body">${T('home_manage_hint')}</div>
+                </div>`);
+            }
+
+            grid.innerHTML = cards.join('');
         }
 
         // ===== DRAG & DROP =====
@@ -3370,7 +3526,8 @@
                 dash_weight_ph: 'הכנס משקל', dash_height_ph: 'הכנס גובה', dash_exp_ph: 'מספר שנות ניסיון', dash_gym_ph: 'שם המכון', dash_comp_name_ph: 'שם התחרות', dash_comp_loc_ph: 'עיר / אולם',
                 // Dashboard
                 dash_hello: 'שלום', dash_welcome: 'ברוך הבא לאזור האישי שלך',
-                dash_overview: 'סקירה', dash_documents: 'מסמכים', dash_videos: 'סרטונים',
+                dash_overview: 'סקירה', dash_home: 'בית', dash_documents: 'מסמכים', dash_videos: 'סרטונים',
+                home_new: 'חדש', home_no_fb: 'אין משוב עדיין', home_sched_has: 'לחץ לצפייה בלוח האימונים השבועי', home_sched_empty: 'עדיין לא הוגדר לוח אימונים', home_no_comp: 'אין תחרויות רשומות', home_stats: 'נתונים מהירים', home_manage_hint: 'צפייה וניהול המתחרים ומשובים',
                 dash_profile: 'פרופיל', dash_competitions: 'תחרויות',
                 dash_manage: 'ניהול מתחרים', dash_manage_admin: 'ניהול משתמשים', dash_logout: 'יציאה',
                 // Stats
@@ -3489,7 +3646,8 @@
                 dash_weight_ph: 'Enter weight', dash_height_ph: 'Enter height', dash_exp_ph: 'Years of experience', dash_gym_ph: 'Gym name', dash_comp_name_ph: 'Competition name', dash_comp_loc_ph: 'City / Venue',
                 // Dashboard
                 dash_hello: 'Hello', dash_welcome: 'Welcome to your personal area',
-                dash_overview: 'Overview', dash_documents: 'Documents', dash_videos: 'Videos',
+                dash_overview: 'Overview', dash_home: 'Home', dash_documents: 'Documents', dash_videos: 'Videos',
+                home_new: 'new', home_no_fb: 'No feedback yet', home_sched_has: 'Tap to view your weekly training board', home_sched_empty: 'No training schedule set yet', home_no_comp: 'No competitions registered', home_stats: 'Quick stats', home_manage_hint: 'View and manage competitors and feedback',
                 dash_profile: 'Profile', dash_competitions: 'Competitions',
                 dash_manage: 'Manage Competitors', dash_manage_admin: 'Manage Users', dash_logout: 'Logout',
                 stat_fights: 'Fights', stat_wins: 'Wins', stat_weight: 'Weight (kg)', stat_docs: 'Documents',
@@ -3601,7 +3759,8 @@
                 dash_weight_ph: 'Gewicht eingeben', dash_height_ph: 'Größe eingeben', dash_exp_ph: 'Jahre Erfahrung', dash_gym_ph: 'Name des Studios', dash_comp_name_ph: 'Name des Wettkampfs', dash_comp_loc_ph: 'Stadt / Halle',
                 // Dashboard
                 dash_hello: 'Hallo', dash_welcome: 'Willkommen in deinem persoenlichen Bereich',
-                dash_overview: 'Uebersicht', dash_documents: 'Dokumente', dash_videos: 'Videos',
+                dash_overview: 'Uebersicht', dash_home: 'Start', dash_documents: 'Dokumente', dash_videos: 'Videos',
+                home_new: 'neu', home_no_fb: 'Noch kein Feedback', home_sched_has: 'Zum Wochen-Trainingsplan tippen', home_sched_empty: 'Noch kein Trainingsplan festgelegt', home_no_comp: 'Keine Wettkaempfe eingetragen', home_stats: 'Schnelluebersicht', home_manage_hint: 'Wettkaempfer und Feedback verwalten',
                 dash_profile: 'Profil', dash_competitions: 'Wettkaempfe',
                 dash_manage: 'Wettkämpfer verwalten', dash_manage_admin: 'Benutzer verwalten', dash_logout: 'Abmelden',
                 stat_fights: 'Kämpfe', stat_wins: 'Siege', stat_weight: 'Gewicht (kg)', stat_docs: 'Dokumente',
@@ -3862,21 +4021,23 @@
             const dashWelcomeP = document.querySelector('.welcome-text p');
             if (dashWelcomeP) dashWelcomeP.textContent = t.dash_welcome;
 
-            // Dashboard nav buttons
-            const dashNavBtns = document.querySelectorAll('.dashboard-nav button');
+            // Sidebar nav buttons
+            const L = txt => `<span class="sidebar-label">${txt}</span>`;
+            const dashNavBtns = document.querySelectorAll('.sidebar-nav button');
             dashNavBtns.forEach(btn => {
                 const onclick = btn.getAttribute('onclick') || '';
-                if (onclick.includes("'overview'")) btn.innerHTML = `<i class="fas fa-th-large"></i> ${t.dash_overview}`;
-                else if (onclick.includes("'documents'")) btn.innerHTML = `<i class="fas fa-folder-open"></i> ${t.dash_documents}`;
-                else if (onclick.includes("'videos'")) btn.innerHTML = `<i class="fas fa-play-circle"></i> ${t.dash_videos}`;
-                else if (onclick.includes("'profile'")) btn.innerHTML = `<i class="fas fa-user"></i> ${t.dash_profile}`;
-                else if (onclick.includes("'schedule'")) btn.innerHTML = `<i class="fas fa-calendar-week"></i> ${t.nav_schedule}`;
-                else if (onclick.includes("'strength'")) btn.innerHTML = `<i class="fas fa-dumbbell"></i> ${t.nav_strength}`;
-                else if (onclick.includes("'feedback'")) { const unread = (userData && userData.coachFeedback) ? userData.coachFeedback.filter(f => !f.ack).length : 0; btn.innerHTML = `<i class="fas fa-comments"></i> ${t.nav_feedback} <span id="feedbackBadge" class="fb-badge" style="display:${unread ? '' : 'none'};">${unread}</span>`; }
-                else if (onclick.includes("'competitions'")) btn.innerHTML = `<i class="fas fa-medal"></i> ${t.dash_competitions}`;
-                else if (onclick.includes("'coach'")) btn.innerHTML = isAdmin ? `<i class="fas fa-crown"></i> ${t.dash_manage_admin}` : `<i class="fas fa-users-cog"></i> ${t.dash_manage}`;
-                else if (onclick.includes('logout')) { btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${t.dash_logout}`; btn.style.color = 'var(--accent)'; }
+                if (onclick.includes("'overview'")) btn.innerHTML = `<i class="fas fa-th-large"></i> ${L(t.dash_home || t.dash_overview)}`;
+                else if (onclick.includes("'documents'")) btn.innerHTML = `<i class="fas fa-folder-open"></i> ${L(t.dash_documents)}`;
+                else if (onclick.includes("'videos'")) btn.innerHTML = `<i class="fas fa-play-circle"></i> ${L(t.dash_videos)}`;
+                else if (onclick.includes("'profile'")) btn.innerHTML = `<i class="fas fa-user"></i> ${L(t.dash_profile)}`;
+                else if (onclick.includes("'schedule'")) btn.innerHTML = `<i class="fas fa-calendar-week"></i> ${L(t.nav_schedule)}`;
+                else if (onclick.includes("'strength'")) btn.innerHTML = `<i class="fas fa-dumbbell"></i> ${L(t.nav_strength)}`;
+                else if (onclick.includes("'feedback'")) { const unread = (userData && userData.coachFeedback) ? userData.coachFeedback.filter(f => !f.ack).length : 0; btn.innerHTML = `<i class="fas fa-comments"></i> ${L(t.nav_feedback)} <span id="feedbackBadge" class="fb-badge" style="display:${unread ? '' : 'none'};">${unread}</span>`; }
+                else if (onclick.includes("'competitions'")) btn.innerHTML = `<i class="fas fa-medal"></i> ${L(t.dash_competitions)}`;
+                else if (onclick.includes("'coach'")) btn.innerHTML = isAdmin ? `<i class="fas fa-crown"></i> ${L(t.dash_manage_admin)}` : `<i class="fas fa-users-cog"></i> ${L(t.dash_manage)}`;
+                else if (onclick.includes('logout')) { btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${L(t.dash_logout)}`; }
             });
+            if (typeof renderHome === 'function' && document.getElementById('dashboard').classList.contains('active')) renderHome();
 
             // Stats labels
             const statLabels = document.querySelectorAll('.stat-label');
