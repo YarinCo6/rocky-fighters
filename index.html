@@ -2662,8 +2662,8 @@
             document.getElementById('profileName').textContent = name;
 
             // Stats
-            document.getElementById('statWeight').textContent = userData.weight || '--';
-            document.getElementById('statDocs').textContent = (userData.documents || []).length;
+            const statW = document.getElementById('statWeight'); if (statW) statW.textContent = userData.weight || '--';
+            const statD = document.getElementById('statDocs'); if (statD) statD.textContent = (userData.documents || []).length;
 
             // Profile fields
             document.getElementById('profileWeight').textContent = userData.weight ? userData.weight + ' ק"ג' : '-- ק"ג';
@@ -2883,7 +2883,7 @@
                 userData.documents = userData.documents || [];
                 userData.documents.unshift(docEntry);
                 renderDocuments();
-                document.getElementById('statDocs').textContent = userData.documents.length;
+                const sd = document.getElementById('statDocs'); if (sd) sd.textContent = userData.documents.length;
             }
 
             showToast(`הקובץ "${file.name}" הועלה בהצלחה`);
