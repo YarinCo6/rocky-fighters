@@ -1889,6 +1889,14 @@
                         <div class="profile-card" style="margin-top: 20px;">
                             <h4 style="margin-bottom:14px;">עדכון פרטים</h4>
                             <div class="form-group">
+                                <label id="nameHeLabel">שם מלא (עברית)</label>
+                                <input type="text" id="nameHeInput" placeholder="השם שלך בעברית">
+                            </div>
+                            <div class="form-group">
+                                <label id="nameEnLabel">Full name (English)</label>
+                                <input type="text" id="nameEnInput" placeholder="Your name in English">
+                            </div>
+                            <div class="form-group">
                                 <label>משקל (ק"ג)</label>
                                 <input type="number" id="weightInput" placeholder="הכנס משקל" step="0.1" min="30" max="200">
                             </div>
@@ -2096,8 +2104,12 @@
             <img src="images/rocky-icon.png" alt="Rocky" class="auth-logo">
             <h2>הרשמה</h2>
             <div class="form-group">
-                <label>שם מלא</label>
-                <input type="text" id="regName" placeholder="השם שלך">
+                <label id="regNameLabel">שם מלא (עברית)</label>
+                <input type="text" id="regName" placeholder="השם שלך בעברית">
+            </div>
+            <div class="form-group">
+                <label id="regNameEnLabel">Full name (English)</label>
+                <input type="text" id="regNameEn" placeholder="Your name in English">
             </div>
             <div class="form-group">
                 <label>אימייל</label>
@@ -2173,6 +2185,15 @@
             const el = document.createElement('div');
             el.textContent = str;
             return el.innerHTML;
+        }
+
+        // Pick a user's name for the current UI language, with fallback to the other.
+        function displayName(d) {
+            if (!d) return '';
+            const he = d.nameHe || d.name || '';
+            const en = d.nameEn || d.name || '';
+            const fallback = currentLang === 'he' ? 'מתחרה' : 'Competitor';
+            return (currentLang === 'he' ? (he || en) : (en || he)) || fallback;
         }
 
         function toggleMobileMenu() {
@@ -2370,14 +2391,16 @@
         }
 
         async function register() {
-            const name = document.getElementById('regName').value.trim();
+            const nameHe = document.getElementById('regName').value.trim();
+            const nameEn = document.getElementById('regNameEn').value.trim();
+            const name = nameHe || nameEn; // legacy/display fallback
             const email = document.getElementById('regEmail').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const gym = document.getElementById('regGym').value.trim();
             const pass = document.getElementById('regPass').value;
 
-            if (!name || !email || !pass) {
-                showToast('נא למלא שם, אימייל וסיסמה');
+            if (!nameHe || !nameEn || !email || !pass) {
+                showToast('נא למלא שם בעברית ובאנגלית, אימייל וסיסמה');
                 return;
             }
             if (pass.length < 6) {
@@ -2399,6 +2422,8 @@
                 // Save user data to Firestore
                 await db.collection('users').doc(cred.user.uid).set({
                     name,
+                    nameHe,
+                    nameEn,
                     email,
                     phone,
                     gym,
@@ -2418,6 +2443,7 @@
 
                 // Clear form
                 document.getElementById('regName').value = '';
+                document.getElementById('regNameEn').value = '';
                 document.getElementById('regEmail').value = '';
                 document.getElementById('regPhone').value = '';
                 document.getElementById('regGym').value = '';
@@ -2499,7 +2525,7 @@
             document.getElementById('publicContent').classList.add('hidden');
             document.getElementById('dashboard').classList.add('active');
 
-            const name = userData.name || currentUser.displayName || 'מתחרה';
+            const name = displayName(userData) || currentUser.displayName || 'מתחרה';
             document.getElementById('dashName').textContent = name;
             document.getElementById('profileName').textContent = name;
 
@@ -2512,6 +2538,12 @@
             document.getElementById('profileHeight').textContent = userData.height ? userData.height + ' ס"מ' : '-- ס"מ';
             document.getElementById('profileCategory').textContent = userData.category || '--';
             document.getElementById('profileGym').textContent = userData.gym || '--';
+
+            // Prefill editable name fields with current values
+            const nameHeEl = document.getElementById('nameHeInput');
+            const nameEnEl = document.getElementById('nameEnInput');
+            if (nameHeEl) nameHeEl.value = userData.nameHe || userData.name || '';
+            if (nameEnEl) nameEnEl.value = userData.nameEn || '';
 
             document.querySelectorAll('.nav-public').forEach(el => el.style.display = 'none');
 
@@ -2717,6 +2749,8 @@
         async function updateProfile() {
             if (!currentUser) return;
 
+            const nameHe = document.getElementById('nameHeInput').value.trim();
+            const nameEn = document.getElementById('nameEnInput').value.trim();
             const weight = parseFloat(document.getElementById('weightInput').value);
             const height = parseInt(document.getElementById('heightInput').value);
             const category = document.getElementById('categoryInput').value;
@@ -2724,6 +2758,9 @@
 
             const updates = {};
             let updated = false;
+
+            if (nameHe) { updates.nameHe = nameHe; updates.name = nameHe; updated = true; }
+            if (nameEn) { updates.nameEn = nameEn; if (!nameHe && !userData.nameHe) updates.name = nameEn; updated = true; }
 
             if (weight && weight >= 30 && weight <= 200) {
                 updates.weight = weight;
@@ -2753,7 +2790,7 @@
             enterDashboard();
 
             // Clear form
-            ['weightInput','heightInput','categoryInput','gymInput'].forEach(id => {
+            ['nameHeInput','nameEnInput','weightInput','heightInput','categoryInput','gymInput'].forEach(id => {
                 document.getElementById(id).value = '';
             });
 
@@ -3104,7 +3141,7 @@
                     <div class="comp-info">
                         <div class="comp-avatar"><i class="fas fa-user"></i></div>
                         <div>
-                            <div class="comp-name">${sanitize(d.name || 'ללא שם')}${roleBadge}</div>
+                            <div class="comp-name">${sanitize(displayName(d) || 'ללא שם')}${roleBadge}</div>
                             <div class="comp-detail">${sanitize(d.gym || '--')} | ${d.category || '--'}</div>
                         </div>
                     </div>
@@ -3133,7 +3170,8 @@
 
             const body = document.getElementById('competitorDetailBody');
             body.innerHTML = `
-                <h2 style="color:var(--white); margin-bottom:24px;"><i class="fas fa-user" style="color:var(--accent);"></i> ${sanitize(d.name)}</h2>
+                <h2 style="color:var(--white); margin-bottom:6px;"><i class="fas fa-user" style="color:var(--accent);"></i> ${sanitize(displayName(d))}</h2>
+                <p style="color:var(--text-secondary); margin-bottom:24px; font-size:0.92rem;">${sanitize(d.nameHe || '--')} / ${sanitize(d.nameEn || '--')}</p>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
                     <div class="stat-card"><div class="stat-value">${d.weight || '--'}</div><div class="stat-label">משקל (ק"ג)</div></div>
@@ -3744,15 +3782,13 @@
             const regH2 = document.querySelector('#registerPage h2');
             if (regH2) regH2.textContent = t.reg_title;
             const regLabels = document.querySelectorAll('#registerPage .form-group label');
-            if (regLabels[0]) regLabels[0].textContent = t.reg_name;
-            if (regLabels[1]) regLabels[1].textContent = t.reg_email;
-            if (regLabels[2]) regLabels[2].textContent = t.reg_phone;
-            if (regLabels[3]) regLabels[3].textContent = t.reg_gym;
-            if (regLabels[4]) regLabels[4].textContent = t.reg_pass;
+            // regLabels[0]=nameHe, [1]=nameEn are static bilingual labels, skip.
+            if (regLabels[2]) regLabels[2].textContent = t.reg_email;
+            if (regLabels[3]) regLabels[3].textContent = t.reg_phone;
+            if (regLabels[4]) regLabels[4].textContent = t.reg_gym;
+            if (regLabels[5]) regLabels[5].textContent = t.reg_pass;
             const regBtnEl = document.getElementById('regBtn');
             if (regBtnEl && !regBtnEl.disabled) regBtnEl.textContent = t.reg_btn;
-            const regNameInput = document.getElementById('regName');
-            if (regNameInput) regNameInput.placeholder = t.reg_name_ph;
             const regGymInput = document.getElementById('regGym');
             if (regGymInput) regGymInput.placeholder = t.reg_gym_ph;
             const regPassInput = document.getElementById('regPass');
@@ -3851,10 +3887,11 @@
                 const pfH4 = profileCards[1].querySelector('h4');
                 if (pfH4) pfH4.textContent = t.dash_update_details;
                 const pfLabels = profileCards[1].querySelectorAll('.form-group label');
-                if (pfLabels[0]) pfLabels[0].textContent = t.dash_weight_kg;
-                if (pfLabels[1]) pfLabels[1].textContent = t.dash_height_cm;
-                if (pfLabels[2]) pfLabels[2].textContent = t.dash_weight_cat;
-                if (pfLabels[3]) pfLabels[3].textContent = t.dash_gym_name;
+                // pfLabels[0]=nameHe, [1]=nameEn are static bilingual labels, skip.
+                if (pfLabels[2]) pfLabels[2].textContent = t.dash_weight_kg;
+                if (pfLabels[3]) pfLabels[3].textContent = t.dash_height_cm;
+                if (pfLabels[4]) pfLabels[4].textContent = t.dash_weight_cat;
+                if (pfLabels[5]) pfLabels[5].textContent = t.dash_gym_name;
                 const pfSubmit = profileCards[1].querySelector('.form-submit');
                 if (pfSubmit) pfSubmit.textContent = t.dash_save_changes;
             }
