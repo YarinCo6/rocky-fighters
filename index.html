@@ -5,26 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Rocky - קבוצת מתחרים ישראלית בענף הלחימה. מסגרת אימונים מקצועית, פתוחה לכל מתחרה מכל מכון ואיגוד בישראל.">
     <title>Rocky - קבוצת מתחרים</title>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-primary: #0a0a10;
-            --bg-secondary: #12121a;
-            --bg-card: #1a1a2e;
-            --bg-card-hover: #22223a;
-            --accent: #e63946;
+            --bg-primary: #0b0b10;
+            --bg-secondary: #13131c;
+            --bg-card: #1a1a28;
+            --bg-card-hover: #23233a;
+            --accent: #e5384d;
             --accent-dark: #c0313d;
-            --accent-glow: rgba(230, 57, 70, 0.3);
-            --text-primary: #f5f5f7;
-            --text-secondary: #ffffff;
+            --accent-glow: rgba(229, 56, 77, 0.35);
+            --accent-grad: linear-gradient(135deg, #e5384d 0%, #c0313d 100%);
+            --text-primary: #f4f4f7;
+            --text-secondary: #9a9aab;
             --white: #ffffff;
-            --border: #2a2a3e;
+            --border: #262636;
             --border-light: rgba(255,255,255,0.08);
-            --gold: #e63946;
+            --gold: #f0a830;
+            --gold-glow: rgba(240, 168, 48, 0.3);
             --success: #2ecc71;
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.35);
+            --shadow-card-hover: 0 12px 32px rgba(0,0,0,0.5);
+            --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
         }
 
         body {
@@ -35,6 +40,12 @@
             min-height: 100dvh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* Display headings: Oswald for Latin, Heebo per-glyph fallback for Hebrew */
+        h1, h2, h3, .sidebar-brand span, .logo-text {
+            font-family: 'Oswald', 'Heebo', sans-serif;
+            letter-spacing: 0.4px;
         }
 
         /* ===== NAVIGATION ===== */
@@ -335,15 +346,15 @@
         }
 
         .btn-primary {
-            background: var(--accent);
+            background: var(--accent-grad);
             color: var(--white);
             box-shadow: 0 4px 24px var(--accent-glow);
         }
 
         .btn-primary:hover {
-            background: var(--accent-dark);
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px var(--accent-glow);
+            box-shadow: 0 10px 34px var(--accent-glow);
+            filter: brightness(1.08);
         }
 
         .btn-outline {
@@ -476,7 +487,8 @@
             border-radius: 20px;
             padding: 36px;
             border: 1px solid var(--border-light);
-            transition: all 0.3s;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s, background 0.25s;
             display: flex;
             gap: 18px;
             align-items: flex-start;
@@ -485,6 +497,8 @@
         .feature-card:hover {
             border-color: var(--accent);
             background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card-hover);
         }
 
         .feature-card .icon-box {
@@ -682,9 +696,11 @@
         .sidebar-nav button i { width: 20px; text-align: center; font-size: 1.05rem; flex: 0 0 auto; }
         .sidebar-nav button:hover { background: rgba(255,255,255,0.05); color: var(--white); }
         .sidebar-nav button.active {
-            background: rgba(230,57,70,0.12); color: var(--accent);
-            border-color: rgba(230,57,70,0.4);
+            background: rgba(229,56,77,0.14); color: var(--accent);
+            border-color: rgba(229,56,77,0.45);
+            box-shadow: inset 3px 0 0 var(--accent), 0 2px 12px var(--accent-glow);
         }
+        [dir="ltr"] .sidebar-nav button.active { box-shadow: inset -3px 0 0 var(--accent), 0 2px 12px var(--accent-glow); }
         .sidebar-nav button.logout-btn { color: var(--accent); margin-top: auto; }
         .sidebar-nav .fb-badge { margin-inline-start: auto; }
 
@@ -755,9 +771,10 @@
         .home-card {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: 16px; padding: 20px 22px; cursor: pointer;
-            transition: border-color 0.2s, transform 0.2s;
+            box-shadow: var(--shadow-card);
+            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
         }
-        .home-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .home-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-card-hover); }
         .home-card-head {
             display: flex; align-items: center; gap: 10px;
             margin-bottom: 14px; color: var(--white); font-weight: 700; font-size: 1.05rem;
@@ -1052,17 +1069,19 @@
         /* Toast */
         .toast {
             position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
+            top: 96px;
+            inset-inline-end: 24px;
+            transform: translateY(-140%);
+            opacity: 0;
             background: var(--bg-card);
             color: var(--text-primary);
-            padding: 18px 32px;
+            padding: 16px 24px;
             border-radius: 14px;
-            border: 2px solid var(--accent);
+            border: 1px solid var(--border);
+            border-inline-start: 4px solid var(--accent);
             box-shadow: 0 12px 48px rgba(0,0,0,0.6);
             z-index: 3000;
-            transition: transform 0.4s ease;
+            transition: transform 0.35s ease, opacity 0.35s ease;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -1071,7 +1090,9 @@
             max-width: 90%;
         }
 
-        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.toast-error { border-inline-start-color: var(--accent); }
+        .toast.toast-success { border-inline-start-color: var(--success); }
 
         /* Notification badge */
         .notif-dot {
