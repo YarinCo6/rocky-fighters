@@ -2461,8 +2461,15 @@
 
         // Password reset
         async function resetPassword() {
-            const email = document.getElementById('loginEmail').value.trim();
-            if (!email) { showToast(T('reset_need_email')); return; }
+            const emailEl = document.getElementById('loginEmail');
+            const email = emailEl.value.trim();
+            if (!email) {
+                showToast(T('reset_need_email'));
+                emailEl.focus();
+                emailEl.style.borderColor = 'var(--accent)';
+                setTimeout(() => { emailEl.style.borderColor = ''; }, 2500);
+                return;
+            }
             try {
                 await auth.sendPasswordResetEmail(email);
                 showToast(T('reset_sent'));
