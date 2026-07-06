@@ -968,6 +968,34 @@
         .btn-google:hover { filter: brightness(0.96); transform: translateY(-1px); }
         .btn-google:disabled { opacity: 0.6; cursor: default; transform: none; }
 
+        /* Training log + weekly goals */
+        .tl-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; box-shadow: var(--shadow-card); }
+        .tl-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+        .tl-date { font-weight: 700; color: var(--white); }
+        .tl-date i { color: var(--accent); margin-inline-end: 6px; }
+        .tl-field { margin-bottom: 10px; }
+        .tl-field:last-child { margin-bottom: 0; }
+        .tl-field .lbl { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+        .tl-field .lbl i { color: var(--accent); font-size: 0.8rem; }
+        .tl-field .val { color: var(--text-primary); line-height: 1.5; overflow-wrap: anywhere; }
+        .tl-coach-note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(240,168,48,0.08); border-inline-start: 3px solid var(--gold); }
+        .tl-coach-note .who { font-size: 0.82rem; color: var(--gold); font-weight: 700; margin-bottom: 3px; }
+        .tl-coach-note .txt { color: var(--text-primary); overflow-wrap: anywhere; }
+
+        .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+        .goal-day { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+        .goal-day h5 { color: var(--white); font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .goal-day h5 i { color: var(--accent); }
+        .goal-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border-light); }
+        .goal-item:first-of-type { border-top: none; }
+        .goal-check { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex: 0 0 auto; margin-top: 2px; }
+        .goal-text { flex: 1; color: var(--text-primary); overflow-wrap: anywhere; line-height: 1.4; }
+        .goal-text.done { text-decoration: line-through; color: var(--text-secondary); }
+        .goal-add { display: flex; gap: 6px; margin-top: 10px; }
+        .goal-add input { flex: 1; min-width: 0; }
+        .goal-add button { flex: 0 0 auto; background: var(--accent-grad); color: #fff; border: none; border-radius: 8px; width: 38px; cursor: pointer; }
+        .goal-coach { font-size: 0.8rem; color: var(--gold); margin-top: 3px; overflow-wrap: anywhere; }
+
         /* Skill Bars */
         .skill-bar { margin-bottom: 16px; }
 
@@ -1984,6 +2012,7 @@
                 <button onclick="switchPanel('profile', this)"><i class="fas fa-user"></i> <span class="sidebar-label">פרופיל</span></button>
                 <button onclick="switchPanel('schedule', this)"><i class="fas fa-calendar-week"></i> <span class="sidebar-label">לוח אימונים</span></button>
                 <button onclick="switchPanel('strength', this)"><i class="fas fa-dumbbell"></i> <span class="sidebar-label">תכנית כוח</span></button>
+                <button onclick="switchPanel('training', this)"><i class="fas fa-clipboard-check"></i> <span class="sidebar-label" data-i18n="nav_training">איך היה לי האימון</span></button>
                 <button onclick="switchPanel('feedback', this)"><i class="fas fa-comments"></i> <span class="sidebar-label">משוב מאמן</span> <span id="feedbackBadge" class="fb-badge" style="display:none;">0</span></button>
                 <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> <span class="sidebar-label">תחרויות</span></button>
                 <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> <span class="sidebar-label">ניהול מתחרים</span></button>
@@ -2264,6 +2293,42 @@
                     <button class="form-submit" onclick="addStrengthEx()"><i class="fas fa-plus"></i> <span id="exAddBtn">הוסף תרגיל</span></button>
                 </div>
                 <div id="strengthList"></div>
+            </div>
+
+            <!-- Training Log -->
+            <div class="dash-panel" id="panel-training">
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-clipboard-check" style="color: var(--accent);"></i> <span data-i18n="tl_title">איך היה לי האימון</span></h3>
+                <p style="color:var(--text-secondary); margin-bottom:20px;" data-i18n="tl_desc">תעד איך עבר האימון. המאמן רואה ויכול להגיב.</p>
+
+                <div class="profile-card" style="margin-bottom:22px;">
+                    <h4 style="margin-bottom:14px;" data-i18n="tl_add_title">רשומת אימון חדשה</h4>
+                    <div class="form-group">
+                        <label data-i18n="tl_date">תאריך</label>
+                        <input type="date" id="tlDate">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="tl_worked_on">על מה ניסיתי לעבוד</label>
+                        <textarea id="tlWorkedOn" rows="2" placeholder=""></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="tl_worked">מה עבד?</label>
+                        <textarea id="tlWorked" rows="2" placeholder=""></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="tl_not_worked">מה לא עבד?</label>
+                        <textarea id="tlNotWorked" rows="2" placeholder=""></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="tl_next_focus">איפה צריך חיזוק בפעם הבאה</label>
+                        <textarea id="tlNextFocus" rows="2" placeholder=""></textarea>
+                    </div>
+                    <button class="form-submit" onclick="addTrainingEntry()"><i class="fas fa-plus"></i> <span data-i18n="tl_add_btn">הוסף רשומה</span></button>
+                </div>
+                <div id="trainingLogList" style="margin-bottom:32px;"></div>
+
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-bullseye" style="color: var(--accent);"></i> <span data-i18n="tl_goals_title">מטרות השבוע</span></h3>
+                <p style="color:var(--text-secondary); margin-bottom:20px;" data-i18n="tl_goals_desc">על מה אני רוצה לעבוד השבוע — לפי ימים.</p>
+                <div id="weeklyGoalsBoard"></div>
             </div>
 
             <!-- Coach Feedback -->
@@ -2605,6 +2670,8 @@
                         weightHistory: [],
                         weeklySchedule: [],
                         strengthProgram: [],
+                        trainingLog: [],
+                        weeklyGoals: [],
                         coachFeedback: [],
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
@@ -2740,6 +2807,8 @@
                     weightHistory: [],
                     weeklySchedule: [],
                     strengthProgram: [],
+                    trainingLog: [],
+                    weeklyGoals: [],
                     coachFeedback: [],
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -2874,6 +2943,7 @@
 
             // Render competitions (upcoming + history)
             renderCompetitions();
+            renderTrainingLog();
             syncNotifToggle();
 
             // Training features
@@ -2949,6 +3019,7 @@
             if (panel === 'schedule') renderSchedule();
             if (panel === 'strength') renderStrength();
             if (panel === 'competitions') renderCompetitions();
+            if (panel === 'training') renderTrainingLog();
             if (panel === 'feedback') renderFeedback();
             if (panel === 'profile') syncNotifToggle();
             window.scrollTo(0, 0);
@@ -3427,6 +3498,145 @@
             showToast(T('removed'));
         }
 
+        // ===== TRAINING LOG (reflections journal + weekly goals by day) =====
+        function uid4() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+        function renderTrainingLog() {
+            renderTrainingEntries();
+            renderWeeklyGoals();
+        }
+
+        function renderTrainingEntries() {
+            const list = document.getElementById('trainingLogList');
+            if (!list) return;
+            const log = (userData && userData.trainingLog) ? userData.trainingLog.slice() : [];
+            if (log.length === 0) {
+                list.innerHTML = emptyState('fa-clipboard-check', T('tl_empty'), '');
+                return;
+            }
+            // Newest first by date, then insertion order.
+            log.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            const field = (icon, label, val) => val ? `
+                <div class="tl-field">
+                    <div class="lbl"><i class="fas ${icon}"></i> ${label}</div>
+                    <div class="val">${sanitize(val)}</div>
+                </div>` : '';
+            list.innerHTML = log.map(e => `
+                <div class="tl-card">
+                    <div class="tl-card-head">
+                        <span class="tl-date"><i class="fas fa-calendar-day"></i>${sanitize(e.date || '')}</span>
+                        <button class="item-del-btn" onclick="removeTrainingEntry('${e.id}')" title="${T('remove')}"><i class="fas fa-trash"></i></button>
+                    </div>
+                    ${field('fa-crosshairs', T('tl_worked_on'), e.workedOn)}
+                    ${field('fa-check', T('tl_worked'), e.worked)}
+                    ${field('fa-xmark', T('tl_not_worked'), e.notWorked)}
+                    ${field('fa-arrow-trend-up', T('tl_next_focus'), e.nextFocus)}
+                    ${e.coachComment ? `<div class="tl-coach-note"><div class="who"><i class="fas fa-user-tie"></i> ${T('tl_coach_reply')}</div><div class="txt">${sanitize(e.coachComment)}</div></div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function addTrainingEntry() {
+            if (!currentUser) return;
+            const date = document.getElementById('tlDate').value || new Date().toISOString().slice(0, 10);
+            const workedOn = document.getElementById('tlWorkedOn').value.trim();
+            const worked = document.getElementById('tlWorked').value.trim();
+            const notWorked = document.getElementById('tlNotWorked').value.trim();
+            const nextFocus = document.getElementById('tlNextFocus').value.trim();
+            if (!workedOn && !worked && !notWorked && !nextFocus) { showToast(T('tl_fill_err'), 'error'); return; }
+            const entry = { id: uid4(), date, workedOn, worked, notWorked, nextFocus, coachComment: '' };
+            await db.collection('users').doc(currentUser.uid).update({
+                trainingLog: firebase.firestore.FieldValue.arrayUnion(entry)
+            });
+            // No optimistic push: the snapshot listener re-renders from Firestore.
+            ['tlDate','tlWorkedOn','tlWorked','tlNotWorked','tlNextFocus'].forEach(id => document.getElementById(id).value = '');
+            showToast(T('tl_added'), 'success');
+        }
+
+        async function removeTrainingEntry(id) {
+            if (!currentUser) return;
+            const log = (userData.trainingLog || []).filter(e => e.id !== id);
+            await db.collection('users').doc(currentUser.uid).update({ trainingLog: log });
+            showToast(T('removed'));
+        }
+
+        function renderWeeklyGoals() {
+            const board = document.getElementById('weeklyGoalsBoard');
+            if (!board) return;
+            const goals = (userData && userData.weeklyGoals) ? userData.weeklyGoals : [];
+            const names = dayNames();
+            board.innerHTML = `<div class="goals-grid">` + names.map((name, day) => {
+                const items = goals.filter(g => g.day === day);
+                const rows = items.map(g => `
+                    <div class="goal-item">
+                        <input type="checkbox" class="goal-check" ${g.done ? 'checked' : ''} onchange="toggleWeeklyGoal('${g.id}')">
+                        <div style="flex:1; min-width:0;">
+                            <div class="goal-text ${g.done ? 'done' : ''}">${sanitize(g.text)}</div>
+                            ${g.coachComment ? `<div class="goal-coach"><i class="fas fa-user-tie"></i> ${sanitize(g.coachComment)}</div>` : ''}
+                        </div>
+                        <button class="item-del-btn" onclick="removeWeeklyGoal('${g.id}')" title="${T('remove')}"><i class="fas fa-trash"></i></button>
+                    </div>`).join('');
+                return `<div class="goal-day">
+                    <h5><i class="fas fa-calendar-day"></i> ${name}</h5>
+                    ${rows}
+                    <div class="goal-add">
+                        <input type="text" id="goalInput-${day}" placeholder="${T('tl_goal_ph')}" onkeydown="if(event.key==='Enter')addWeeklyGoal(${day})">
+                        <button onclick="addWeeklyGoal(${day})" title="${T('tl_add_btn')}"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>`;
+            }).join('') + `</div>`;
+        }
+
+        async function addWeeklyGoal(day) {
+            if (!currentUser) return;
+            const input = document.getElementById('goalInput-' + day);
+            const text = input.value.trim();
+            if (!text) return;
+            const goal = { id: uid4(), day, text, done: false, coachComment: '' };
+            await db.collection('users').doc(currentUser.uid).update({
+                weeklyGoals: firebase.firestore.FieldValue.arrayUnion(goal)
+            });
+            input.value = '';
+        }
+
+        async function toggleWeeklyGoal(id) {
+            if (!currentUser) return;
+            const goals = (userData.weeklyGoals || []).map(g => g.id === id ? { ...g, done: !g.done } : g);
+            await db.collection('users').doc(currentUser.uid).update({ weeklyGoals: goals });
+        }
+
+        async function removeWeeklyGoal(id) {
+            if (!currentUser) return;
+            const goals = (userData.weeklyGoals || []).filter(g => g.id !== id);
+            await db.collection('users').doc(currentUser.uid).update({ weeklyGoals: goals });
+            showToast(T('removed'));
+        }
+
+        // Coach replies on a competitor's training entry / weekly goal (writes to their doc).
+        async function addTrainingComment(uid, id) {
+            const input = document.getElementById('tlComment-' + id);
+            const text = input.value.trim();
+            if (!text) return;
+            const ref = db.collection('users').doc(uid);
+            const snap = await ref.get();
+            const log = ((snap.data() && snap.data().trainingLog) || []).map(e => e.id === id ? { ...e, coachComment: text } : e);
+            await ref.update({ trainingLog: log });
+            showToast(T('fb_sent'), 'success');
+            showCompetitorDetail(uid);
+        }
+
+        async function addGoalComment(uid, id) {
+            const input = document.getElementById('goalComment-' + id);
+            const text = input.value.trim();
+            if (!text) return;
+            const ref = db.collection('users').doc(uid);
+            const snap = await ref.get();
+            const goals = ((snap.data() && snap.data().weeklyGoals) || []).map(g => g.id === id ? { ...g, coachComment: text } : g);
+            await ref.update({ weeklyGoals: goals });
+            showToast(T('fb_sent'), 'success');
+            showCompetitorDetail(uid);
+        }
+
         // ===== COACH FEEDBACK (competitor side) =====
         function updateFeedbackBadge() {
             const badge = document.getElementById('feedbackBadge');
@@ -3519,6 +3729,7 @@
                 case 'panel-videos': renderVideos(); break;
                 case 'panel-profile': renderWeightHistory(); break;
                 case 'panel-competitions': renderCompetitions(); break;
+                case 'panel-training': renderTrainingLog(); break;
                 case 'panel-feedback': renderFeedback(); break;
             }
         }
@@ -3602,6 +3813,47 @@
                     ${ex.includes ? `<div class="ex-includes">${sanitize(ex.includes)}</div>` : ''}
                 </div>
             `).join('');
+        }
+
+        function cdTrainingHtml(uid, log) {
+            if (!log || log.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_training')}</p>`;
+            const sorted = log.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            const field = (icon, label, val) => val ? `<div class="tl-field"><div class="lbl"><i class="fas ${icon}"></i> ${label}</div><div class="val">${sanitize(val)}</div></div>` : '';
+            return sorted.map(e => `
+                <div class="tl-card">
+                    <div class="tl-date" style="margin-bottom:10px;"><i class="fas fa-calendar-day"></i>${sanitize(e.date || '')}</div>
+                    ${field('fa-crosshairs', T('tl_worked_on'), e.workedOn)}
+                    ${field('fa-check', T('tl_worked'), e.worked)}
+                    ${field('fa-xmark', T('tl_not_worked'), e.notWorked)}
+                    ${field('fa-arrow-trend-up', T('tl_next_focus'), e.nextFocus)}
+                    ${e.coachComment ? `<div class="tl-coach-note"><div class="who"><i class="fas fa-user-tie"></i> ${T('tl_coach_reply')}</div><div class="txt">${sanitize(e.coachComment)}</div></div>` : ''}
+                    <div class="goal-add" style="margin-top:12px;">
+                        <input type="text" id="tlComment-${e.id}" placeholder="${T('tl_reply_ph')}" onkeydown="if(event.key==='Enter')addTrainingComment('${uid}','${e.id}')">
+                        <button onclick="addTrainingComment('${uid}','${e.id}')" title="${T('cd_send_fb')}"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function cdGoalsHtml(uid, goals) {
+            if (!goals || goals.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_goals')}</p>`;
+            const names = dayNames();
+            return `<div class="goals-grid">` + names.map((name, day) => {
+                const items = goals.filter(g => g.day === day);
+                if (items.length === 0) return '';
+                const rows = items.map(g => `
+                    <div class="goal-item">
+                        <i class="fas ${g.done ? 'fa-check-circle' : 'fa-circle'}" style="color:${g.done ? 'var(--success)' : 'var(--text-secondary)'}; margin-top:3px;"></i>
+                        <div style="flex:1; min-width:0;">
+                            <div class="goal-text ${g.done ? 'done' : ''}">${sanitize(g.text)}</div>
+                            ${g.coachComment ? `<div class="goal-coach"><i class="fas fa-user-tie"></i> ${sanitize(g.coachComment)}</div>` : ''}
+                            <div class="goal-add" style="margin-top:6px;">
+                                <input type="text" id="goalComment-${g.id}" placeholder="${T('tl_reply_ph')}" onkeydown="if(event.key==='Enter')addGoalComment('${uid}','${g.id}')">
+                                <button onclick="addGoalComment('${uid}','${g.id}')" title="${T('cd_send_fb')}"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>`).join('');
+                return `<div class="goal-day"><h5><i class="fas fa-calendar-day"></i> ${name}</h5>${rows}</div>`;
+            }).join('') + `</div>`;
         }
 
         // ===== COACH: LOAD COMPETITORS =====
@@ -3721,6 +3973,12 @@
 
                 <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-dumbbell" style="color:var(--accent);"></i> ${T('cd_strength')}</h4>
                 ${cdStrengthHtml(d.strengthProgram || [])}
+
+                <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-clipboard-check" style="color:var(--accent);"></i> ${T('cd_training')}</h4>
+                ${cdTrainingHtml(uid, d.trainingLog || [])}
+
+                <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-bullseye" style="color:var(--accent);"></i> ${T('cd_goals')}</h4>
+                ${cdGoalsHtml(uid, d.weeklyGoals || [])}
 
                 <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-comments" style="color:var(--accent);"></i> ${T('cd_feedback')}</h4>
                 ${(d.coachFeedback || []).length ? (d.coachFeedback).slice().reverse().map(f => `
@@ -3886,6 +4144,14 @@
                 dash_loading: 'טוען מתחרים...',
                 // Training features
                 nav_schedule: 'לוח אימונים', nav_strength: 'תכנית כוח', nav_feedback: 'משוב מאמן',
+                nav_training: 'איך היה לי האימון',
+                tl_title: 'איך היה לי האימון', tl_desc: 'תעד איך עבר האימון. המאמן רואה ויכול להגיב.',
+                tl_add_title: 'רשומת אימון חדשה', tl_date: 'תאריך',
+                tl_worked_on: 'על מה ניסיתי לעבוד', tl_worked: 'מה עבד?', tl_not_worked: 'מה לא עבד?', tl_next_focus: 'איפה צריך חיזוק בפעם הבאה',
+                tl_add_btn: 'הוסף רשומה', tl_empty: 'עדיין אין רשומות אימון', tl_added: 'הרשומה נוספה', tl_fill_err: 'מלא לפחות שדה אחד',
+                tl_goals_title: 'מטרות השבוע', tl_goals_desc: 'על מה אני רוצה לעבוד השבוע — לפי ימים.', tl_goal_ph: 'הוסף מטרה...',
+                tl_coach_reply: 'תגובת המאמן', tl_reply_ph: 'כתוב תגובה...',
+                cd_training: 'יומן אימונים', cd_no_training: 'אין עדיין רשומות אימון', cd_goals: 'מטרות השבוע', cd_no_goals: 'אין מטרות שבועיות',
                 day_sun: 'ראשון', day_mon: 'שני', day_tue: 'שלישי', day_wed: 'רביעי', day_thu: 'חמישי', day_fri: 'שישי', day_sat: 'שבת',
                 sched_title: 'לוח אימונים שבועי', sched_desc: 'הוסף בלוקים של אימון לכל יום, בקפיצות של רבע שעה.',
                 sched_add_title: 'הוספת בלוק אימון', sched_day: 'יום', sched_start: 'התחלה', sched_end: 'סיום',
@@ -4004,6 +4270,14 @@
                 dash_loading: 'Loading competitors...',
                 // Training features
                 nav_schedule: 'Schedule', nav_strength: 'Strength', nav_feedback: 'Coach Feedback',
+                nav_training: 'How was my training',
+                tl_title: 'How was my training', tl_desc: 'Log how your training went. Your coach can see and reply.',
+                tl_add_title: 'New training entry', tl_date: 'Date',
+                tl_worked_on: 'What I tried to work on', tl_worked: 'What worked?', tl_not_worked: 'What did not work?', tl_next_focus: 'Where I need reinforcement next time',
+                tl_add_btn: 'Add entry', tl_empty: 'No training entries yet', tl_added: 'Entry added', tl_fill_err: 'Fill at least one field',
+                tl_goals_title: 'This week\'s goals', tl_goals_desc: 'What I want to work on this week — by day.', tl_goal_ph: 'Add a goal...',
+                tl_coach_reply: 'Coach reply', tl_reply_ph: 'Write a reply...',
+                cd_training: 'Training log', cd_no_training: 'No training entries yet', cd_goals: 'Weekly goals', cd_no_goals: 'No weekly goals',
                 day_sun: 'Sunday', day_mon: 'Monday', day_tue: 'Tuesday', day_wed: 'Wednesday', day_thu: 'Thursday', day_fri: 'Friday', day_sat: 'Saturday',
                 sched_title: 'Weekly Training Schedule', sched_desc: 'Add training blocks for each day, in 15-minute steps.',
                 sched_add_title: 'Add Training Block', sched_day: 'Day', sched_start: 'Start', sched_end: 'End',
@@ -4122,6 +4396,14 @@
                 dash_loading: 'Wettkämpfer werden geladen...',
                 // Training features
                 nav_schedule: 'Trainingsplan', nav_strength: 'Kraftplan', nav_feedback: 'Trainer-Feedback',
+                nav_training: 'Wie war mein Training',
+                tl_title: 'Wie war mein Training', tl_desc: 'Dokumentiere dein Training. Dein Trainer sieht es und kann antworten.',
+                tl_add_title: 'Neuer Trainingseintrag', tl_date: 'Datum',
+                tl_worked_on: 'Woran ich arbeiten wollte', tl_worked: 'Was hat funktioniert?', tl_not_worked: 'Was hat nicht funktioniert?', tl_next_focus: 'Wo ich beim nächsten Mal Verstärkung brauche',
+                tl_add_btn: 'Eintrag hinzufügen', tl_empty: 'Noch keine Trainingseinträge', tl_added: 'Eintrag hinzugefügt', tl_fill_err: 'Fülle mindestens ein Feld aus',
+                tl_goals_title: 'Ziele dieser Woche', tl_goals_desc: 'Woran ich diese Woche arbeiten will — nach Tag.', tl_goal_ph: 'Ziel hinzufügen...',
+                tl_coach_reply: 'Trainer-Antwort', tl_reply_ph: 'Antwort schreiben...',
+                cd_training: 'Trainingslog', cd_no_training: 'Noch keine Trainingseinträge', cd_goals: 'Wochenziele', cd_no_goals: 'Keine Wochenziele',
                 day_sun: 'Sonntag', day_mon: 'Montag', day_tue: 'Dienstag', day_wed: 'Mittwoch', day_thu: 'Donnerstag', day_fri: 'Freitag', day_sat: 'Samstag',
                 sched_title: 'Wöchentlicher Trainingsplan', sched_desc: 'Füge Trainingsblöcke pro Tag hinzu, in 15-Minuten-Schritten.',
                 sched_add_title: 'Trainingsblock hinzufügen', sched_day: 'Tag', sched_start: 'Beginn', sched_end: 'Ende',
