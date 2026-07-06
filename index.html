@@ -2472,6 +2472,7 @@
         let isAdmin = false;
         let userDocUnsub = null;   // realtime listener teardown
         let lastUnreadCount = 0;   // to detect NEW incoming feedback
+        let lastCoachCommentCount = 0; // to detect NEW coach replies on journal / goals
 
         // ===== HELPERS =====
         function sanitize(str) {
@@ -3695,11 +3696,23 @@
             toggle.checked = notifSupported() && notifEnabled() && Notification.permission === 'granted';
         }
 
+        // Count every non-empty coach reply on the athlete's journal + weekly goals.
+        // Used to detect new coach replies (separate from formal coach feedback).
+        function coachCommentCount() {
+            const log = (userData && userData.trainingLog) ? userData.trainingLog : [];
+            const goals = (userData && userData.weeklyGoals) ? userData.weeklyGoals : [];
+            let n = 0;
+            log.forEach(e => { if (e && e.coachComment) n++; });
+            goals.forEach(g => { if (g && g.coachComment) n++; });
+            return n;
+        }
+
         // Live listener on the user's own doc: new coach feedback triggers an
         // instant alert + numeric badge without needing a page refresh.
         function setupUserDocListener(uid) {
             teardownUserDocListener();
             lastUnreadCount = unreadFeedbackCount();
+            lastCoachCommentCount = coachCommentCount();
             userDocUnsub = db.collection('users').doc(uid).onSnapshot((snap) => {
                 if (!snap.exists) return;
                 userData = snap.data();
@@ -3710,6 +3723,13 @@
                     fireNativeNotification(T('fb_new_toast'));
                 }
                 lastUnreadCount = unread;
+                // Any new coach reply on the journal / weekly goals also alerts the athlete.
+                const cc = coachCommentCount();
+                if (cc > lastCoachCommentCount) {
+                    showToast(T('tl_coach_replied'));
+                    fireNativeNotification(T('tl_coach_replied'));
+                }
+                lastCoachCommentCount = cc;
                 updateFeedbackBadge();
                 // Re-render whatever panel the user is viewing so live data (and their
                 // own just-added items) show exactly once — Firestore's snapshot is the
@@ -3737,6 +3757,7 @@
         function teardownUserDocListener() {
             if (userDocUnsub) { try { userDocUnsub(); } catch (e) {} userDocUnsub = null; }
             lastUnreadCount = 0;
+            lastCoachCommentCount = 0;
         }
         function renderFeedback() {
             const list = document.getElementById('feedbackList');
@@ -4150,7 +4171,7 @@
                 tl_worked_on: 'על מה ניסיתי לעבוד', tl_worked: 'מה עבד?', tl_not_worked: 'מה לא עבד?', tl_next_focus: 'איפה צריך חיזוק בפעם הבאה',
                 tl_add_btn: 'הוסף רשומה', tl_empty: 'עדיין אין רשומות אימון', tl_added: 'הרשומה נוספה', tl_fill_err: 'מלא לפחות שדה אחד',
                 tl_goals_title: 'מטרות השבוע', tl_goals_desc: 'על מה אני רוצה לעבוד השבוע — לפי ימים.', tl_goal_ph: 'הוסף מטרה...',
-                tl_coach_reply: 'תגובת המאמן', tl_reply_ph: 'כתוב תגובה...',
+                tl_coach_reply: 'תגובת המאמן', tl_reply_ph: 'כתוב תגובה...', tl_coach_replied: 'המאמן הגיב לך!',
                 cd_training: 'יומן אימונים', cd_no_training: 'אין עדיין רשומות אימון', cd_goals: 'מטרות השבוע', cd_no_goals: 'אין מטרות שבועיות',
                 day_sun: 'ראשון', day_mon: 'שני', day_tue: 'שלישי', day_wed: 'רביעי', day_thu: 'חמישי', day_fri: 'שישי', day_sat: 'שבת',
                 sched_title: 'לוח אימונים שבועי', sched_desc: 'הוסף בלוקים של אימון לכל יום, בקפיצות של רבע שעה.',
@@ -4276,7 +4297,7 @@
                 tl_worked_on: 'What I tried to work on', tl_worked: 'What worked?', tl_not_worked: 'What did not work?', tl_next_focus: 'Where I need reinforcement next time',
                 tl_add_btn: 'Add entry', tl_empty: 'No training entries yet', tl_added: 'Entry added', tl_fill_err: 'Fill at least one field',
                 tl_goals_title: 'This week\'s goals', tl_goals_desc: 'What I want to work on this week — by day.', tl_goal_ph: 'Add a goal...',
-                tl_coach_reply: 'Coach reply', tl_reply_ph: 'Write a reply...',
+                tl_coach_reply: 'Coach reply', tl_reply_ph: 'Write a reply...', tl_coach_replied: 'Your coach replied!',
                 cd_training: 'Training log', cd_no_training: 'No training entries yet', cd_goals: 'Weekly goals', cd_no_goals: 'No weekly goals',
                 day_sun: 'Sunday', day_mon: 'Monday', day_tue: 'Tuesday', day_wed: 'Wednesday', day_thu: 'Thursday', day_fri: 'Friday', day_sat: 'Saturday',
                 sched_title: 'Weekly Training Schedule', sched_desc: 'Add training blocks for each day, in 15-minute steps.',
@@ -4402,7 +4423,7 @@
                 tl_worked_on: 'Woran ich arbeiten wollte', tl_worked: 'Was hat funktioniert?', tl_not_worked: 'Was hat nicht funktioniert?', tl_next_focus: 'Wo ich beim nächsten Mal Verstärkung brauche',
                 tl_add_btn: 'Eintrag hinzufügen', tl_empty: 'Noch keine Trainingseinträge', tl_added: 'Eintrag hinzugefügt', tl_fill_err: 'Fülle mindestens ein Feld aus',
                 tl_goals_title: 'Ziele dieser Woche', tl_goals_desc: 'Woran ich diese Woche arbeiten will — nach Tag.', tl_goal_ph: 'Ziel hinzufügen...',
-                tl_coach_reply: 'Trainer-Antwort', tl_reply_ph: 'Antwort schreiben...',
+                tl_coach_reply: 'Trainer-Antwort', tl_reply_ph: 'Antwort schreiben...', tl_coach_replied: 'Dein Trainer hat geantwortet!',
                 cd_training: 'Trainingslog', cd_no_training: 'Noch keine Trainingseinträge', cd_goals: 'Wochenziele', cd_no_goals: 'Keine Wochenziele',
                 day_sun: 'Sonntag', day_mon: 'Montag', day_tue: 'Dienstag', day_wed: 'Mittwoch', day_thu: 'Donnerstag', day_fri: 'Freitag', day_sat: 'Samstag',
                 sched_title: 'Wöchentlicher Trainingsplan', sched_desc: 'Füge Trainingsblöcke pro Tag hinzu, in 15-Minuten-Schritten.',
