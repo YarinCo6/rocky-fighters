@@ -956,6 +956,18 @@
         .switch input:checked + .switch-slider::before { transform: translateX(22px); }
         [dir="rtl"] .switch input:checked + .switch-slider::before { transform: translateX(-22px); }
 
+        /* Google sign-in */
+        .auth-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--text-secondary); font-size: 0.9rem; }
+        .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+        .btn-google {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 12px; border-radius: 10px; border: 1px solid var(--border-light);
+            background: #fff; color: #1f1f1f; font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: filter .2s, transform .2s;
+        }
+        .btn-google:hover { filter: brightness(0.96); transform: translateY(-1px); }
+        .btn-google:disabled { opacity: 0.6; cursor: default; transform: none; }
+
         /* Skill Bars */
         .skill-bar { margin-bottom: 16px; }
 
@@ -2295,6 +2307,11 @@
                 <span id="rememberMeLabel">השאר אותי מחובר</span>
             </label>
             <button class="form-submit" id="loginBtn" onclick="login()">כניסה</button>
+            <div class="auth-divider"><span data-i18n="login_or">או</span></div>
+            <button class="btn-google" id="googleBtn" onclick="loginWithGoogle()">
+                <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.6l-6.6-5.6C29.6 34.6 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.6 5.6C41.9 36.2 44 30.6 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+                <span data-i18n="login_google">התחבר עם Google</span>
+            </button>
             <p style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:0.95rem;">
                 <a href="#" onclick="event.preventDefault(); resetPassword();" style="color:var(--accent);" data-i18n="login_forgot">שכחתי סיסמה</a>
             </p>
@@ -2548,6 +2565,65 @@
         document.getElementById('loginPass').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') login();
         });
+
+        // Google sign-in. Provider must be enabled in Firebase console (Auth > Sign-in
+        // method > Google). New Google users get a Firestore doc created on first login,
+        // matching the schema from the email/password registration flow.
+        async function loginWithGoogle() {
+            const btn = document.getElementById('googleBtn');
+            btn.disabled = true;
+            try {
+                // Honor "keep me signed in" the same way email login does.
+                const remember = document.getElementById('rememberMe').checked;
+                await auth.setPersistence(remember
+                    ? firebase.auth.Auth.Persistence.LOCAL
+                    : firebase.auth.Auth.Persistence.SESSION);
+
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const cred = await auth.signInWithPopup(provider);
+                const user = cred.user;
+
+                // Create the Firestore profile on first Google login only.
+                const ref = db.collection('users').doc(user.uid);
+                const snap = await ref.get();
+                if (!snap.exists) {
+                    const displayName = user.displayName || '';
+                    await ref.set({
+                        name: displayName,
+                        nameHe: displayName,
+                        nameEn: displayName,
+                        email: user.email || '',
+                        phone: user.phoneNumber || '',
+                        gym: '',
+                        role: 'competitor',
+                        weight: null,
+                        height: null,
+                        category: '',
+                        documents: [],
+                        videos: [],
+                        competitions: [],
+                        weightHistory: [],
+                        weeklySchedule: [],
+                        strengthProgram: [],
+                        coachFeedback: [],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                hideLoginPage();
+            } catch (err) {
+                const msgs = {
+                    'auth/popup-closed-by-user': 'החלון נסגר לפני השלמת ההתחברות',
+                    'auth/cancelled-popup-request': '',
+                    'auth/popup-blocked': 'הדפדפן חסם את חלון ההתחברות',
+                    'auth/account-exists-with-different-credential': 'האימייל כבר רשום עם סיסמה — התחבר עם סיסמה',
+                    'auth/operation-not-allowed': 'התחברות Google לא מופעלת בשרת'
+                };
+                if (err.code !== 'auth/cancelled-popup-request') {
+                    showToast(msgs[err.code] || 'שגיאה בהתחברות עם Google', 'error');
+                }
+            }
+            btn.disabled = false;
+        }
 
         // Password reset
         async function resetPassword() {
@@ -3742,7 +3818,7 @@
                 footer: '© 2026 Rocky - קבוצת מתחרים | כל הזכויות שמורות',
                 // Auth
                 login_title: 'כניסה', login_email: 'אימייל', login_pass: 'סיסמה', login_btn: 'כניסה', login_back: 'חזרה',
-                login_forgot: 'שכחתי סיסמה', login_no_account: 'עדיין לא רשום?', login_register_link: 'הרשמה', login_remember: 'השאר אותי מחובר',
+                login_forgot: 'שכחתי סיסמה', login_no_account: 'עדיין לא רשום?', login_register_link: 'הרשמה', login_remember: 'השאר אותי מחובר', login_or: 'או', login_google: 'התחבר עם Google',
                 reset_need_email: 'הזן אימייל קודם', reset_sent: 'נשלח קישור לאיפוס סיסמה למייל שלך',
                 reset_not_found: 'אימייל לא נמצא במערכת', reset_bad_email: 'אימייל לא תקין',
                 reset_bad_domain: 'הדומיין לא מאושר ב-Firebase — יש להוסיף אותו', reset_too_many: 'יותר מדי ניסיונות, נסה מאוחר יותר', reset_err: 'שגיאה בשליחת המייל',
@@ -3867,7 +3943,7 @@
                 contact_name_ph: 'Your name', contact_phone_ph: '050-0000000', contact_msg_ph: 'What would you like to ask?',
                 footer: '© 2026 Rocky - Competition Team | All rights reserved',
                 login_title: 'Login', login_email: 'Email', login_pass: 'Password', login_btn: 'Login', login_back: 'Back',
-                login_forgot: 'Forgot password', login_no_account: 'Not registered yet?', login_register_link: 'Register', login_remember: 'Keep me signed in',
+                login_forgot: 'Forgot password', login_no_account: 'Not registered yet?', login_register_link: 'Register', login_remember: 'Keep me signed in', login_or: 'or', login_google: 'Sign in with Google',
                 reset_need_email: 'Enter your email first', reset_sent: 'A password reset link was sent to your email',
                 reset_not_found: 'Email not found in the system', reset_bad_email: 'Invalid email',
                 reset_bad_domain: 'Domain not authorized in Firebase — please add it', reset_too_many: 'Too many attempts, try later', reset_err: 'Error sending the email',
@@ -3985,7 +4061,7 @@
                 contact_name_ph: 'Dein Name', contact_phone_ph: '050-0000000', contact_msg_ph: 'Was möchtest du fragen?',
                 footer: '© 2026 Rocky - Wettkampfteam | Alle Rechte vorbehalten',
                 login_title: 'Anmelden', login_email: 'E-Mail', login_pass: 'Passwort', login_btn: 'Anmelden', login_back: 'Zurück',
-                login_forgot: 'Passwort vergessen', login_no_account: 'Noch nicht registriert?', login_register_link: 'Registrieren', login_remember: 'Angemeldet bleiben',
+                login_forgot: 'Passwort vergessen', login_no_account: 'Noch nicht registriert?', login_register_link: 'Registrieren', login_remember: 'Angemeldet bleiben', login_or: 'oder', login_google: 'Mit Google anmelden',
                 reset_need_email: 'Zuerst E-Mail eingeben', reset_sent: 'Ein Link zum Zurücksetzen wurde an deine E-Mail gesendet',
                 reset_not_found: 'E-Mail nicht im System gefunden', reset_bad_email: 'Ungültige E-Mail',
                 reset_bad_domain: 'Domain in Firebase nicht autorisiert — bitte hinzufügen', reset_too_many: 'Zu viele Versuche, später erneut', reset_err: 'Fehler beim Senden der E-Mail',
