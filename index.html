@@ -947,6 +947,15 @@
         .profile-stat .label { color: var(--text-secondary); font-size: 0.98rem; }
         .profile-stat .value { font-weight: 700; color: var(--accent); }
 
+        /* Toggle switch */
+        .switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 26px; transition: .25s; }
+        .switch-slider::before { content: ""; position: absolute; height: 20px; width: 20px; inset-inline-start: 3px; top: 3px; background: var(--white); border-radius: 50%; transition: .25s; }
+        .switch input:checked + .switch-slider { background: var(--accent); }
+        .switch input:checked + .switch-slider::before { transform: translateX(22px); }
+        [dir="rtl"] .switch input:checked + .switch-slider::before { transform: translateX(-22px); }
+
         /* Skill Bars */
         .skill-bar { margin-bottom: 16px; }
 
@@ -2103,6 +2112,18 @@
                             <h4 style="margin-bottom:14px;">היסטוריית משקל</h4>
                             <div style="display:flex; gap:8px; flex-wrap:wrap;" id="weightHistory"></div>
                         </div>
+                        <div class="profile-card" style="margin-top:20px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:14px;">
+                                <div>
+                                    <h4 style="margin-bottom:4px;"><i class="fas fa-bell" style="color: var(--accent);"></i> <span data-i18n="notif_settings_title">התראות</span></h4>
+                                    <div style="color: var(--text-secondary); font-size:0.92rem;" data-i18n="notif_hint">התראה קופצת כשהמאמן שולח פידבק</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="notifToggle" onchange="toggleNotifications(this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2468,10 +2489,13 @@
 
         // ===== TOAST =====
         let toastTimeout;
-        function showToast(msg) {
+        function showToast(msg, type) {
             clearTimeout(toastTimeout);
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('toast-error', 'toast-success');
+            if (type === 'error') toast.classList.add('toast-error');
+            else if (type === 'success') toast.classList.add('toast-success');
             toast.classList.add('show');
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
         }
@@ -2774,6 +2798,7 @@
 
             // Render competitions (upcoming + history)
             renderCompetitions();
+            syncNotifToggle();
 
             // Training features
             initScheduleSelects();
@@ -2849,6 +2874,7 @@
             if (panel === 'strength') renderStrength();
             if (panel === 'competitions') renderCompetitions();
             if (panel === 'feedback') renderFeedback();
+            if (panel === 'profile') syncNotifToggle();
             window.scrollTo(0, 0);
         }
 
@@ -3340,6 +3366,49 @@
             return fb.filter(f => !f.ack).length;
         }
 
+        // Browser/OS push notifications for new coach feedback.
+        // Toggle persists per device in localStorage. Works while the tab is open
+        // (foreground or backgrounded); true closed-browser push would need FCM.
+        function notifSupported() { return 'Notification' in window; }
+        function notifEnabled() { return localStorage.getItem('rf_notif') === 'on'; }
+
+        async function toggleNotifications(on) {
+            const toggle = document.getElementById('notifToggle');
+            if (on) {
+                if (!notifSupported()) {
+                    showToast(T('notif_unsupported'), 'error');
+                    if (toggle) toggle.checked = false;
+                    return;
+                }
+                let perm = Notification.permission;
+                if (perm === 'default') perm = await Notification.requestPermission();
+                if (perm !== 'granted') {
+                    showToast(T('notif_denied'), 'error');
+                    if (toggle) toggle.checked = false;
+                    localStorage.setItem('rf_notif', 'off');
+                    return;
+                }
+                localStorage.setItem('rf_notif', 'on');
+                showToast(T('notif_on'), 'success');
+                fireNativeNotification(T('notif_test'));
+            } else {
+                localStorage.setItem('rf_notif', 'off');
+                showToast(T('notif_off'));
+            }
+        }
+
+        function fireNativeNotification(body) {
+            if (!notifSupported() || !notifEnabled() || Notification.permission !== 'granted') return;
+            if (document.visibilityState === 'visible') return; // tab focused → toast already shown
+            try { new Notification('Rocky Fighters', { body, icon: 'https://yarinco6.github.io/rocky-fighters/favicon.ico' }); } catch (e) {}
+        }
+
+        function syncNotifToggle() {
+            const toggle = document.getElementById('notifToggle');
+            if (!toggle) return;
+            toggle.checked = notifSupported() && notifEnabled() && Notification.permission === 'granted';
+        }
+
         // Live listener on the user's own doc: new coach feedback triggers an
         // instant alert + numeric badge without needing a page refresh.
         function setupUserDocListener(uid) {
@@ -3352,6 +3421,7 @@
                 const unread = unreadFeedbackCount();
                 if (unread > lastUnreadCount) {
                     showToast(T('fb_new_toast'));
+                    fireNativeNotification(T('fb_new_toast'));
                 }
                 lastUnreadCount = unread;
                 updateFeedbackBadge();
@@ -3756,6 +3826,10 @@
                 fb_empty: 'עדיין אין משוב מהמאמן.', fb_coach: 'מאמן', fb_ack_btn: 'אשר קבלה', fb_acked: 'אישרת קבלה',
                 fb_acked_toast: 'אישרת שקיבלת את המשוב', fb_write_err: 'נא לכתוב משוב',
                 fb_new_toast: 'קיבלת משוב חדש מהמאמן!',
+                notif_settings_title: 'התראות', notif_hint: 'התראה קופצת כשהמאמן שולח פידבק',
+                notif_on: 'התראות הופעלו', notif_off: 'התראות כובו',
+                notif_test: 'התראות פעילות ✓', notif_denied: 'הדפדפן חסם התראות — אשר בהגדרות',
+                notif_unsupported: 'הדפדפן לא תומך בהתראות',
                 remove: 'הסר', removed: 'הוסר',
                 cd_documents: 'מסמכים', cd_approved: 'אושר', cd_pending: 'בבדיקה', cd_no_docs: 'אין מסמכים',
                 cd_schedule: 'לוח אימונים', cd_no_schedule: 'אין לוח אימונים', cd_strength: 'תכנית כוח', cd_no_strength: 'אין תכנית כוח',
@@ -3870,6 +3944,10 @@
                 fb_empty: 'No feedback from coach yet.', fb_coach: 'Coach', fb_ack_btn: 'Acknowledge', fb_acked: 'Acknowledged',
                 fb_acked_toast: 'You acknowledged the feedback', fb_write_err: 'Please write feedback',
                 fb_new_toast: 'New feedback from your coach!',
+                notif_settings_title: 'Notifications', notif_hint: 'Pops an alert when your coach sends feedback',
+                notif_on: 'Notifications enabled', notif_off: 'Notifications disabled',
+                notif_test: 'Notifications active ✓', notif_denied: 'Browser blocked notifications — allow in settings',
+                notif_unsupported: 'Your browser does not support notifications',
                 remove: 'Remove', removed: 'Removed',
                 cd_documents: 'Documents', cd_approved: 'Approved', cd_pending: 'Pending', cd_no_docs: 'No documents',
                 cd_schedule: 'Training Schedule', cd_no_schedule: 'No schedule', cd_strength: 'Strength Program', cd_no_strength: 'No strength program',
@@ -3984,6 +4062,10 @@
                 fb_empty: 'Noch kein Feedback vom Trainer.', fb_coach: 'Trainer', fb_ack_btn: 'Bestätigen', fb_acked: 'Bestätigt',
                 fb_acked_toast: 'Du hast das Feedback bestätigt', fb_write_err: 'Bitte Feedback schreiben',
                 fb_new_toast: 'Neues Feedback von deinem Trainer!',
+                notif_settings_title: 'Benachrichtigungen', notif_hint: 'Zeigt eine Meldung, wenn dein Trainer Feedback sendet',
+                notif_on: 'Benachrichtigungen aktiviert', notif_off: 'Benachrichtigungen deaktiviert',
+                notif_test: 'Benachrichtigungen aktiv ✓', notif_denied: 'Browser hat Benachrichtigungen blockiert — in Einstellungen erlauben',
+                notif_unsupported: 'Dein Browser unterstützt keine Benachrichtigungen',
                 remove: 'Entfernen', removed: 'Entfernt',
                 cd_documents: 'Dokumente', cd_approved: 'Genehmigt', cd_pending: 'In Prüfung', cd_no_docs: 'Keine Dokumente',
                 cd_schedule: 'Trainingsplan', cd_no_schedule: 'Kein Trainingsplan', cd_strength: 'Kraftprogramm', cd_no_strength: 'Kein Kraftprogramm',
