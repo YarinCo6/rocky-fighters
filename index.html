@@ -786,6 +786,19 @@
         }
         .home-card-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
 
+        /* Keep long/unbroken text from spilling out of its container */
+        .home-card, .home-card-head, .home-card-body,
+        .fb-card, .fb-text, .fb-meta,
+        .strength-item, .ex-name, .ex-includes,
+        .sched-block-cell, .sched-block-cell .sched-type,
+        .sched-block, .sched-block .type,
+        .comp-table td, .empty-hint, .empty-title,
+        .update-item, .doc-name, .video-title {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            min-width: 0;
+        }
+
         .dashboard-content {
             max-width: 1200px;
             margin: 30px auto;
