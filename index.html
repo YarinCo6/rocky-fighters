@@ -2759,6 +2759,9 @@
             // Render saved videos
             renderVideos();
 
+            // Render competitions (upcoming + history)
+            renderCompetitions();
+
             // Training features
             initScheduleSelects();
             updateFeedbackBadge();
@@ -2831,6 +2834,7 @@
             if (panel === 'coach' && (isCoach || isAdmin)) loadCompetitors();
             if (panel === 'schedule') renderSchedule();
             if (panel === 'strength') renderStrength();
+            if (panel === 'competitions') renderCompetitions();
             if (panel === 'feedback') renderFeedback();
             window.scrollTo(0, 0);
         }
@@ -2962,10 +2966,7 @@
                 await db.collection('users').doc(currentUser.uid).update({
                     documents: firebase.firestore.FieldValue.arrayUnion(docEntry)
                 });
-                userData.documents = userData.documents || [];
-                userData.documents.unshift(docEntry);
-                renderDocuments();
-                const sd = document.getElementById('statDocs'); if (sd) sd.textContent = userData.documents.length;
+                // No optimistic mutation: the snapshot listener re-renders from Firestore.
             }
 
             showToast(`הקובץ "${file.name}" הועלה בהצלחה`);
@@ -3016,9 +3017,7 @@
                 await db.collection('users').doc(currentUser.uid).update({
                     videos: firebase.firestore.FieldValue.arrayUnion(videoEntry)
                 });
-                userData.videos = userData.videos || [];
-                userData.videos.unshift(videoEntry);
-                renderVideos();
+                // No optimistic mutation: the snapshot listener re-renders from Firestore.
             }
 
             showToast(`הסרטון "${title}" הועלה בהצלחה`);
@@ -3133,21 +3132,7 @@
                 await db.collection('users').doc(currentUser.uid).update({
                     competitions: firebase.firestore.FieldValue.arrayUnion(compEntry)
                 });
-                userData.competitions = userData.competitions || [];
-                userData.competitions.push(compEntry);
-
-                // Add row to table
-                const tbody = document.querySelector('#panel-competitions .comp-table tbody');
-                if (tbody) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${sanitize(name)}</strong></td>
-                        <td>${formatted}</td>
-                        <td>${sanitize(compEntry.location)}</td>
-                        <td><span class="file-status status-pending">נרשם</span></td>
-                    `;
-                    tbody.appendChild(row);
-                }
+                // No optimistic mutation: the snapshot listener re-renders from Firestore.
             }
 
             showToast(`נרשמת בהצלחה לתחרות "${name}"`);
@@ -3238,10 +3223,8 @@
             await db.collection('users').doc(currentUser.uid).update({
                 weeklySchedule: firebase.firestore.FieldValue.arrayUnion(block)
             });
-            userData.weeklySchedule = userData.weeklySchedule || [];
-            userData.weeklySchedule.push(block);
+            // No optimistic push: the snapshot listener re-renders from Firestore (single source of truth).
             document.getElementById('schedType').value = '';
-            renderSchedule();
             showToast(T('sched_added'));
         }
         async function removeScheduleBlock(idx) {
@@ -3276,6 +3259,32 @@
                 </div>
             `).join('');
         }
+        function renderCompetitions() {
+            const up = document.getElementById('upcomingCompBody');
+            if (!up) return;
+            const comps = (userData && userData.competitions) ? userData.competitions : [];
+            const upcoming = comps.filter(c => c.status !== 'done');
+            const history = comps.filter(c => c.status === 'done');
+            up.innerHTML = upcoming.length === 0
+                ? `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">אין תחרויות קרובות</td></tr>`
+                : upcoming.map(c => `<tr>
+                    <td><strong>${sanitize(c.name)}</strong></td>
+                    <td>${sanitize(c.date || '')}</td>
+                    <td>${sanitize(c.location || '--')}</td>
+                    <td><span class="file-status status-pending">נרשם</span></td>
+                </tr>`).join('');
+            const hist = document.getElementById('compHistoryBody');
+            if (hist) {
+                hist.innerHTML = history.length === 0
+                    ? `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">אין היסטוריית תחרויות</td></tr>`
+                    : history.map(c => `<tr>
+                        <td><strong>${sanitize(c.name)}</strong></td>
+                        <td>${sanitize(c.date || '')}</td>
+                        <td>${sanitize(c.result || '--')}</td>
+                        <td>${sanitize(c.location || '--')}</td>
+                    </tr>`).join('');
+            }
+        }
         async function addStrengthEx() {
             if (!currentUser) return;
             const name = document.getElementById('exName').value.trim();
@@ -3291,10 +3300,8 @@
             await db.collection('users').doc(currentUser.uid).update({
                 strengthProgram: firebase.firestore.FieldValue.arrayUnion(ex)
             });
-            userData.strengthProgram = userData.strengthProgram || [];
-            userData.strengthProgram.push(ex);
+            // No optimistic push: the snapshot listener re-renders from Firestore (single source of truth).
             ['exName','exWeight','exReps','exSets','exDays','exIncludes'].forEach(id => document.getElementById(id).value = '');
-            renderStrength();
             showToast(T('str_added'));
         }
         async function removeStrengthEx(idx) {
@@ -3335,10 +3342,26 @@
                 }
                 lastUnreadCount = unread;
                 updateFeedbackBadge();
-                // Refresh the feedback panel if the user is currently viewing it.
-                const fbPanel = document.getElementById('panel-feedback');
-                if (fbPanel && fbPanel.classList.contains('active')) renderFeedback();
+                // Re-render whatever panel the user is viewing so live data (and their
+                // own just-added items) show exactly once — Firestore's snapshot is the
+                // single source of truth, avoiding optimistic-write duplicates.
+                refreshActivePanel();
             }, (err) => { console.error('user doc listener failed:', err); });
+        }
+
+        function refreshActivePanel() {
+            const active = document.querySelector('.dash-panel.active');
+            if (!active) return;
+            switch (active.id) {
+                case 'panel-overview': renderHome(); break;
+                case 'panel-schedule': renderSchedule(); break;
+                case 'panel-strength': renderStrength(); break;
+                case 'panel-documents': renderDocuments(); break;
+                case 'panel-videos': renderVideos(); break;
+                case 'panel-profile': renderWeightHistory(); break;
+                case 'panel-competitions': renderCompetitions(); break;
+                case 'panel-feedback': renderFeedback(); break;
+            }
         }
 
         function teardownUserDocListener() {
