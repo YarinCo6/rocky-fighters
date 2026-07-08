@@ -781,9 +781,11 @@
         }
         .home-card-head i { color: var(--accent); }
         .home-card-head .count-pill {
-            margin-right: auto; background: var(--accent); color: #fff;
-            border-radius: 20px; padding: 2px 10px; font-size: 0.85rem; font-weight: 700;
+            margin-inline-start: auto; background: var(--bg-card-hover); color: var(--text-secondary);
+            border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; font-size: 0.85rem; font-weight: 700;
         }
+        /* Red pill = a real alert (unread coach messages), not just a count. */
+        .home-card-head .count-pill.alert { background: var(--accent); color: #fff; border-color: var(--accent); }
         .home-card-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
 
         /* Keep long/unbroken text from spilling out of its container */
@@ -3060,7 +3062,7 @@
             const lastFb = fb.length ? fb[fb.length - 1] : null;
             cards.push(`<div class="home-card" onclick="switchPanel('feedback')">
                 <div class="home-card-head"><i class="fas fa-comments"></i> ${T('nav_feedback')}
-                    ${unread ? `<span class="count-pill">${unread} ${T('home_new')}</span>` : ''}</div>
+                    ${unread ? `<span class="count-pill alert">${unread} ${T('home_new')}</span>` : ''}</div>
                 <div class="home-card-body">${lastFb
                     ? `<strong>${sanitize(lastFb.coach || T('fb_coach'))}:</strong> ${sanitize((lastFb.text || '').slice(0, 90))}${(lastFb.text || '').length > 90 ? '…' : ''}`
                     : T('home_no_fb')}</div>
