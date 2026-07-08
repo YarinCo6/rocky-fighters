@@ -3771,6 +3771,7 @@
             list.innerHTML = fb.slice().reverse().map((f) => {
                 const realIdx = fb.indexOf(f);
                 return `<div class="fb-card ${f.ack ? '' : 'unread'}">
+                    <button class="item-del-btn" style="float:${currentLang==='he'?'left':'right'};" onclick="deleteFeedback(${realIdx})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
                     <div class="fb-meta"><i class="fas fa-user-tie" style="color:var(--accent);"></i> ${sanitize(f.coach || T('fb_coach'))} · ${f.date || ''}</div>
                     <div class="fb-text">${sanitize(f.text)}</div>
                     ${f.ack
@@ -3786,6 +3787,15 @@
             await db.collection('users').doc(currentUser.uid).update({ coachFeedback: userData.coachFeedback });
             renderFeedback();
             showToast(T('fb_acked_toast'));
+        }
+        async function deleteFeedback(idx) {
+            if (!currentUser || !userData.coachFeedback || !userData.coachFeedback[idx]) return;
+            userData.coachFeedback.splice(idx, 1);
+            await db.collection('users').doc(currentUser.uid).update({ coachFeedback: userData.coachFeedback });
+            // Keep the "new coach message" counters in sync so deleting never re-fires an alert.
+            lastUnreadCount = unreadFeedbackCount();
+            renderFeedback();
+            showToast(T('removed'));
         }
 
         // ===== COACH: add feedback / promote (write to a competitor doc) =====
@@ -4669,7 +4679,9 @@
             if (headerLogoutLbl) headerLogoutLbl.textContent = t.dash_logout;
             const collapseLbl = document.getElementById('collapseLabel');
             if (collapseLbl) collapseLbl.textContent = t.dash_collapse || 'כווץ תפריט';
-            if (typeof renderHome === 'function' && document.getElementById('dashboard').classList.contains('active')) renderHome();
+            // Re-render the active dashboard panel so its dynamic content (lists, empty
+            // states, day names) picks up the new language, not just the home panel.
+            if (document.getElementById('dashboard').classList.contains('active') && typeof refreshActivePanel === 'function') refreshActivePanel();
 
             // Stats labels
             const statLabels = document.querySelectorAll('.stat-label');
