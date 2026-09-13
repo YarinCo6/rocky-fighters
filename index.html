@@ -11,22 +11,27 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-primary: #0b0b10;
-            --bg-secondary: #13131c;
-            --bg-card: #1a1a28;
-            --bg-card-hover: #23233a;
-            --accent: #e5384d;
-            --accent-dark: #c0313d;
-            --accent-glow: rgba(229, 56, 77, 0.35);
-            --accent-grad: linear-gradient(135deg, #e5384d 0%, #c0313d 100%);
-            --text-primary: #f4f4f7;
-            --text-secondary: #9a9aab;
+            /* Navy / royal-blue / white palette. Two blues on purpose: the royal
+               fill is not readable as text on navy, so text and icons use the
+               lighter electric blue while buttons and badges use the royal fill. */
+            --bg-primary: #070b2a;
+            --bg-secondary: #0c1240;
+            --bg-card: #111a50;
+            --bg-card-hover: #182370;
+            --accent: #6f8fff;
+            --accent-fill: #2a31db;
+            --accent-dark: #1f26bd;
+            --accent-glow: rgba(42, 49, 219, 0.45);
+            --accent-tint: rgba(111, 143, 255, 0.12);
+            --accent-grad: linear-gradient(135deg, #3340f0 0%, #2229c4 100%);
+            --text-primary: #f4f5fa;
+            --text-secondary: #aeb6e0;
             --white: #ffffff;
-            --border: #262636;
-            --border-light: rgba(255,255,255,0.08);
-            --gold: #f0a830;
-            --gold-glow: rgba(240, 168, 48, 0.3);
-            --success: #2ecc71;
+            --border: #233079;
+            --border-light: rgba(255,255,255,0.10);
+            --gold: #c7d3ff;
+            --gold-glow: rgba(199, 211, 255, 0.25);
+            --success: #ffffff;
             --shadow-card: 0 4px 24px rgba(0,0,0,0.35);
             --shadow-card-hover: 0 12px 32px rgba(0,0,0,0.5);
             --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
@@ -54,7 +59,7 @@
             top: 0;
             width: 100%;
             z-index: 1000;
-            background: rgba(8, 8, 16, 0.92);
+            background: rgba(7, 11, 42, 0.92);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
@@ -115,7 +120,7 @@
         }
 
         .nav-links .btn-login {
-            background: var(--accent);
+            background: var(--accent-fill);
             color: var(--white);
             padding: 10px 28px;
             border-radius: 8px;
@@ -148,7 +153,7 @@
             justify-content: center;
             text-align: center;
             position: relative;
-            background: linear-gradient(160deg, var(--bg-primary) 0%, #0d1a30 50%, var(--bg-primary) 100%);
+            background: linear-gradient(160deg, var(--bg-primary) 0%, #0e1656 50%, var(--bg-primary) 100%);
             overflow: hidden;
             padding-top: calc(90px + env(safe-area-inset-top));
             padding-bottom: calc(60px + env(safe-area-inset-bottom));
@@ -312,16 +317,16 @@
             gap: 10px;
         }
         .contact-option-btn.phone {
-            background: var(--accent);
+            background: var(--accent-fill);
             color: var(--white);
         }
         .contact-option-btn.phone:hover { filter: brightness(1.1); transform: translateY(-2px); }
         .contact-option-btn.whatsapp {
             background: transparent;
-            border: 2px solid #25D366;
-            color: #25D366;
+            border: 2px solid var(--accent);
+            color: var(--accent);
         }
-        .contact-option-btn.whatsapp:hover { background: rgba(37, 211, 102, 0.1); transform: translateY(-2px); }
+        .contact-option-btn.whatsapp:hover { background: var(--accent-tint); transform: translateY(-2px); }
         .contact-option-btn.email {
             background: transparent;
             border: 2px solid var(--border);
@@ -387,7 +392,7 @@
             color: var(--white);
             letter-spacing: 1px;
             text-transform: uppercase;
-            text-shadow: 0 2px 40px rgba(230, 57, 70, 0.15);
+            text-shadow: 0 2px 40px rgba(111, 143, 255, 0.2);
             animation: fadeInUp 0.8s ease;
         }
 
@@ -505,7 +510,7 @@
             width: 56px;
             height: 56px;
             min-width: 56px;
-            background: rgba(230, 57, 70, 0.12);
+            background: rgba(111,143,255,0.12);
             border-radius: 14px;
             display: flex;
             align-items: center;
@@ -614,13 +619,13 @@
 
         .form-group input::placeholder,
         .form-group textarea::placeholder {
-            color: #888;
+            color: #8a93c4;
         }
 
         .form-submit {
             width: 100%;
             padding: 16px;
-            background: var(--accent);
+            background: var(--accent-fill);
             color: var(--white);
             border: none;
             border-radius: 12px;
@@ -696,8 +701,8 @@
         .sidebar-nav button i { width: 20px; text-align: center; font-size: 1.05rem; flex: 0 0 auto; }
         .sidebar-nav button:hover { background: rgba(255,255,255,0.05); color: var(--white); }
         .sidebar-nav button.active {
-            background: rgba(229,56,77,0.14); color: var(--accent);
-            border-color: rgba(229,56,77,0.45);
+            background: rgba(111,143,255,0.14); color: var(--accent);
+            border-color: rgba(111,143,255,0.45);
             box-shadow: inset 3px 0 0 var(--accent), 0 2px 12px var(--accent-glow);
         }
         [dir="ltr"] .sidebar-nav button.active { box-shadow: inset -3px 0 0 var(--accent), 0 2px 12px var(--accent-glow); }
@@ -739,13 +744,13 @@
         .header-logout {
             margin-inline-start: auto; flex: 0 0 auto;
             display: flex; align-items: center; gap: 8px;
-            background: transparent; border: 1px solid rgba(230,57,70,0.4);
+            background: transparent; border: 1px solid rgba(111,143,255,0.4);
             color: var(--accent); border-radius: 10px;
             padding: 9px 16px; cursor: pointer; font-family: 'Heebo', sans-serif;
             font-size: 0.98rem; font-weight: 600; white-space: nowrap;
             transition: all 0.2s;
         }
-        .header-logout:hover { background: rgba(230,57,70,0.12); }
+        .header-logout:hover { background: rgba(111,143,255,0.12); }
 
         /* Sidebar collapse control (bottom, desktop) */
         .sidebar-collapse-btn {
@@ -785,7 +790,7 @@
             border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; font-size: 0.85rem; font-weight: 700;
         }
         /* Red pill = a real alert (unread coach messages), not just a count. */
-        .home-card-head .count-pill.alert { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .home-card-head .count-pill.alert { background: var(--accent-fill); color: #fff; border-color: var(--accent-fill); }
         .home-card-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
 
         /* Keep long/unbroken text from spilling out of its container */
@@ -853,7 +858,7 @@
         .upload-zone:hover,
         .upload-zone.dragover {
             border-color: var(--accent);
-            background: rgba(230, 57, 70, 0.06);
+            background: rgba(111,143,255,0.06);
         }
 
         .upload-zone i {
@@ -900,8 +905,8 @@
             white-space: nowrap;
         }
 
-        .status-approved { background: rgba(46, 204, 113, 0.15); color: var(--success); }
-        .status-pending { background: rgba(255, 215, 0, 0.15); color: var(--gold); }
+        .status-approved { background: var(--accent-fill); color: var(--white); }
+        .status-pending { background: rgba(199, 211, 255, 0.14); color: var(--gold); }
 
         /* Profile */
         .profile-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 22px; }
@@ -919,7 +924,7 @@
             width: 90px;
             height: 90px;
             border-radius: 50%;
-            background: rgba(230, 57, 70, 0.15);
+            background: rgba(111,143,255,0.15);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -954,7 +959,7 @@
         .switch input { opacity: 0; width: 0; height: 0; }
         .switch-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 26px; transition: .25s; }
         .switch-slider::before { content: ""; position: absolute; height: 20px; width: 20px; inset-inline-start: 3px; top: 3px; background: var(--white); border-radius: 50%; transition: .25s; }
-        .switch input:checked + .switch-slider { background: var(--accent); }
+        .switch input:checked + .switch-slider { background: var(--accent-fill); }
         .switch input:checked + .switch-slider::before { transform: translateX(22px); }
         [dir="rtl"] .switch input:checked + .switch-slider::before { transform: translateX(-22px); }
 
@@ -964,7 +969,7 @@
         .btn-google {
             width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
             padding: 12px; border-radius: 10px; border: 1px solid var(--border-light);
-            background: #fff; color: #1f1f1f; font-size: 1rem; font-weight: 600; cursor: pointer;
+            background: #fff; color: #070b2a; font-size: 1rem; font-weight: 600; cursor: pointer;
             transition: filter .2s, transform .2s;
         }
         .btn-google:hover { filter: brightness(0.96); transform: translateY(-1px); }
@@ -980,7 +985,7 @@
         .tl-field .lbl { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
         .tl-field .lbl i { color: var(--accent); font-size: 0.8rem; }
         .tl-field .val { color: var(--text-primary); line-height: 1.5; overflow-wrap: anywhere; }
-        .tl-coach-note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(240,168,48,0.08); border-inline-start: 3px solid var(--gold); }
+        .tl-coach-note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(199,211,255,0.08); border-inline-start: 3px solid var(--gold); }
         .tl-coach-note .who { font-size: 0.82rem; color: var(--gold); font-weight: 700; margin-bottom: 3px; }
         .tl-coach-note .txt { color: var(--text-primary); overflow-wrap: anywhere; }
 
@@ -1016,7 +1021,7 @@
         .bar-fill {
             height: 100%;
             border-radius: 10px;
-            background: linear-gradient(90deg, var(--accent), #ff6b6b);
+            background: linear-gradient(90deg, var(--accent-fill), var(--accent));
             transition: width 1s ease;
         }
 
@@ -1106,7 +1111,7 @@
         .contact-item .ci-icon {
             width: 56px;
             height: 56px;
-            background: rgba(230, 57, 70, 0.1);
+            background: rgba(111,143,255,0.1);
             border-radius: 14px;
             display: flex;
             align-items: center;
@@ -1155,7 +1160,7 @@
         }
 
         .toast.show { transform: translateY(0); opacity: 1; }
-        .toast.toast-error { border-inline-start-color: var(--accent); }
+        .toast.toast-error { border-inline-start-color: var(--accent-fill); }
         .toast.toast-success { border-inline-start-color: var(--success); }
 
         /* Notification badge */
@@ -1178,7 +1183,7 @@
         .empty-state .empty-icon {
             width: 56px; height: 56px; border-radius: 16px;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(229,56,77,0.10); color: var(--accent); font-size: 1.5rem;
+            background: rgba(111,143,255,0.10); color: var(--accent); font-size: 1.5rem;
         }
         .empty-state .empty-title { color: var(--text-primary); font-weight: 700; font-size: 1.02rem; }
         .empty-state .empty-hint { color: var(--text-secondary); font-size: 0.92rem; max-width: 320px; }
@@ -1250,7 +1255,7 @@
                 top: 80px;
                 right: 0;
                 width: 100%;
-                background: rgba(10,10,15,0.98);
+                background: rgba(7,11,42,0.98);
                 flex-direction: column;
                 padding: 16px;
                 border-bottom: 1px solid var(--border);
@@ -1457,7 +1462,7 @@
 
         /* Selection */
         ::selection {
-            background: var(--accent);
+            background: var(--accent-fill);
             color: var(--white);
         }
         /* Coach panel */
@@ -1483,7 +1488,7 @@
         .competitor-card .comp-info { display: flex; align-items: center; gap: 14px; }
         .competitor-card .comp-avatar {
             width: 44px; height: 44px; border-radius: 50%;
-            background: rgba(230,57,70,0.15); display: flex;
+            background: rgba(111,143,255,0.15); display: flex;
             align-items: center; justify-content: center;
             color: var(--accent); font-size: 1.2rem;
         }
@@ -1496,7 +1501,7 @@
 
         .fb-badge {
             display: inline-block; min-width: 18px; padding: 0 5px;
-            background: var(--accent); color: #fff; border-radius: 10px;
+            background: var(--accent-fill); color: #fff; border-radius: 10px;
             font-size: 0.72rem; font-weight: 800; text-align: center; line-height: 18px;
         }
         .sched-day-card {
@@ -1534,11 +1539,11 @@
             background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
             padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow-card);
         }
-        .notif-item.unread { border-color: var(--accent); background: rgba(229,56,77,0.06); }
+        .notif-item.unread { border-color: var(--accent); background: rgba(111,143,255,0.06); }
         .notif-icon {
             width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(229,56,77,0.12); color: var(--accent); font-size: 1.1rem;
+            background: rgba(111,143,255,0.12); color: var(--accent); font-size: 1.1rem;
         }
         .notif-body { flex: 1; min-width: 0; }
         .notif-title { color: var(--white); font-weight: 700; overflow-wrap: anywhere; }
@@ -1551,7 +1556,7 @@
             background: none; border: none; color: var(--text-secondary); cursor: pointer;
             font-size: 0.95rem; padding: 4px 8px; border-radius: 8px;
         }
-        .notif-actions button:hover { color: var(--accent); background: rgba(229,56,77,0.08); }
+        .notif-actions button:hover { color: var(--accent); background: rgba(111,143,255,0.08); }
 
         /* ===== Video upload / playback ===== */
         .upload-progress { margin: -14px 0 24px; display: none; }
@@ -1583,7 +1588,7 @@
             table-layout: fixed;
         }
         .sched-board th {
-            background: var(--accent); color: #fff; font-weight: 800; font-size: 0.92rem;
+            background: var(--accent-fill); color: #fff; font-weight: 800; font-size: 0.92rem;
             padding: 10px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.12);
         }
         .sched-board th:first-child { border-top-right-radius: 10px; }
@@ -1594,8 +1599,8 @@
             background: rgba(255,255,255,0.02);
         }
         .sched-block-cell {
-            position: relative; background: rgba(230,57,70,0.10);
-            border: 1px solid rgba(230,57,70,0.25); border-radius: 8px;
+            position: relative; background: rgba(111,143,255,0.10);
+            border: 1px solid rgba(111,143,255,0.25); border-radius: 8px;
             padding: 8px 10px; margin-bottom: 8px;
         }
         .sched-block-cell:last-child { margin-bottom: 0; }
@@ -1617,7 +1622,7 @@
         .strength-item .ex-name { font-weight: 800; color: var(--white); font-size: 1.08rem; margin-bottom: 8px; }
         .strength-item .ex-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
         .strength-item .ex-chip {
-            background: rgba(230,57,70,0.12); color: var(--accent);
+            background: rgba(111,143,255,0.12); color: var(--accent);
             border-radius: 6px; padding: 3px 10px; font-size: 0.86rem; font-weight: 700;
         }
         .strength-item .ex-includes { color: var(--text-secondary); font-size: 0.94rem; }
@@ -1625,7 +1630,7 @@
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px; padding: 16px 18px; margin-bottom: 12px;
         }
-        .fb-card.unread { border-color: var(--accent); background: rgba(230,57,70,0.06); }
+        .fb-card.unread { border-color: var(--accent); background: rgba(111,143,255,0.06); }
         .fb-card .fb-meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 6px; }
         .fb-card .fb-text { color: var(--white); margin-bottom: 10px; white-space: pre-wrap; }
         .fb-ack { color: var(--success); font-size: 0.9rem; font-weight: 700; }
@@ -1633,8 +1638,8 @@
         .coach-checkbox-group {
             display: flex; align-items: center; gap: 10px;
             margin-bottom: 18px; padding: 12px 16px;
-            background: rgba(230,57,70,0.08); border-radius: 10px;
-            border: 1px solid rgba(230,57,70,0.2);
+            background: rgba(111,143,255,0.08); border-radius: 10px;
+            border: 1px solid rgba(111,143,255,0.2);
         }
         .coach-checkbox-group input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer; }
         .coach-checkbox-group label { color: var(--text-primary); font-size: 1.02rem; cursor: pointer; font-weight: 500; }
@@ -1665,9 +1670,9 @@
         .lang-switcher .lang-btn:only-child { border-radius: 8px; }
         .lang-switcher .lang-btn:hover { background: var(--bg-card-hover); }
         .lang-switcher .lang-btn.active {
-            background: var(--accent);
+            background: var(--accent-fill);
             color: var(--white);
-            border-color: var(--accent);
+            border-color: var(--accent-fill);
         }
         .lang-switcher .lang-options {
             display: none;
@@ -1689,7 +1694,7 @@
             border-radius: 6px; overflow: hidden;
         }
         .load-progress-fill {
-            height: 100%; width: 0%; background: var(--accent);
+            height: 100%; width: 0%; background: var(--accent-fill);
             border-radius: 6px; transition: width 0.15s ease;
         }
         .load-progress-pct {
@@ -1708,7 +1713,7 @@
         .auth-page {
             position: fixed; inset: 0; z-index: 4000;
             background:
-                radial-gradient(1200px 600px at 50% -10%, rgba(230,57,70,0.18), transparent 60%),
+                radial-gradient(1200px 600px at 50% -10%, rgba(111,143,255,0.18), transparent 60%),
                 var(--bg-primary);
             display: none; flex-direction: column;
             align-items: center; justify-content: flex-start;
@@ -4228,7 +4233,7 @@
             const pct = document.getElementById('loadProgressPct');
 
             const roleLabels = { admin: 'אדמין', coach: 'מאמן', competitor: 'מתחרה' };
-            const roleColors = { admin: 'var(--gold)', coach: '#8ecae6', competitor: 'var(--accent)' };
+            const roleColors = { admin: 'var(--gold)', coach: 'var(--white)', competitor: 'var(--accent)' };
             const frag = document.createDocumentFragment();
             const total = allDocs.length;
 
@@ -4340,7 +4345,7 @@
                 </div>
 
                 ${isAdmin && d.role !== 'admin' ? `
-                <div class="profile-card" style="margin-top:16px; border:1px solid rgba(230,57,70,0.3);">
+                <div class="profile-card" style="margin-top:16px; border:1px solid rgba(111,143,255,0.3);">
                     <h4 style="margin-bottom:12px;"><i class="fas fa-crown" style="color:var(--gold);"></i> ${T('cd_role_mgmt')}</h4>
                     ${d.role === 'coach'
                         ? `<p style="color:var(--text-secondary); margin-bottom:12px;">${T('cd_is_coach')}</p>
@@ -4617,7 +4622,7 @@
                     const size = opts.size || 10.5;
                     const style = opts.bold ? 'bold' : 'normal';
                     doc.setFont('Heebo', style); doc.setFontSize(size);
-                    if (opts.color) doc.setTextColor(opts.color[0], opts.color[1], opts.color[2]); else doc.setTextColor(30);
+                    if (opts.color) doc.setTextColor(opts.color[0], opts.color[1], opts.color[2]); else doc.setTextColor(7, 11, 42);
                     const lines = doc.splitTextToSize(String(str == null ? '' : str), opts.maxW || maxW);
                     const lh = size * 0.5;
                     ensure(lines.length * lh);
@@ -4627,13 +4632,13 @@
                     });
                     doc.setTextColor(0);
                 },
-                h1: (str) => { w.gap(2); w.text(str, { size: 20, bold: true, color: [229, 56, 77] }); w.gap(1.5); },
+                h1: (str) => { w.gap(2); w.text(str, { size: 20, bold: true, color: [42, 49, 219] }); w.gap(1.5); },
                 h2: (str) => {
                     w.gap(4); ensure(10);
-                    doc.setDrawColor(229, 56, 77); doc.setLineWidth(0.6);
+                    doc.setDrawColor(42, 49, 219); doc.setLineWidth(0.6);
                     doc.line(margin, y + 2.2, pageW - margin, y + 2.2);
                     w.gap(6);
-                    w.text(str, { size: 13, bold: true, color: [229, 56, 77] });
+                    w.text(str, { size: 13, bold: true, color: [42, 49, 219] });
                     w.gap(1.5);
                 },
                 kv: (label, value) => {
@@ -4641,7 +4646,7 @@
                     w.text(`${label}: ${v}`, { size: 10.5 });
                 },
                 bullet: (str) => { w.text(`• ${str}`, { size: 10 }); },
-                muted: (str) => { w.text(str, { size: 9.5, color: [120, 120, 130] }); },
+                muted: (str) => { w.text(str, { size: 9.5, color: [110, 118, 160] }); },
                 // Simple table: header row + rows, columns share the width equally.
                 table: (headers, rows) => {
                     const cols = headers.length;
@@ -4653,7 +4658,7 @@
                     };
                     const drawHeader = () => {
                         ensure(rowH);
-                        doc.setFillColor(229, 56, 77); doc.rect(margin, y, maxW, rowH, 'F');
+                        doc.setFillColor(42, 49, 219); doc.rect(margin, y, maxW, rowH, 'F');
                         doc.setFont('Heebo', 'bold'); doc.setFontSize(9.5); doc.setTextColor(255);
                         headers.forEach((h, i) => {
                             const cx = rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
@@ -4665,8 +4670,8 @@
                     doc.setFont('Heebo', 'normal'); doc.setFontSize(9.5);
                     rows.forEach((r, ri) => {
                         if (y + rowH > pageH - margin - 6) { newPage(); drawHeader(); doc.setFont('Heebo', 'normal'); doc.setFontSize(9.5); }
-                        if (ri % 2 === 0) { doc.setFillColor(245, 245, 248); doc.rect(margin, y, maxW, rowH, 'F'); }
-                        doc.setTextColor(30);
+                        if (ri % 2 === 0) { doc.setFillColor(242, 244, 253); doc.rect(margin, y, maxW, rowH, 'F'); }
+                        doc.setTextColor(7, 11, 42);
                         r.forEach((c, i) => {
                             const cx = rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
                             cellText(c, cx, y + 4.8);
@@ -4753,7 +4758,7 @@
                     if (e.worked) w.kv(T('tl_worked'), e.worked);
                     if (e.notWorked) w.kv(T('tl_not_worked'), e.notWorked);
                     if (e.nextFocus) w.kv(T('tl_next_focus'), e.nextFocus);
-                    if (e.coachComment) w.text(`${T('tl_coach_reply')}: ${e.coachComment}`, { color: [180, 120, 20], size: 10 });
+                    if (e.coachComment) w.text(`${T('tl_coach_reply')}: ${e.coachComment}`, { color: [42, 49, 219], size: 10 });
                     w.gap(2.5);
                 });
                 if (log.length > 30) w.muted(T('pdf_truncated').replace('{n}', log.length - 30));
