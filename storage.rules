@@ -1,0 +1,27 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Fight videos live under the uploader's own uid. Only the owner can write or
+    // delete. Playback for coaches goes through the download URL stored on the
+    // athlete's Firestore doc, which Firestore rules already restrict to staff.
+    match /videos/{userId}/{videoId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size <= 500 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+
+      allow delete: if request.auth != null && request.auth.uid == userId;
+
+      // No metadata rewrites / overwrites of an existing object.
+      allow update: if false;
+    }
+
+    // Everything else in the bucket is closed.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

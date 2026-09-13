@@ -1516,6 +1516,66 @@
             background: none; border: none; color: var(--accent);
             cursor: pointer; font-size: 1rem; padding: 4px 8px;
         }
+        .coach-note-del {
+            background: none; border: none; color: var(--text-secondary); cursor: pointer;
+            font-size: 0.8rem; padding: 2px 6px; margin-inline-start: 6px; opacity: 0.7;
+        }
+        .coach-note-del:hover { color: var(--accent); opacity: 1; }
+
+        /* ===== Coach inbox (notifications) ===== */
+        .notif-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+        .notif-toolbar .btn-sm {
+            background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border);
+            border-radius: 10px; padding: 8px 14px; cursor: pointer; font-family: 'Heebo', sans-serif; font-size: 0.92rem;
+        }
+        .notif-toolbar .btn-sm:hover { border-color: var(--accent); }
+        .notif-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow-card);
+        }
+        .notif-item.unread { border-color: var(--accent); background: rgba(229,56,77,0.06); }
+        .notif-icon {
+            width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(229,56,77,0.12); color: var(--accent); font-size: 1.1rem;
+        }
+        .notif-body { flex: 1; min-width: 0; }
+        .notif-title { color: var(--white); font-weight: 700; overflow-wrap: anywhere; }
+        .notif-title a { color: var(--accent); cursor: pointer; text-decoration: none; }
+        .notif-title a:hover { text-decoration: underline; }
+        .notif-text { color: var(--text-primary); margin-top: 3px; overflow-wrap: anywhere; }
+        .notif-time { color: var(--text-secondary); font-size: 0.82rem; margin-top: 5px; }
+        .notif-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+        .notif-actions button {
+            background: none; border: none; color: var(--text-secondary); cursor: pointer;
+            font-size: 0.95rem; padding: 4px 8px; border-radius: 8px;
+        }
+        .notif-actions button:hover { color: var(--accent); background: rgba(229,56,77,0.08); }
+
+        /* ===== Video upload / playback ===== */
+        .upload-progress { margin: -14px 0 24px; display: none; }
+        .upload-progress.active { display: block; }
+        .upload-progress .row { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px; }
+        .video-thumbnail { cursor: pointer; position: relative; }
+        .video-thumbnail video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .video-meta { color: var(--text-secondary); font-size: 0.85rem; margin-top: 6px; }
+        .video-card .video-actions { display: flex; justify-content: flex-end; gap: 6px; padding: 0 12px 12px; }
+        .video-card .video-actions button {
+            background: none; border: 1px solid var(--border); color: var(--text-secondary);
+            border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 0.88rem; font-family: 'Heebo', sans-serif;
+        }
+        .video-card .video-actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ===== PDF export ===== */
+        .btn-pdf {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border);
+            border-radius: 10px; padding: 9px 16px; cursor: pointer; font-family: 'Heebo', sans-serif; font-size: 0.95rem; font-weight: 500;
+        }
+        .btn-pdf:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-pdf:disabled { opacity: 0.6; cursor: wait; }
+        .btn-pdf i { color: var(--gold); }
         /* ===== Weekly schedule board (columns per day) ===== */
         .sched-board-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
         .sched-board {
@@ -1709,6 +1769,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <script>
         firebase.initializeApp({
             apiKey: "AIzaSyAU2knBfIaTMBEXsQOduCcX-3KOAEfqFwo",
@@ -1720,6 +1781,7 @@
         });
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const storage = firebase.storage();
     </script>
 </head>
 <body>
@@ -2018,6 +2080,7 @@
                 <button onclick="switchPanel('feedback', this)"><i class="fas fa-comments"></i> <span class="sidebar-label">משוב מאמן</span> <span id="feedbackBadge" class="fb-badge" style="display:none;">0</span></button>
                 <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> <span class="sidebar-label">תחרויות</span></button>
                 <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> <span class="sidebar-label">ניהול מתחרים</span></button>
+                <button id="notifPanelBtn" onclick="switchPanel('notifications', this)" style="display:none;"><i class="fas fa-bell"></i> <span class="sidebar-label">התראות</span> <span id="coachNotifBadge" class="fb-badge" style="display:none;">0</span></button>
             </div>
             <button class="sidebar-collapse-btn" onclick="toggleSidebar()" aria-label="כווץ תפריט">
                 <i class="fas fa-angles-left collapse-icon"></i> <span class="sidebar-label" id="collapseLabel">כווץ תפריט</span>
@@ -2089,6 +2152,10 @@
                     <p class="upload-hint">MP4, MOV - עד 500MB</p>
                     <input type="file" id="videoInput" style="display:none" accept="video/*" onchange="handleVideoUpload(this)">
                 </div>
+                <div class="upload-progress" id="videoProgress">
+                    <div class="row"><span id="videoProgressName"></span><span id="videoProgressPct">0%</span></div>
+                    <div class="load-progress-track"><div class="load-progress-fill" id="videoProgressFill" style="width:0%"></div></div>
+                </div>
 
                 <div class="videos-grid" id="videosGrid"></div>
             </div>
@@ -2159,7 +2226,7 @@
                             <div style="display:flex; align-items:center; justify-content:space-between; gap:14px;">
                                 <div>
                                     <h4 style="margin-bottom:4px;"><i class="fas fa-bell" style="color: var(--accent);"></i> <span data-i18n="notif_settings_title">התראות</span></h4>
-                                    <div style="color: var(--text-secondary); font-size:0.92rem;" data-i18n="notif_hint">התראה קופצת כשהמאמן שולח פידבק</div>
+                                    <div style="color: var(--text-secondary); font-size:0.92rem;" data-i18n="notif_hint">התראה קופצת על הודעות ועדכונים חדשים</div>
                                 </div>
                                 <label class="switch">
                                     <input type="checkbox" id="notifToggle" onchange="toggleNotifications(this.checked)">
@@ -2340,10 +2407,24 @@
                 <div id="feedbackList"></div>
             </div>
 
+            <!-- Coach Notifications (inbox) -->
+            <div class="dash-panel" id="panel-notifications">
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-bell" style="color: var(--accent);"></i> <span data-i18n="cn_title">התראות מהמתחרים</span></h3>
+                <p style="color:var(--text-secondary); margin-bottom:18px;" data-i18n="cn_desc">עדכונים על שינויי פרטים, הרשמות לתחרויות והעלאות. לחץ על שם המתחרה לפתיחת הכרטיס שלו.</p>
+                <div class="notif-toolbar">
+                    <button class="btn-sm" onclick="markAllCoachNotifsRead()"><i class="fas fa-check-double"></i> <span data-i18n="cn_mark_all">סמן הכל כנקרא</span></button>
+                    <button class="btn-sm" onclick="deleteReadCoachNotifs()"><i class="fas fa-broom"></i> <span data-i18n="cn_clear_read">נקה את מה שנקרא</span></button>
+                </div>
+                <div id="coachNotifList"></div>
+            </div>
+
             <!-- Coach Panel -->
             <div class="dash-panel" id="panel-coach">
                 <h3 style="margin-bottom: 20px; color: var(--white);"><i class="fas fa-users-cog" style="color: var(--accent);"></i> ניהול מתחרים</h3>
-                <p style="color:var(--text-secondary); margin-bottom:20px;">לחץ על מתחרה לצפייה בפרטים המלאים שלו.</p>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+                    <p id="coachPanelDesc" style="color:var(--text-secondary); margin:0;">לחץ על מתחרה לצפייה בפרטים המלאים שלו.</p>
+                    <button class="btn-pdf" id="exportAllBtn" onclick="exportAllAthletesPdf()"><i class="fas fa-file-pdf"></i> <span data-i18n="pdf_export_all">ייצוא כל המתחרים (PDF)</span></button>
+                </div>
                 <div class="competitor-list" id="competitorList">
                     <p style="color:var(--text-secondary);"><span class="loading-spinner"></span> טוען מתחרים...</p>
                 </div>
@@ -2475,12 +2556,57 @@
         let userDocUnsub = null;   // realtime listener teardown
         let lastUnreadCount = 0;   // to detect NEW incoming feedback
         let lastCoachCommentCount = 0; // to detect NEW coach replies on journal / goals
+        let coachInboxUnsub = null;    // coach notifications listener teardown
+        let coachInbox = [];           // latest snapshot of coach notifications (visible ones)
+        let coachInboxReady = false;   // false until the first snapshot lands (suppresses alerts on load)
+        let coachInboxError = null;    // 'permission' | 'generic' when the listener fails
+        const VIDEO_MAX_BYTES = 500 * 1024 * 1024; // must match storage.rules
 
         // ===== HELPERS =====
+        // All user-provided strings are escaped before touching innerHTML. Athlete
+        // data is rendered inside the coach's session, so this blocks stored XSS.
         function sanitize(str) {
             const el = document.createElement('div');
-            el.textContent = str;
+            el.textContent = str == null ? '' : String(str);
             return el.innerHTML;
+        }
+        // For HTML attribute values (quotes included).
+        function escAttr(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        // For a string literal inside an inline onclick="fn(...)" handler: JSON-encode
+        // (JS-safe), then attribute-escape (HTML-safe). Survives both decoders.
+        function jsArg(v) {
+            return escAttr(JSON.stringify(String(v == null ? '' : v)));
+        }
+        function formatBytes(n) {
+            if (!n || n < 1024) return (n || 0) + ' B';
+            if (n < 1024 * 1024) return (n / 1024).toFixed(0) + ' KB';
+            if (n < 1024 * 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + ' MB';
+            return (n / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+        }
+        function langLocale() {
+            return currentLang === 'he' ? 'he-IL' : currentLang === 'de' ? 'de-DE' : 'en-GB';
+        }
+        function fmtDateTime(ts) {
+            const d = ts && typeof ts.toDate === 'function' ? ts.toDate() : (ts instanceof Date ? ts : null);
+            if (!d) return '';
+            return d.toLocaleString(langLocale(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        const loadedScripts = {};
+        function loadScript(url) {
+            if (!loadedScripts[url]) {
+                loadedScripts[url] = new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = url;
+                    s.onload = resolve;
+                    s.onerror = () => { delete loadedScripts[url]; reject(new Error('script load failed: ' + url)); };
+                    document.head.appendChild(s);
+                });
+            }
+            return loadedScripts[url];
         }
 
         // Pick a user's name for the current UI language, with fallback to the other.
@@ -2880,9 +3006,11 @@
                     }
                     enterDashboard();
                     setupUserDocListener(user.uid);
+                    if (isCoach || isAdmin) setupCoachInboxListener(); else teardownCoachInboxListener();
                 } else {
                     if (currentUser) {
                         teardownUserDocListener();
+                        teardownCoachInboxListener();
                         currentUser = null;
                         userData = null;
                         isCoach = false;
@@ -2928,11 +3056,13 @@
             if (isCoach || isAdmin) {
                 document.getElementById('coachPanelBtn').style.display = '';
                 document.getElementById('coachPanelBtn').innerHTML = isAdmin
-                    ? '<i class="fas fa-crown"></i> ניהול משתמשים'
-                    : '<i class="fas fa-users-cog"></i> ניהול מתחרים';
+                    ? `<i class="fas fa-crown"></i> <span class="sidebar-label">${T('dash_manage_admin')}</span>`
+                    : `<i class="fas fa-users-cog"></i> <span class="sidebar-label">${T('dash_manage')}</span>`;
+                document.getElementById('notifPanelBtn').style.display = '';
                 loadCompetitors();
             } else {
                 document.getElementById('coachPanelBtn').style.display = 'none';
+                document.getElementById('notifPanelBtn').style.display = 'none';
             }
 
             // Render weight history
@@ -3025,6 +3155,9 @@
             if (panel === 'training') renderTrainingLog();
             if (panel === 'feedback') renderFeedback();
             if (panel === 'profile') syncNotifToggle();
+            if (panel === 'notifications') renderCoachInbox();
+            if (panel === 'videos') renderVideos();
+            if (panel === 'documents') renderDocuments();
             window.scrollTo(0, 0);
         }
 
@@ -3097,8 +3230,17 @@
                 <div class="home-card-body">${T('stat_weight')}: <strong>${sanitize(String(w))}</strong> · ${T('dash_documents')}: <strong>${docs}</strong> · ${T('dash_videos')}: <strong>${vids}</strong></div>
             </div>`);
 
-            // 5. Coach/admin summary
+            // 5. Coach/admin summary + inbox
             if (isCoach || isAdmin) {
+                const unreadN = coachInboxUnreadCount();
+                const latest = coachInbox[0];
+                cards.push(`<div class="home-card" onclick="switchPanel('notifications')">
+                    <div class="home-card-head"><i class="fas fa-bell"></i> ${T('cn_title')}
+                        ${unreadN ? `<span class="count-pill alert">${unreadN} ${T('home_new')}</span>` : ''}</div>
+                    <div class="home-card-body">${latest
+                        ? `<strong>${sanitize(latest.fromName || T('cn_athlete'))}:</strong> ${coachNotifText(latest)}`
+                        : T('cn_empty')}</div>
+                </div>`);
                 cards.push(`<div class="home-card" onclick="switchPanel('coach')">
                     <div class="home-card-head"><i class="fas fa-users-cog"></i> ${isAdmin ? T('dash_manage_admin') : T('dash_manage')}</div>
                     <div class="home-card-body">${T('home_manage_hint')}</div>
@@ -3156,6 +3298,7 @@
                     documents: firebase.firestore.FieldValue.arrayUnion(docEntry)
                 });
                 // No optimistic mutation: the snapshot listener re-renders from Firestore.
+                notifyCoaches('document', { docType: docEntry.type, name: String(file.name).slice(0, 120) });
             }
 
             showToast(`הקובץ "${file.name}" הועלה בהצלחה`);
@@ -3170,15 +3313,15 @@
                 return;
             }
             list.innerHTML = docs.map(d => {
-                const icon = d.name.endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
+                const icon = String(d.name || '').toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
                 const statusClass = d.status === 'approved' ? 'status-approved' : 'status-pending';
-                const statusText = d.status === 'approved' ? 'אושר' : 'בבדיקה';
+                const statusText = d.status === 'approved' ? T('dash_doc_approved') : T('dash_doc_pending');
                 return `<div class="file-item">
                     <div class="file-info">
                         <i class="fas ${icon} file-icon"></i>
                         <div>
                             <div class="file-name">${sanitize(d.name)}</div>
-                            <div class="file-date">הועלה: ${d.date} | ${sanitize(d.typeName)}</div>
+                            <div class="file-date">${sanitize(d.date)} | ${sanitize(d.typeName)}</div>
                         </div>
                     </div>
                     <span class="file-status ${statusClass}">${statusText}</span>
@@ -3186,33 +3329,140 @@
             }).join('');
         }
 
-        // ===== VIDEO UPLOAD =====
+        // ===== VIDEO UPLOAD (Firebase Storage) =====
+        let videoUploadTask = null;
+
+        function setVideoProgress(pct, label) {
+            const wrap = document.getElementById('videoProgress');
+            if (!wrap) return;
+            if (pct == null) { wrap.classList.remove('active'); return; }
+            wrap.classList.add('active');
+            document.getElementById('videoProgressFill').style.width = pct + '%';
+            document.getElementById('videoProgressPct').textContent = pct + '%';
+            if (label != null) document.getElementById('videoProgressName').textContent = label;
+        }
+
         async function handleVideoUpload(input) {
-            if (input.files.length === 0) return;
+            if (input.files.length === 0 || !currentUser) return;
             const file = input.files[0];
             const titleEl = document.getElementById('videoTitle');
             const notesEl = document.getElementById('videoNotes');
-            const title = titleEl.value.trim() || file.name;
-            const notes = notesEl.value.trim();
+            const title = (titleEl.value.trim() || file.name).slice(0, 120);
+            const notes = notesEl.value.trim().slice(0, 1000);
 
-            const videoEntry = {
-                title,
-                notes,
-                date: new Date().toLocaleDateString('he-IL'),
-                fileName: file.name
-            };
+            if (!file.type || !file.type.startsWith('video/')) {
+                showToast(T('vid_type_err'), 'error'); input.value = ''; return;
+            }
+            if (file.size > VIDEO_MAX_BYTES) {
+                showToast(T('vid_size_err'), 'error'); input.value = ''; return;
+            }
+            if (videoUploadTask) { showToast(T('vid_busy'), 'error'); return; }
 
-            if (currentUser) {
+            const id = uid4();
+            // Keep only safe filename characters; the original name is stored separately.
+            const ext = (file.name.match(/\.([a-z0-9]{1,5})$/i) || [, 'mp4'])[1].toLowerCase();
+            const storagePath = `videos/${currentUser.uid}/${id}/video.${ext}`;
+            const ref = storage.ref(storagePath);
+            const zone = document.getElementById('uploadZoneVideo');
+            zone.style.pointerEvents = 'none';
+            zone.style.opacity = '0.6';
+            setVideoProgress(0, file.name);
+
+            let uploaded = false;
+            try {
+                videoUploadTask = ref.put(file, { contentType: file.type });
+                await new Promise((resolve, reject) => {
+                    videoUploadTask.on('state_changed', (snap) => {
+                        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+                        setVideoProgress(pct, `${file.name} · ${formatBytes(snap.bytesTransferred)} / ${formatBytes(snap.totalBytes)}`);
+                    }, reject, resolve);
+                });
+                uploaded = true;
+                const url = await ref.getDownloadURL();
+                const videoEntry = {
+                    id, title, notes,
+                    date: new Date().toLocaleDateString('he-IL'),
+                    fileName: String(file.name).slice(0, 200),
+                    storagePath, url,
+                    size: file.size,
+                    contentType: file.type,
+                    uploadedAt: new Date().toISOString()
+                };
                 await db.collection('users').doc(currentUser.uid).update({
                     videos: firebase.firestore.FieldValue.arrayUnion(videoEntry)
                 });
                 // No optimistic mutation: the snapshot listener re-renders from Firestore.
+                notifyCoaches('video', { title });
+                showToast(T('vid_uploaded'), 'success');
+                titleEl.value = '';
+                notesEl.value = '';
+            } catch (err) {
+                console.error('video upload failed:', err);
+                // The file landed but the Firestore write failed → remove the orphan object.
+                if (uploaded) { try { await ref.delete(); } catch (e) {} }
+                const msgs = {
+                    'storage/unauthorized': T('vid_err_unauth'),
+                    'storage/canceled': T('vid_err_cancel'),
+                    'storage/quota-exceeded': T('vid_err_quota'),
+                    'storage/retry-limit-exceeded': T('vid_err_network'),
+                    // Storage not enabled on the Firebase project yet.
+                    'storage/bucket-not-found': T('vid_err_disabled'),
+                    'storage/project-not-found': T('vid_err_disabled'),
+                    'storage/unknown': T('vid_err_disabled')
+                };
+                showToast(msgs[err && err.code] || T('vid_err_generic'), 'error');
+            } finally {
+                videoUploadTask = null;
+                setVideoProgress(null);
+                zone.style.pointerEvents = '';
+                zone.style.opacity = '';
+                input.value = '';
             }
+        }
 
-            showToast(`הסרטון "${title}" הועלה בהצלחה`);
-            input.value = '';
-            titleEl.value = '';
-            notesEl.value = '';
+        // Only Firebase Storage download URLs are ever rendered as links / sources.
+        // A doc field is user-controlled, so this blocks javascript: and foreign hosts.
+        function safeVideoUrl(v) {
+            const u = v && typeof v.url === 'string' ? v.url : '';
+            return /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/[a-z0-9.\-]+\/o\/[^\s"'<>]+$/i.test(u) ? u : '';
+        }
+
+        function videoCardHtml(v, opts) {
+            const canDelete = opts && opts.canDelete;
+            const url = safeVideoUrl(v);
+            const hasFile = !!url;
+            const id = String(v.id || '');
+            return `
+                <div class="video-card" data-video-id="${escAttr(id)}">
+                    <div class="video-thumbnail" ${hasFile ? `onclick="playVideo(this, ${jsArg(url)})"` : ''} title="${hasFile ? escAttr(T('vid_play')) : escAttr(T('vid_no_file'))}">
+                        <i class="fas ${hasFile ? 'fa-play-circle' : 'fa-video-slash'}"></i>
+                    </div>
+                    <div class="video-info">
+                        <h4>${sanitize(v.title)}</h4>
+                        <p><i class="fas fa-calendar-alt"></i> ${sanitize(v.date)}${v.size ? ` · ${formatBytes(Number(v.size) || 0)}` : ''}</p>
+                        ${v.notes ? `<p style="margin-top:6px; color:var(--text-secondary); font-size:0.9rem; font-style:italic;"><i class="fas fa-comment-alt" style="color:var(--accent);"></i> ${sanitize(v.notes)}</p>` : ''}
+                        ${!hasFile ? `<p class="video-meta"><i class="fas fa-triangle-exclamation" style="color:var(--gold);"></i> ${T('vid_no_file')}</p>` : ''}
+                    </div>
+                    ${(canDelete || hasFile) ? `<div class="video-actions">
+                        ${hasFile ? `<a href="${escAttr(url)}" target="_blank" rel="noopener noreferrer"><button type="button"><i class="fas fa-up-right-from-square"></i> ${T('vid_open')}</button></a>` : ''}
+                        ${canDelete ? `<button type="button" onclick="deleteVideo(${jsArg(id)})"><i class="fas fa-trash"></i> ${T('remove')}</button>` : ''}
+                    </div>` : ''}
+                </div>`;
+        }
+
+        // Swap the poster for a real <video> only on demand, so a grid of clips does
+        // not pull bytes for every file at once.
+        function playVideo(thumbEl, url) {
+            if (!safeVideoUrl({ url })) return;
+            const vid = document.createElement('video');
+            vid.controls = true;
+            vid.autoplay = true;
+            vid.playsInline = true;
+            vid.src = url;
+            thumbEl.innerHTML = '';
+            thumbEl.appendChild(vid);
+            thumbEl.onclick = null;
+            thumbEl.style.cursor = 'default';
         }
 
         function renderVideos() {
@@ -3222,16 +3472,26 @@
                 grid.innerHTML = emptyState('fa-video', T('vid_empty_title'), T('vid_empty_hint'));
                 return;
             }
-            grid.innerHTML = videos.map(v => `
-                <div class="video-card">
-                    <div class="video-thumbnail"><i class="fas fa-play-circle"></i></div>
-                    <div class="video-info">
-                        <h4>${sanitize(v.title)}</h4>
-                        <p><i class="fas fa-calendar-alt"></i> ${v.date}</p>
-                        ${v.notes ? `<p style="margin-top:6px; color:var(--text-secondary); font-size:0.9rem; font-style:italic;"><i class="fas fa-comment-alt" style="color:var(--accent);"></i> ${sanitize(v.notes)}</p>` : ''}
-                    </div>
-                </div>
-            `).join('');
+            grid.innerHTML = videos.slice().reverse().map(v => videoCardHtml(v, { canDelete: true })).join('');
+        }
+
+        async function deleteVideo(id) {
+            if (!currentUser) return;
+            const videos = userData.videos || [];
+            const v = videos.find(x => x.id === id);
+            if (!v) return;
+            if (!confirm(T('vid_delete_confirm'))) return;
+            try {
+                if (v.storagePath) {
+                    try { await storage.ref(v.storagePath).delete(); }
+                    catch (e) { if (!e || e.code !== 'storage/object-not-found') throw e; }
+                }
+                await db.collection('users').doc(currentUser.uid).update({ videos: videos.filter(x => x.id !== id) });
+                showToast(T('removed'));
+            } catch (err) {
+                console.error('deleteVideo failed:', err);
+                showToast(T('vid_err_generic'), 'error');
+            }
         }
 
         // ===== UPDATE PROFILE =====
@@ -3274,6 +3534,10 @@
             if (!updated) { showToast('נא למלא לפחות שדה אחד'); return; }
 
             await saveUserData(updates);
+
+            // Tell the coaches which profile fields changed (never the values themselves).
+            const changedFields = ['nameHe', 'nameEn', 'weight', 'height', 'category', 'gym'].filter(k => k in updates);
+            if (changedFields.length) notifyCoaches('profile', { fields: changedFields });
 
             // Refresh local weightHistory if added
             if (updates.weight) {
@@ -3322,6 +3586,10 @@
                     competitions: firebase.firestore.FieldValue.arrayUnion(compEntry)
                 });
                 // No optimistic mutation: the snapshot listener re-renders from Firestore.
+                notifyCoaches('competition', {
+                    name: name.slice(0, 100), date: formatted.slice(0, 20),
+                    location: (location || '').slice(0, 100), weight: String(weight).slice(0, 30)
+                });
             }
 
             showToast(`נרשמת בהצלחה לתחרות "${name}"`);
@@ -3380,7 +3648,7 @@
                             ? `<button class="sched-block-del" onclick="removeScheduleBlock(${idx})" title="${T('remove')}"><i class="fas fa-times"></i></button>`
                             : '';
                         cell += `<div class="sched-block-cell">
-                            <div class="sched-time">${b.start}–${b.end}</div>
+                            <div class="sched-time">${sanitize(b.start)}–${sanitize(b.end)}</div>
                             ${b.type ? `<div class="sched-type">${sanitize(b.type)}</div>` : ''}
                             ${del}
                         </div>`;
@@ -3438,15 +3706,18 @@
                     <div class="ex-name">${sanitize(ex.name)}
                         <button class="item-del-btn" style="float:${currentLang==='he'?'left':'right'};" onclick="removeStrengthEx(${i})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
                     </div>
-                    <div class="ex-meta">
-                        ${ex.weight ? `<span class="ex-chip">${ex.weight} ${T('str_kg')}</span>` : ''}
-                        ${ex.reps ? `<span class="ex-chip">${ex.reps} ${T('str_reps')}</span>` : ''}
-                        ${ex.sets ? `<span class="ex-chip">${ex.sets} ${T('str_sets')}</span>` : ''}
-                        ${ex.days ? `<span class="ex-chip">${ex.days} ${T('str_days')}</span>` : ''}
-                    </div>
+                    ${exMetaHtml(ex)}
                     ${ex.includes ? `<div class="ex-includes">${sanitize(ex.includes)}</div>` : ''}
                 </div>
             `).join('');
+        }
+        function exMetaHtml(ex) {
+            return `<div class="ex-meta">
+                ${ex.weight ? `<span class="ex-chip">${sanitize(ex.weight)} ${T('str_kg')}</span>` : ''}
+                ${ex.reps ? `<span class="ex-chip">${sanitize(ex.reps)} ${T('str_reps')}</span>` : ''}
+                ${ex.sets ? `<span class="ex-chip">${sanitize(ex.sets)} ${T('str_sets')}</span>` : ''}
+                ${ex.days ? `<span class="ex-chip">${sanitize(ex.days)} ${T('str_days')}</span>` : ''}
+            </div>`;
         }
         function renderCompetitions() {
             const up = document.getElementById('upcomingCompBody');
@@ -3455,17 +3726,17 @@
             const upcoming = comps.filter(c => c.status !== 'done');
             const history = comps.filter(c => c.status === 'done');
             up.innerHTML = upcoming.length === 0
-                ? `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">אין תחרויות קרובות</td></tr>`
+                ? `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">${T('home_no_comp')}</td></tr>`
                 : upcoming.map(c => `<tr>
                     <td><strong>${sanitize(c.name)}</strong></td>
                     <td>${sanitize(c.date || '')}</td>
                     <td>${sanitize(c.location || '--')}</td>
-                    <td><span class="file-status status-pending">נרשם</span></td>
+                    <td><span class="file-status status-pending">${T('dash_registered')}</span></td>
                 </tr>`).join('');
             const hist = document.getElementById('compHistoryBody');
             if (hist) {
                 hist.innerHTML = history.length === 0
-                    ? `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">אין היסטוריית תחרויות</td></tr>`
+                    ? `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">${T('comp_no_history')}</td></tr>`
                     : history.map(c => `<tr>
                         <td><strong>${sanitize(c.name)}</strong></td>
                         <td>${sanitize(c.date || '')}</td>
@@ -3528,15 +3799,30 @@
                 <div class="tl-card">
                     <div class="tl-card-head">
                         <span class="tl-date"><i class="fas fa-calendar-day"></i>${sanitize(e.date || '')}</span>
-                        <button class="item-del-btn" onclick="removeTrainingEntry('${e.id}')" title="${T('remove')}"><i class="fas fa-trash"></i></button>
+                        <button class="item-del-btn" onclick="removeTrainingEntry(${jsArg(e.id)})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
                     </div>
                     ${field('fa-crosshairs', T('tl_worked_on'), e.workedOn)}
                     ${field('fa-check', T('tl_worked'), e.worked)}
                     ${field('fa-xmark', T('tl_not_worked'), e.notWorked)}
                     ${field('fa-arrow-trend-up', T('tl_next_focus'), e.nextFocus)}
-                    ${e.coachComment ? `<div class="tl-coach-note"><div class="who"><i class="fas fa-user-tie"></i> ${T('tl_coach_reply')}</div><div class="txt">${sanitize(e.coachComment)}</div></div>` : ''}
+                    ${e.coachComment ? `<div class="tl-coach-note">
+                        <div class="who"><i class="fas fa-user-tie"></i> ${T('tl_coach_reply')}
+                            <button class="coach-note-del" onclick="clearCoachReply('trainingLog', ${jsArg(e.id)})" title="${escAttr(T('reply_delete'))}"><i class="fas fa-xmark"></i></button>
+                        </div>
+                        <div class="txt">${sanitize(e.coachComment)}</div></div>` : ''}
                 </div>
             `).join('');
+        }
+
+        // The athlete owns their doc, so they may clear a coach reply once read.
+        async function clearCoachReply(field, id) {
+            if (!currentUser || (field !== 'trainingLog' && field !== 'weeklyGoals')) return;
+            const items = (userData[field] || []).map(x => x.id === id ? { ...x, coachComment: '' } : x);
+            await db.collection('users').doc(currentUser.uid).update({ [field]: items });
+            // Keep the "new coach reply" counter in sync so this never re-fires an alert.
+            userData[field] = items;
+            lastCoachCommentCount = coachCommentCount();
+            showToast(T('removed'));
         }
 
         async function addTrainingEntry() {
@@ -3572,12 +3858,13 @@
                 const items = goals.filter(g => g.day === day);
                 const rows = items.map(g => `
                     <div class="goal-item">
-                        <input type="checkbox" class="goal-check" ${g.done ? 'checked' : ''} onchange="toggleWeeklyGoal('${g.id}')">
+                        <input type="checkbox" class="goal-check" ${g.done ? 'checked' : ''} onchange="toggleWeeklyGoal(${jsArg(g.id)})">
                         <div style="flex:1; min-width:0;">
                             <div class="goal-text ${g.done ? 'done' : ''}">${sanitize(g.text)}</div>
-                            ${g.coachComment ? `<div class="goal-coach"><i class="fas fa-user-tie"></i> ${sanitize(g.coachComment)}</div>` : ''}
+                            ${g.coachComment ? `<div class="goal-coach"><i class="fas fa-user-tie"></i> ${sanitize(g.coachComment)}
+                                <button class="coach-note-del" onclick="clearCoachReply('weeklyGoals', ${jsArg(g.id)})" title="${escAttr(T('reply_delete'))}"><i class="fas fa-xmark"></i></button></div>` : ''}
                         </div>
-                        <button class="item-del-btn" onclick="removeWeeklyGoal('${g.id}')" title="${T('remove')}"><i class="fas fa-trash"></i></button>
+                        <button class="item-del-btn" onclick="removeWeeklyGoal(${jsArg(g.id)})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
                     </div>`).join('');
                 return `<div class="goal-day">
                     <h5><i class="fas fa-calendar-day"></i> ${name}</h5>
@@ -3753,6 +4040,7 @@
                 case 'panel-competitions': renderCompetitions(); break;
                 case 'panel-training': renderTrainingLog(); break;
                 case 'panel-feedback': renderFeedback(); break;
+                case 'panel-notifications': renderCoachInbox(); break;
             }
         }
 
@@ -3774,7 +4062,7 @@
                 const realIdx = fb.indexOf(f);
                 return `<div class="fb-card ${f.ack ? '' : 'unread'}">
                     <button class="item-del-btn" style="float:${currentLang==='he'?'left':'right'};" onclick="deleteFeedback(${realIdx})" title="${T('remove')}"><i class="fas fa-trash"></i></button>
-                    <div class="fb-meta"><i class="fas fa-user-tie" style="color:var(--accent);"></i> ${sanitize(f.coach || T('fb_coach'))} · ${f.date || ''}</div>
+                    <div class="fb-meta"><i class="fas fa-user-tie" style="color:var(--accent);"></i> ${sanitize(f.coach || T('fb_coach'))} · ${sanitize(f.date || '')}</div>
                     <div class="fb-text">${sanitize(f.text)}</div>
                     ${f.ack
                         ? `<span class="fb-ack"><i class="fas fa-check-circle"></i> ${T('fb_acked')}</span>`
@@ -3837,22 +4125,23 @@
             return items.map(ex => `
                 <div class="strength-item">
                     <div class="ex-name">${sanitize(ex.name)}</div>
-                    <div class="ex-meta">
-                        ${ex.weight ? `<span class="ex-chip">${ex.weight} ${T('str_kg')}</span>` : ''}
-                        ${ex.reps ? `<span class="ex-chip">${ex.reps} ${T('str_reps')}</span>` : ''}
-                        ${ex.sets ? `<span class="ex-chip">${ex.sets} ${T('str_sets')}</span>` : ''}
-                        ${ex.days ? `<span class="ex-chip">${ex.days} ${T('str_days')}</span>` : ''}
-                    </div>
+                    ${exMetaHtml(ex)}
                     ${ex.includes ? `<div class="ex-includes">${sanitize(ex.includes)}</div>` : ''}
                 </div>
             `).join('');
         }
 
+        // Entry ids come from the athlete's doc: only a safe charset is allowed to be
+        // used as a DOM id, and every inline-handler argument goes through jsArg().
+        function safeDomId(id) { return /^[A-Za-z0-9_-]{1,64}$/.test(String(id)) ? String(id) : ''; }
+
         function cdTrainingHtml(uid, log) {
             if (!log || log.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_training')}</p>`;
-            const sorted = log.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            const sorted = log.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
             const field = (icon, label, val) => val ? `<div class="tl-field"><div class="lbl"><i class="fas ${icon}"></i> ${label}</div><div class="val">${sanitize(val)}</div></div>` : '';
-            return sorted.map(e => `
+            return sorted.map(e => {
+                const did = safeDomId(e.id);
+                return `
                 <div class="tl-card">
                     <div class="tl-date" style="margin-bottom:10px;"><i class="fas fa-calendar-day"></i>${sanitize(e.date || '')}</div>
                     ${field('fa-crosshairs', T('tl_worked_on'), e.workedOn)}
@@ -3860,12 +4149,12 @@
                     ${field('fa-xmark', T('tl_not_worked'), e.notWorked)}
                     ${field('fa-arrow-trend-up', T('tl_next_focus'), e.nextFocus)}
                     ${e.coachComment ? `<div class="tl-coach-note"><div class="who"><i class="fas fa-user-tie"></i> ${T('tl_coach_reply')}</div><div class="txt">${sanitize(e.coachComment)}</div></div>` : ''}
-                    <div class="goal-add" style="margin-top:12px;">
-                        <input type="text" id="tlComment-${e.id}" placeholder="${T('tl_reply_ph')}" onkeydown="if(event.key==='Enter')addTrainingComment('${uid}','${e.id}')">
-                        <button onclick="addTrainingComment('${uid}','${e.id}')" title="${T('cd_send_fb')}"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
-            `).join('');
+                    ${did ? `<div class="goal-add" style="margin-top:12px;">
+                        <input type="text" id="tlComment-${did}" placeholder="${T('tl_reply_ph')}" onkeydown="if(event.key==='Enter')addTrainingComment(${jsArg(uid)},${jsArg(did)})">
+                        <button onclick="addTrainingComment(${jsArg(uid)},${jsArg(did)})" title="${T('cd_send_fb')}"><i class="fas fa-paper-plane"></i></button>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
         }
         function cdGoalsHtml(uid, goals) {
             if (!goals || goals.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_goals')}</p>`;
@@ -3873,20 +4162,27 @@
             return `<div class="goals-grid">` + names.map((name, day) => {
                 const items = goals.filter(g => g.day === day);
                 if (items.length === 0) return '';
-                const rows = items.map(g => `
+                const rows = items.map(g => {
+                    const did = safeDomId(g.id);
+                    return `
                     <div class="goal-item">
                         <i class="fas ${g.done ? 'fa-check-circle' : 'fa-circle'}" style="color:${g.done ? 'var(--success)' : 'var(--text-secondary)'}; margin-top:3px;"></i>
                         <div style="flex:1; min-width:0;">
                             <div class="goal-text ${g.done ? 'done' : ''}">${sanitize(g.text)}</div>
                             ${g.coachComment ? `<div class="goal-coach"><i class="fas fa-user-tie"></i> ${sanitize(g.coachComment)}</div>` : ''}
-                            <div class="goal-add" style="margin-top:6px;">
-                                <input type="text" id="goalComment-${g.id}" placeholder="${T('tl_reply_ph')}" onkeydown="if(event.key==='Enter')addGoalComment('${uid}','${g.id}')">
-                                <button onclick="addGoalComment('${uid}','${g.id}')" title="${T('cd_send_fb')}"><i class="fas fa-paper-plane"></i></button>
-                            </div>
+                            ${did ? `<div class="goal-add" style="margin-top:6px;">
+                                <input type="text" id="goalComment-${did}" placeholder="${T('tl_reply_ph')}" onkeydown="if(event.key==='Enter')addGoalComment(${jsArg(uid)},${jsArg(did)})">
+                                <button onclick="addGoalComment(${jsArg(uid)},${jsArg(did)})" title="${T('cd_send_fb')}"><i class="fas fa-paper-plane"></i></button>
+                            </div>` : ''}
                         </div>
-                    </div>`).join('');
+                    </div>`;
+                }).join('');
                 return `<div class="goal-day"><h5><i class="fas fa-calendar-day"></i> ${name}</h5>${rows}</div>`;
             }).join('') + `</div>`;
+        }
+        function cdVideosHtml(videos) {
+            if (!videos || videos.length === 0) return `<p style="color:var(--text-secondary);">${T('cd_no_videos')}</p>`;
+            return `<div class="videos-grid">${videos.slice().reverse().map(v => videoCardHtml(v, { canDelete: false })).join('')}</div>`;
         }
 
         // ===== COACH: LOAD COMPETITORS =====
@@ -3938,7 +4234,7 @@
 
             for (let i = 0; i < total; i++) {
                 const d = allDocs[i];
-                const roleBadge = isAdmin ? `<span style="color:${roleColors[d.role]||'var(--text-secondary)'};font-size:0.85rem;font-weight:700;"> (${roleLabels[d.role] || d.role})</span>` : '';
+                const roleBadge = isAdmin ? `<span style="color:${roleColors[d.role]||'var(--text-secondary)'};font-size:0.85rem;font-weight:700;"> (${sanitize(roleLabels[d.role] || d.role)})</span>` : '';
                 const card = document.createElement('div');
                 card.className = 'competitor-card';
                 card.onclick = () => showCompetitorDetail(d.id);
@@ -3947,12 +4243,12 @@
                         <div class="comp-avatar"><i class="fas fa-user"></i></div>
                         <div>
                             <div class="comp-name">${sanitize(displayName(d) || 'ללא שם')}${roleBadge}</div>
-                            <div class="comp-detail">${sanitize(d.gym || '--')} | ${d.category || '--'}</div>
+                            <div class="comp-detail">${sanitize(d.gym || '--')} | ${sanitize(d.category || '--')}</div>
                         </div>
                     </div>
                     <div class="comp-stats">
-                        <div class="comp-stat-item"><div class="val">${d.weight || '--'}</div><div class="lbl">משקל</div></div>
-                        <div class="comp-stat-item"><div class="val">${d.height || '--'}</div><div class="lbl">גובה</div></div>
+                        <div class="comp-stat-item"><div class="val">${sanitize(d.weight || '--')}</div><div class="lbl">${T('dash_prof_weight')}</div></div>
+                        <div class="comp-stat-item"><div class="val">${sanitize(d.height || '--')}</div><div class="lbl">${T('dash_prof_height')}</div></div>
                     </div>
                 `;
                 frag.appendChild(card);
@@ -3975,31 +4271,42 @@
 
             const body = document.getElementById('competitorDetailBody');
             body.innerHTML = `
-                <h2 style="color:var(--white); margin-bottom:6px;"><i class="fas fa-user" style="color:var(--accent);"></i> ${sanitize(displayName(d))}</h2>
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; padding-inline-end:36px;">
+                    <h2 style="color:var(--white); margin:0;"><i class="fas fa-user" style="color:var(--accent);"></i> ${sanitize(displayName(d))}</h2>
+                    <button class="btn-pdf" id="exportOneBtn" onclick="exportAthletePdf(${jsArg(uid)})"><i class="fas fa-file-pdf"></i> ${T('pdf_export_one')}</button>
+                </div>
                 <p style="color:var(--text-secondary); margin-bottom:24px; font-size:0.92rem;">${sanitize(d.nameHe || '--')} / ${sanitize(d.nameEn || '--')}</p>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
-                    <div class="stat-card"><div class="stat-value">${d.weight || '--'}</div><div class="stat-label">משקל (ק"ג)</div></div>
-                    <div class="stat-card"><div class="stat-value">${d.height || '--'}</div><div class="stat-label">גובה (ס"מ)</div></div>
+                    <div class="stat-card"><div class="stat-value">${sanitize(d.weight || '--')}</div><div class="stat-label">${T('dash_weight_kg')}</div></div>
+                    <div class="stat-card"><div class="stat-value">${sanitize(d.height || '--')}</div><div class="stat-label">${T('dash_height_cm')}</div></div>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
-                    <div class="profile-stat"><span class="label">קטגוריה</span><span class="value">${d.category || '--'}</span></div>
-                    <div class="profile-stat"><span class="label">מכון</span><span class="value">${sanitize(d.gym || '--')}</span></div>
-                    <div class="profile-stat"><span class="label">אימייל</span><span class="value" style="font-size:0.92rem;">${sanitize(d.email || '--')}</span></div>
-                    <div class="profile-stat"><span class="label">טלפון</span><span class="value">${sanitize(d.phone || '--')}</span></div>
+                    <div class="profile-stat"><span class="label">${T('dash_prof_category')}</span><span class="value">${sanitize(d.category || '--')}</span></div>
+                    <div class="profile-stat"><span class="label">${T('dash_prof_gym')}</span><span class="value">${sanitize(d.gym || '--')}</span></div>
+                    <div class="profile-stat"><span class="label">${T('login_email')}</span><span class="value" style="font-size:0.92rem;">${sanitize(d.email || '--')}</span></div>
+                    <div class="profile-stat"><span class="label">${T('reg_phone')}</span><span class="value">${sanitize(d.phone || '--')}</span></div>
                 </div>
+
+                <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-medal" style="color:var(--accent);"></i> ${T('dash_competitions')} (${(d.competitions || []).length})</h4>
+                ${(d.competitions || []).length ? `<table class="comp-table"><thead><tr><th>${T('dash_th_comp')}</th><th>${T('dash_th_date')}</th><th>${T('dash_th_location')}</th><th>${T('dash_comp_weight_cat')}</th></tr></thead><tbody>
+                    ${d.competitions.map(c => `<tr><td><strong>${sanitize(c.name)}</strong></td><td>${sanitize(c.date || '')}</td><td>${sanitize(c.location || '--')}</td><td>${sanitize(c.weight || '--')}</td></tr>`).join('')}
+                </tbody></table>` : `<p style="color:var(--text-secondary);">${T('home_no_comp')}</p>`}
 
                 <h4 style="color:var(--white); margin:20px 0 12px;">${T('cd_documents')} (${(d.documents || []).length})</h4>
                 ${(d.documents || []).length ? d.documents.map(doc => `
                     <div class="file-item" style="margin-bottom:8px;">
                         <div class="file-info">
                             <i class="fas fa-file file-icon"></i>
-                            <div><div class="file-name">${sanitize(doc.name)}</div><div class="file-date">${doc.date} | ${sanitize(doc.typeName)}</div></div>
+                            <div><div class="file-name">${sanitize(doc.name)}</div><div class="file-date">${sanitize(doc.date)} | ${sanitize(doc.typeName)}</div></div>
                         </div>
                         <span class="file-status ${doc.status === 'approved' ? 'status-approved' : 'status-pending'}">${doc.status === 'approved' ? T('cd_approved') : T('cd_pending')}</span>
                     </div>
                 `).join('') : `<p style="color:var(--text-secondary);">${T('cd_no_docs')}</p>`}
+
+                <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-video" style="color:var(--accent);"></i> ${T('dash_videos')} (${(d.videos || []).length})</h4>
+                ${cdVideosHtml(d.videos || [])}
 
                 <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-calendar-week" style="color:var(--accent);"></i> ${T('cd_schedule')}</h4>
                 ${cdScheduleHtml(d.weeklySchedule || [])}
@@ -4016,7 +4323,7 @@
                 <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-comments" style="color:var(--accent);"></i> ${T('cd_feedback')}</h4>
                 ${(d.coachFeedback || []).length ? (d.coachFeedback).slice().reverse().map(f => `
                     <div class="fb-card ${f.ack ? '' : 'unread'}">
-                        <div class="fb-meta"><i class="fas fa-user-tie" style="color:var(--accent);"></i> ${sanitize(f.coach || T('fb_coach'))} · ${f.date || ''}</div>
+                        <div class="fb-meta"><i class="fas fa-user-tie" style="color:var(--accent);"></i> ${sanitize(f.coach || T('fb_coach'))} · ${sanitize(f.date || '')}</div>
                         <div class="fb-text">${sanitize(f.text)}</div>
                         <span class="fb-ack" style="color:${f.ack ? 'var(--success)' : 'var(--text-secondary)'};">
                             <i class="fas ${f.ack ? 'fa-check-circle' : 'fa-clock'}"></i> ${f.ack ? T('cd_fb_seen') : T('cd_fb_unseen')}
@@ -4029,7 +4336,7 @@
                     <div class="form-group">
                         <textarea id="coachFbInput" rows="3" placeholder="${T('cd_fb_ph')}"></textarea>
                     </div>
-                    <button class="form-submit" onclick="addCoachFeedback('${uid}')"><i class="fas fa-paper-plane"></i> ${T('cd_send_fb')}</button>
+                    <button class="form-submit" onclick="addCoachFeedback(${jsArg(uid)})"><i class="fas fa-paper-plane"></i> ${T('cd_send_fb')}</button>
                 </div>
 
                 ${isAdmin && d.role !== 'admin' ? `
@@ -4037,9 +4344,9 @@
                     <h4 style="margin-bottom:12px;"><i class="fas fa-crown" style="color:var(--gold);"></i> ${T('cd_role_mgmt')}</h4>
                     ${d.role === 'coach'
                         ? `<p style="color:var(--text-secondary); margin-bottom:12px;">${T('cd_is_coach')}</p>
-                           <button class="form-submit" style="background:var(--text-secondary);" onclick="promoteToCoach('${uid}', false)"><i class="fas fa-user-minus"></i> ${T('cd_demote')}</button>`
+                           <button class="form-submit" style="background:var(--text-secondary);" onclick="promoteToCoach(${jsArg(uid)}, false)"><i class="fas fa-user-minus"></i> ${T('cd_demote')}</button>`
                         : `<p style="color:var(--text-secondary); margin-bottom:12px;">${T('cd_is_competitor')}</p>
-                           <button class="form-submit" onclick="promoteToCoach('${uid}', true)"><i class="fas fa-user-plus"></i> ${T('cd_promote')}</button>`}
+                           <button class="form-submit" onclick="promoteToCoach(${jsArg(uid)}, true)"><i class="fas fa-user-plus"></i> ${T('cd_promote')}</button>`}
                 </div>` : ''}
             `;
 
@@ -4055,6 +4362,482 @@
         document.getElementById('competitorDetailModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('competitorDetailModal')) closeCompetitorDetail();
         });
+
+        // ===== COACH INBOX (athlete → coaches notifications) =====
+        // Athlete side: append an entry. Fire-and-forget — the primary write already
+        // succeeded, so a failure here must never surface as a failed action.
+        async function notifyCoaches(type, data) {
+            if (!currentUser || isCoach || isAdmin) return;
+            try {
+                await db.collection('coachNotifications').add({
+                    fromUid: currentUser.uid,
+                    fromName: String(displayName(userData) || currentUser.displayName || '').slice(0, 80),
+                    type,
+                    data,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    readBy: {},
+                    deletedBy: {}
+                });
+            } catch (e) {
+                console.warn('notifyCoaches failed (non-fatal):', e && e.code, e && e.message);
+            }
+        }
+
+        // Coach side: live listener over the shared inbox, filtered per coach.
+        function setupCoachInboxListener() {
+            teardownCoachInboxListener();
+            const myUid = currentUser.uid;
+            coachInboxError = null;
+            coachInboxUnsub = db.collection('coachNotifications')
+                .orderBy('createdAt', 'desc')
+                .limit(100)
+                .onSnapshot((snap) => {
+                    let fresh = 0;
+                    if (coachInboxReady) {
+                        snap.docChanges().forEach(ch => {
+                            if (ch.type === 'added' && !ch.doc.metadata.hasPendingWrites) fresh++;
+                        });
+                    }
+                    coachInbox = [];
+                    snap.forEach(doc => {
+                        const n = doc.data();
+                        const deletedBy = n.deletedBy || {};
+                        if (deletedBy[myUid]) return;
+                        coachInbox.push({ id: doc.id, ...n, isRead: !!((n.readBy || {})[myUid]) });
+                    });
+                    if (fresh > 0) {
+                        const msg = fresh === 1 ? T('cn_new_one') : T('cn_new_many').replace('{n}', fresh);
+                        showToast(msg);
+                        fireNativeNotification(msg);
+                    }
+                    coachInboxReady = true;
+                    updateCoachNotifBadge();
+                    const active = document.querySelector('.dash-panel.active');
+                    if (active && (active.id === 'panel-notifications' || active.id === 'panel-overview')) refreshActivePanel();
+                    purgeStaleCoachNotifs(snap);
+                }, (err) => {
+                    console.error('coach inbox listener failed:', err);
+                    coachInboxError = err && err.code === 'permission-denied' ? 'permission' : 'generic';
+                    const active = document.querySelector('.dash-panel.active');
+                    if (active && active.id === 'panel-notifications') renderCoachInbox();
+                });
+        }
+
+        function teardownCoachInboxListener() {
+            if (coachInboxUnsub) { try { coachInboxUnsub(); } catch (e) {} coachInboxUnsub = null; }
+            coachInbox = [];
+            coachInboxReady = false;
+            updateCoachNotifBadge();
+        }
+
+        // Housekeeping: rules let coaches hard-delete entries older than 60 days.
+        let purgedOnce = false;
+        function purgeStaleCoachNotifs(snap) {
+            if (purgedOnce) return;
+            purgedOnce = true;
+            const cutoff = Date.now() - 61 * 24 * 60 * 60 * 1000;
+            snap.forEach(doc => {
+                const ts = doc.data().createdAt;
+                if (ts && typeof ts.toMillis === 'function' && ts.toMillis() < cutoff) {
+                    doc.ref.delete().catch(() => {});
+                }
+            });
+        }
+
+        function coachInboxUnreadCount() { return coachInbox.filter(n => !n.isRead).length; }
+
+        function updateCoachNotifBadge() {
+            const badge = document.getElementById('coachNotifBadge');
+            if (!badge) return;
+            const n = coachInboxUnreadCount();
+            if (n > 0) { badge.textContent = n; badge.style.display = ''; }
+            else badge.style.display = 'none';
+        }
+
+        const NOTIF_ICONS = { profile: 'fa-user-pen', competition: 'fa-medal', document: 'fa-file-arrow-up', video: 'fa-film' };
+
+        // Human-readable line for one notification, in the COACH's UI language.
+        // Payload values are athlete-controlled → always sanitized.
+        function coachNotifText(n) {
+            const d = n.data || {};
+            switch (n.type) {
+                case 'profile': {
+                    const labels = { nameHe: T('cn_f_nameHe'), nameEn: T('cn_f_nameEn'), weight: T('cn_f_weight'), height: T('cn_f_height'), category: T('cn_f_category'), gym: T('cn_f_gym') };
+                    const parts = (Array.isArray(d.fields) ? d.fields : []).map(f => labels[f]).filter(Boolean);
+                    return `${T('cn_t_profile')}${parts.length ? ': ' + sanitize(parts.join(', ')) : ''}`;
+                }
+                case 'competition':
+                    return `${T('cn_t_competition')}: <strong>${sanitize(d.name || '')}</strong>${d.date ? ` · ${sanitize(d.date)}` : ''}${d.location ? ` · ${sanitize(d.location)}` : ''}${d.weight ? ` · ${sanitize(d.weight)}` : ''}`;
+                case 'document': {
+                    const typeNames = { medical: T('dash_doc_medical'), registration: T('dash_doc_registration'), passport: T('dash_doc_passport'), insurance: T('dash_doc_insurance'), other: T('dash_doc_other') };
+                    return `${T('cn_t_document')}: ${sanitize(typeNames[d.docType] || T('dash_doc_other'))}${d.name ? ` (${sanitize(d.name)})` : ''}`;
+                }
+                case 'video':
+                    return `${T('cn_t_video')}: <strong>${sanitize(d.title || '')}</strong>`;
+                default:
+                    return sanitize(n.type || '');
+            }
+        }
+
+        function renderCoachInbox() {
+            const list = document.getElementById('coachNotifList');
+            if (!list) return;
+            if (coachInboxError) {
+                list.innerHTML = emptyState('fa-triangle-exclamation', T(coachInboxError === 'permission' ? 'cn_err_perm' : 'cn_err_load'), '');
+                return;
+            }
+            if (!coachInboxReady) { list.innerHTML = skeletonRows(3); return; }
+            if (coachInbox.length === 0) {
+                list.innerHTML = emptyState('fa-bell-slash', T('cn_empty'), T('cn_empty_hint'));
+                return;
+            }
+            list.innerHTML = coachInbox.map(n => `
+                <div class="notif-item ${n.isRead ? '' : 'unread'}">
+                    <div class="notif-icon"><i class="fas ${NOTIF_ICONS[n.type] || 'fa-bell'}"></i></div>
+                    <div class="notif-body">
+                        <div class="notif-title"><a onclick="openAthleteFromNotif(${jsArg(n.id)}, ${jsArg(n.fromUid)})">${sanitize(n.fromName || T('cn_athlete'))}</a></div>
+                        <div class="notif-text">${coachNotifText(n)}</div>
+                        <div class="notif-time"><i class="fas fa-clock"></i> ${sanitize(fmtDateTime(n.createdAt))}${n.isRead ? ` · <i class="fas fa-check-double"></i> ${T('cn_read')}` : ''}</div>
+                    </div>
+                    <div class="notif-actions">
+                        ${n.isRead ? '' : `<button onclick="markCoachNotifRead(${jsArg(n.id)})" title="${escAttr(T('cn_mark_read'))}"><i class="fas fa-check"></i></button>`}
+                        <button onclick="deleteCoachNotif(${jsArg(n.id)})" title="${escAttr(T('remove'))}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function myFlag(field) {
+            // Dot-path update → touches only readBy.<uid> / deletedBy.<uid>, as the rules require.
+            return { [field + '.' + currentUser.uid]: true };
+        }
+        async function markCoachNotifRead(id) {
+            if (!currentUser) return;
+            try { await db.collection('coachNotifications').doc(id).update(myFlag('readBy')); }
+            catch (e) { console.error('markCoachNotifRead failed:', e); showToast(T('cn_err'), 'error'); }
+        }
+        async function deleteCoachNotif(id) {
+            if (!currentUser) return;
+            try {
+                await db.collection('coachNotifications').doc(id).update({ ...myFlag('readBy'), ...myFlag('deletedBy') });
+                showToast(T('removed'));
+            } catch (e) { console.error('deleteCoachNotif failed:', e); showToast(T('cn_err'), 'error'); }
+        }
+        async function markAllCoachNotifsRead() {
+            if (!currentUser) return;
+            const unread = coachInbox.filter(n => !n.isRead);
+            if (unread.length === 0) return;
+            try {
+                const batch = db.batch();
+                unread.forEach(n => batch.update(db.collection('coachNotifications').doc(n.id), myFlag('readBy')));
+                await batch.commit();
+                showToast(T('cn_all_read'));
+            } catch (e) { console.error('markAllCoachNotifsRead failed:', e); showToast(T('cn_err'), 'error'); }
+        }
+        async function deleteReadCoachNotifs() {
+            if (!currentUser) return;
+            const read = coachInbox.filter(n => n.isRead);
+            if (read.length === 0) { showToast(T('cn_nothing_read')); return; }
+            try {
+                const batch = db.batch();
+                read.forEach(n => batch.update(db.collection('coachNotifications').doc(n.id), myFlag('deletedBy')));
+                await batch.commit();
+                showToast(T('removed'));
+            } catch (e) { console.error('deleteReadCoachNotifs failed:', e); showToast(T('cn_err'), 'error'); }
+        }
+        function openAthleteFromNotif(id, uid) {
+            markCoachNotifRead(id);
+            if (uid) showCompetitorDetail(uid);
+        }
+
+        // ===== PDF EXPORT (coach / admin only) =====
+        const JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        let pdfFontsB64 = null;
+
+        function arrayBufferToBase64(buf) {
+            const bytes = new Uint8Array(buf);
+            let bin = '';
+            for (let i = 0; i < bytes.length; i += 0x8000) {
+                bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+            }
+            return btoa(bin);
+        }
+
+        // Heebo is the site font and covers Hebrew + Latin (incl. German umlauts).
+        async function loadPdfFonts() {
+            if (pdfFontsB64) return pdfFontsB64;
+            const [reg, bold] = await Promise.all([
+                fetch('fonts/Heebo-Regular.ttf').then(r => { if (!r.ok) throw new Error('font'); return r.arrayBuffer(); }),
+                fetch('fonts/Heebo-Bold.ttf').then(r => { if (!r.ok) throw new Error('font'); return r.arrayBuffer(); })
+            ]);
+            pdfFontsB64 = { regular: arrayBufferToBase64(reg), bold: arrayBufferToBase64(bold) };
+            return pdfFontsB64;
+        }
+
+        async function createPdfDoc() {
+            await loadScript(JSPDF_URL);
+            const fonts = await loadPdfFonts();
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+            doc.addFileToVFS('Heebo-Regular.ttf', fonts.regular);
+            doc.addFont('Heebo-Regular.ttf', 'Heebo', 'normal');
+            doc.addFileToVFS('Heebo-Bold.ttf', fonts.bold);
+            doc.addFont('Heebo-Bold.ttf', 'Heebo', 'bold');
+            doc.setFont('Heebo', 'normal');
+            return doc;
+        }
+
+        // Minimal flow layout: right-aligned for Hebrew, left-aligned otherwise, with
+        // page breaks. jsPDF's bidi engine reorders logical → visual per line.
+        function pdfWriter(doc) {
+            const rtl = currentLang === 'he';
+            const pageW = doc.internal.pageSize.getWidth();
+            const pageH = doc.internal.pageSize.getHeight();
+            const margin = 16;
+            const maxW = pageW - margin * 2;
+            const xEdge = rtl ? pageW - margin : margin;
+            const bidi = { isInputVisual: false, isOutputVisual: true, isInputRtl: rtl, isOutputRtl: false, isSymmetricSwapping: true };
+            let y = margin;
+
+            const footer = () => {
+                doc.setFont('Heebo', 'normal'); doc.setFontSize(8); doc.setTextColor(140);
+                doc.text(String(doc.getNumberOfPages()), pageW / 2, pageH - 8, { align: 'center' });
+                doc.text('Rocky Fighters', rtl ? margin : pageW - margin, pageH - 8, { align: rtl ? 'left' : 'right' });
+                doc.setTextColor(0);
+            };
+            const newPage = () => { footer(); doc.addPage(); y = margin; };
+            const ensure = (h) => {
+                if (y + h > pageH - margin - 6) newPage();
+            };
+            const w = {
+                y: () => y,
+                gap: (h) => { y += h; },
+                newPage,
+                text: (str, opts) => {
+                    opts = opts || {};
+                    const size = opts.size || 10.5;
+                    const style = opts.bold ? 'bold' : 'normal';
+                    doc.setFont('Heebo', style); doc.setFontSize(size);
+                    if (opts.color) doc.setTextColor(opts.color[0], opts.color[1], opts.color[2]); else doc.setTextColor(30);
+                    const lines = doc.splitTextToSize(String(str == null ? '' : str), opts.maxW || maxW);
+                    const lh = size * 0.5;
+                    ensure(lines.length * lh);
+                    lines.forEach(line => {
+                        doc.text(line, opts.x != null ? opts.x : xEdge, y, Object.assign({ align: opts.align || (rtl ? 'right' : 'left') }, bidi));
+                        y += lh;
+                    });
+                    doc.setTextColor(0);
+                },
+                h1: (str) => { w.gap(2); w.text(str, { size: 20, bold: true, color: [229, 56, 77] }); w.gap(1.5); },
+                h2: (str) => {
+                    w.gap(4); ensure(10);
+                    doc.setDrawColor(229, 56, 77); doc.setLineWidth(0.6);
+                    doc.line(margin, y + 2.2, pageW - margin, y + 2.2);
+                    w.gap(6);
+                    w.text(str, { size: 13, bold: true, color: [229, 56, 77] });
+                    w.gap(1.5);
+                },
+                kv: (label, value) => {
+                    const v = (value == null || value === '') ? '--' : String(value);
+                    w.text(`${label}: ${v}`, { size: 10.5 });
+                },
+                bullet: (str) => { w.text(`• ${str}`, { size: 10 }); },
+                muted: (str) => { w.text(str, { size: 9.5, color: [120, 120, 130] }); },
+                // Simple table: header row + rows, columns share the width equally.
+                table: (headers, rows) => {
+                    const cols = headers.length;
+                    const colW = maxW / cols;
+                    const rowH = 7;
+                    const cellText = (txt, cx, cy) => {
+                        const s = doc.splitTextToSize(String(txt == null ? '' : txt), colW - 4)[0] || '';
+                        doc.text(s, rtl ? cx + colW - 2 : cx + 2, cy, Object.assign({ align: rtl ? 'right' : 'left' }, bidi));
+                    };
+                    const drawHeader = () => {
+                        ensure(rowH);
+                        doc.setFillColor(229, 56, 77); doc.rect(margin, y, maxW, rowH, 'F');
+                        doc.setFont('Heebo', 'bold'); doc.setFontSize(9.5); doc.setTextColor(255);
+                        headers.forEach((h, i) => {
+                            const cx = rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
+                            cellText(h, cx, y + 4.8);
+                        });
+                        y += rowH; doc.setTextColor(0);
+                    };
+                    drawHeader();
+                    doc.setFont('Heebo', 'normal'); doc.setFontSize(9.5);
+                    rows.forEach((r, ri) => {
+                        if (y + rowH > pageH - margin - 6) { newPage(); drawHeader(); doc.setFont('Heebo', 'normal'); doc.setFontSize(9.5); }
+                        if (ri % 2 === 0) { doc.setFillColor(245, 245, 248); doc.rect(margin, y, maxW, rowH, 'F'); }
+                        doc.setTextColor(30);
+                        r.forEach((c, i) => {
+                            const cx = rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
+                            cellText(c, cx, y + 4.8);
+                        });
+                        y += rowH;
+                    });
+                    doc.setTextColor(0);
+                    w.gap(2);
+                },
+                finish: () => { footer(); }
+            };
+            return w;
+        }
+
+        function pdfSafeFilename(s) {
+            return String(s || 'athlete').replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '_').slice(0, 60) || 'athlete';
+        }
+
+        function athleteSections(w, d) {
+            const s = (v) => (v == null || v === '') ? '--' : String(v);
+            w.h1(displayName(d) || T('cn_athlete'));
+            w.muted(`${T('pdf_generated')}: ${new Date().toLocaleString(langLocale())}`);
+
+            w.h2(T('pdf_personal'));
+            w.kv(T('cn_f_nameHe'), s(d.nameHe || d.name));
+            w.kv(T('cn_f_nameEn'), s(d.nameEn));
+            w.kv(T('login_email'), s(d.email));
+            w.kv(T('reg_phone'), s(d.phone));
+            w.kv(T('dash_prof_gym'), s(d.gym));
+            w.kv(T('dash_prof_category'), s(d.category));
+            w.kv(T('dash_weight_kg'), s(d.weight));
+            w.kv(T('dash_height_cm'), s(d.height));
+
+            const wh = Array.isArray(d.weightHistory) ? d.weightHistory : [];
+            if (wh.length) {
+                w.h2(T('dash_weight_history'));
+                w.table([T('dash_th_date'), T('dash_weight_kg')], wh.slice(-24).map(h => [s(h.month), s(h.value)]));
+            }
+
+            const comps = Array.isArray(d.competitions) ? d.competitions : [];
+            w.h2(`${T('dash_competitions')} (${comps.length})`);
+            if (comps.length) {
+                w.table([T('dash_th_comp'), T('dash_th_date'), T('dash_th_location'), T('dash_comp_weight_cat'), T('dash_th_status')],
+                    comps.map(c => [s(c.name), s(c.date), s(c.location), s(c.weight), c.status === 'done' ? s(c.result) : T('dash_registered')]));
+            } else w.muted(T('home_no_comp'));
+
+            const docs = Array.isArray(d.documents) ? d.documents : [];
+            w.h2(`${T('cd_documents')} (${docs.length})`);
+            if (docs.length) {
+                w.table([T('dash_doc_type'), T('pdf_file'), T('dash_th_date'), T('dash_th_status')],
+                    docs.map(x => [s(x.typeName), s(x.name), s(x.date), x.status === 'approved' ? T('cd_approved') : T('cd_pending')]));
+            } else w.muted(T('cd_no_docs'));
+
+            const vids = Array.isArray(d.videos) ? d.videos : [];
+            w.h2(`${T('dash_videos')} (${vids.length})`);
+            if (vids.length) {
+                w.table([T('dash_video_name'), T('dash_th_date'), T('pdf_size')],
+                    vids.map(v => [s(v.title), s(v.date), v.size ? formatBytes(Number(v.size) || 0) : '--']));
+            } else w.muted(T('vid_empty_title'));
+
+            const blocks = Array.isArray(d.weeklySchedule) ? d.weeklySchedule : [];
+            w.h2(T('cd_schedule'));
+            if (blocks.length) {
+                const names = dayNames();
+                const sorted = blocks.slice().sort((a, b) => (a.day - b.day) || String(a.start || '').localeCompare(String(b.start || '')));
+                w.table([T('sched_day'), T('sched_start'), T('sched_end'), T('sched_type')],
+                    sorted.map(b => [names[b.day] || s(b.day), s(b.start), s(b.end), s(b.type)]));
+            } else w.muted(T('cd_no_schedule'));
+
+            const ex = Array.isArray(d.strengthProgram) ? d.strengthProgram : [];
+            w.h2(T('cd_strength'));
+            if (ex.length) {
+                w.table([T('ex_name'), T('ex_weight'), T('ex_reps'), T('ex_sets'), T('ex_days')],
+                    ex.map(e => [s(e.name), s(e.weight), s(e.reps), s(e.sets), s(e.days)]));
+                ex.filter(e => e.includes).forEach(e => w.bullet(`${s(e.name)}: ${s(e.includes)}`));
+            } else w.muted(T('cd_no_strength'));
+
+            const log = Array.isArray(d.trainingLog) ? d.trainingLog.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))) : [];
+            w.h2(`${T('cd_training')} (${log.length})`);
+            if (log.length) {
+                log.slice(0, 30).forEach(e => {
+                    w.text(s(e.date), { bold: true, size: 11 });
+                    if (e.workedOn) w.kv(T('tl_worked_on'), e.workedOn);
+                    if (e.worked) w.kv(T('tl_worked'), e.worked);
+                    if (e.notWorked) w.kv(T('tl_not_worked'), e.notWorked);
+                    if (e.nextFocus) w.kv(T('tl_next_focus'), e.nextFocus);
+                    if (e.coachComment) w.text(`${T('tl_coach_reply')}: ${e.coachComment}`, { color: [180, 120, 20], size: 10 });
+                    w.gap(2.5);
+                });
+                if (log.length > 30) w.muted(T('pdf_truncated').replace('{n}', log.length - 30));
+            } else w.muted(T('cd_no_training'));
+
+            const goals = Array.isArray(d.weeklyGoals) ? d.weeklyGoals : [];
+            w.h2(T('cd_goals'));
+            if (goals.length) {
+                const names = dayNames();
+                goals.slice().sort((a, b) => a.day - b.day).forEach(g => {
+                    w.bullet(`${names[g.day] || ''} — ${g.done ? '✓ ' : ''}${s(g.text)}${g.coachComment ? ` (${T('tl_coach_reply')}: ${g.coachComment})` : ''}`);
+                });
+            } else w.muted(T('cd_no_goals'));
+
+            const fb = Array.isArray(d.coachFeedback) ? d.coachFeedback : [];
+            w.h2(`${T('cd_feedback')} (${fb.length})`);
+            if (fb.length) {
+                fb.slice().reverse().slice(0, 30).forEach(f => {
+                    w.text(`${s(f.coach || T('fb_coach'))} · ${s(f.date)} · ${f.ack ? T('cd_fb_seen') : T('cd_fb_unseen')}`, { bold: true, size: 10 });
+                    w.text(s(f.text), { size: 10 });
+                    w.gap(2.5);
+                });
+            } else w.muted(T('cd_no_fb'));
+        }
+
+        async function withPdfButton(btnId, fn) {
+            const btn = document.getElementById(btnId);
+            const orig = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = `<span class="loading-spinner"></span> ${T('pdf_building')}`; }
+            try { await fn(); }
+            catch (e) {
+                console.error('PDF export failed:', e);
+                showToast(T('pdf_err'), 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+            }
+        }
+
+        async function exportAthletePdf(uid) {
+            if (!isCoach && !isAdmin) return;
+            await withPdfButton('exportOneBtn', async () => {
+                const snap = await db.collection('users').doc(uid).get();
+                if (!snap.exists) throw new Error('no such user');
+                const d = snap.data();
+                const doc = await createPdfDoc();
+                const w = pdfWriter(doc);
+                athleteSections(w, d);
+                w.finish();
+                doc.save(`Rocky_${pdfSafeFilename(d.nameEn || d.nameHe || d.name)}_${new Date().toISOString().slice(0, 10)}.pdf`);
+                showToast(T('pdf_done'), 'success');
+            });
+        }
+
+        async function exportAllAthletesPdf() {
+            if (!isCoach && !isAdmin) return;
+            await withPdfButton('exportAllBtn', async () => {
+                const snap = await db.collection('users').where('role', '==', 'competitor').get();
+                const list = [];
+                snap.forEach(x => list.push({ id: x.id, ...x.data() }));
+                list.sort((a, b) => String(displayName(a)).localeCompare(String(displayName(b)), langLocale()));
+                const doc = await createPdfDoc();
+                const w = pdfWriter(doc);
+                const s = (v) => (v == null || v === '') ? '--' : String(v);
+
+                w.h1(T('pdf_roster_title'));
+                w.muted(`${T('pdf_generated')}: ${new Date().toLocaleString(langLocale())} · ${list.length} ${T('pdf_athletes')}`);
+                w.h2(T('pdf_roster'));
+                w.table([T('reg_name'), T('reg_phone'), T('login_email'), T('dash_prof_gym'), T('dash_prof_category'), T('dash_weight_kg')],
+                    list.map(d => [displayName(d), s(d.phone), s(d.email), s(d.gym), s(d.category), s(d.weight)]));
+
+                const upcoming = [];
+                list.forEach(d => (Array.isArray(d.competitions) ? d.competitions : []).forEach(c => {
+                    if (c.status !== 'done') upcoming.push([displayName(d), s(c.name), s(c.date), s(c.location), s(c.weight)]);
+                }));
+                w.h2(`${T('dash_upcoming')} (${upcoming.length})`);
+                if (upcoming.length) w.table([T('reg_name'), T('dash_th_comp'), T('dash_th_date'), T('dash_th_location'), T('dash_comp_weight_cat')], upcoming);
+                else w.muted(T('home_no_comp'));
+
+                list.forEach(d => { w.newPage(); athleteSections(w, d); });
+                w.finish();
+                doc.save(`Rocky_athletes_${new Date().toISOString().slice(0, 10)}.pdf`);
+                showToast(T('pdf_done'), 'success');
+            });
+        }
 
         // ===== CONTACT =====
         function sendContact() {
@@ -4201,7 +4984,7 @@
                 fb_empty: 'עדיין אין משוב מהמאמן.', fb_coach: 'מאמן', fb_ack_btn: 'אשר קבלה', fb_acked: 'אישרת קבלה',
                 fb_acked_toast: 'אישרת שקיבלת את המשוב', fb_write_err: 'נא לכתוב משוב',
                 fb_new_toast: 'קיבלת משוב חדש מהמאמן!',
-                notif_settings_title: 'התראות', notif_hint: 'התראה קופצת כשהמאמן שולח פידבק',
+                notif_settings_title: 'התראות', notif_hint: 'התראה קופצת על הודעות ועדכונים חדשים',
                 notif_on: 'התראות הופעלו', notif_off: 'התראות כובו',
                 notif_test: 'התראות פעילות ✓', notif_denied: 'הדפדפן חסם התראות — אשר בהגדרות',
                 notif_unsupported: 'הדפדפן לא תומך בהתראות',
@@ -4212,6 +4995,26 @@
                 cd_add_fb: 'שליחת משוב / הצעה', cd_fb_ph: 'כתוב הצעה או שינוי למתחרה...', cd_send_fb: 'שלח משוב', fb_sent: 'המשוב נשלח',
                 cd_role_mgmt: 'ניהול הרשאות', cd_is_coach: 'משתמש זה הוא מאמן.', cd_is_competitor: 'משתמש זה הוא מתחרה.',
                 cd_promote: 'הפוך למאמן', cd_demote: 'הורד למתחרה', promote_done: 'המשתמש הפך למאמן', demote_done: 'המשתמש הפך למתחרה',
+                cd_no_videos: 'אין סרטונים', comp_no_history: 'אין היסטוריית תחרויות', reply_delete: 'מחק תגובה זו',
+                // Videos (real upload)
+                vid_type_err: 'ניתן להעלות קבצי וידאו בלבד', vid_size_err: 'הסרטון גדול מדי — מקסימום 500MB', vid_busy: 'העלאה אחרת עדיין רצה',
+                vid_uploaded: 'הסרטון הועלה בהצלחה', vid_play: 'לחץ לניגון', vid_no_file: 'רשומה ישנה — הקובץ לא נשמר', vid_open: 'פתח בחלון חדש',
+                vid_delete_confirm: 'למחוק את הסרטון לצמיתות?',
+                vid_err_unauth: 'אין הרשאה להעלות (בדוק שהחשבון מאומת)', vid_err_cancel: 'ההעלאה בוטלה', vid_err_quota: 'מכסת האחסון מלאה — פנה למנהל',
+                vid_err_network: 'בעיית רשת — נסה שוב', vid_err_generic: 'ההעלאה נכשלה, נסה שוב',
+                vid_err_disabled: 'העלאת סרטונים עדיין לא הופעלה במערכת — פנה למנהל',
+                // Coach inbox
+                nav_notifications: 'התראות', cn_title: 'התראות מהמתחרים', cn_desc: 'עדכונים על שינויי פרטים, הרשמות לתחרויות והעלאות. לחץ על שם המתחרה לפתיחת הכרטיס שלו.',
+                cn_mark_all: 'סמן הכל כנקרא', cn_clear_read: 'נקה את מה שנקרא', cn_mark_read: 'סמן כנקרא', cn_read: 'נקרא', cn_athlete: 'מתחרה',
+                cn_empty: 'אין התראות חדשות', cn_empty_hint: 'כשמתחרה יעדכן פרטים, יירשם לתחרות או יעלה קובץ — זה יופיע כאן',
+                cn_new_one: 'עדכון חדש ממתחרה', cn_new_many: '{n} עדכונים חדשים ממתחרים', cn_all_read: 'כל ההתראות סומנו כנקראו', cn_nothing_read: 'אין התראות שנקראו',
+                cn_err: 'הפעולה נכשלה, נסה שוב', cn_err_perm: 'אין הרשאה לקרוא התראות — יש לפרסם את חוקי Firestore המעודכנים', cn_err_load: 'טעינת ההתראות נכשלה — רענן את הדף',
+                cn_t_profile: 'עדכן פרטי פרופיל', cn_t_competition: 'נרשם לתחרות', cn_t_document: 'העלה מסמך', cn_t_video: 'העלה סרטון',
+                cn_f_nameHe: 'שם בעברית', cn_f_nameEn: 'שם באנגלית', cn_f_weight: 'משקל', cn_f_height: 'גובה', cn_f_category: 'קטגוריה', cn_f_gym: 'מכון',
+                // PDF export
+                pdf_export_all: 'ייצוא כל המתחרים (PDF)', pdf_export_one: 'הורד PDF', pdf_building: 'מכין PDF...', pdf_done: 'קובץ ה-PDF נוצר', pdf_err: 'יצירת ה-PDF נכשלה — בדוק חיבור ונסה שוב',
+                pdf_generated: 'הופק בתאריך', pdf_personal: 'פרטים אישיים', pdf_file: 'קובץ', pdf_size: 'גודל', pdf_truncated: 'ועוד {n} רשומות ישנות שלא נכללו',
+                pdf_roster_title: 'Rocky — רשימת מתחרים', pdf_roster: 'טבלת מתחרים', pdf_athletes: 'מתחרים',
                 // Coach cards
                 coach_gadi_name: 'גדי שור', coach_gadi_role: 'מאמן ראשי - לחימה', coach_gadi_bio: 'מאמן ומנהל קבוצת Rocky. מוביל את המתחרים לתוצאות ברמה הגבוהה ביותר.',
                 coach_omer_name: 'עומר עמנואלי', coach_omer_role: 'מאמן בכיר ומתחרה פעיל', coach_omer_bio: 'מייסד קבוצת Rocky בשיתוף עם גדי, המאמן הראשי. מאמן בכיר ומתחרה פעיל שמוביל בדוגמה אישית.',
@@ -4327,7 +5130,7 @@
                 fb_empty: 'No feedback from coach yet.', fb_coach: 'Coach', fb_ack_btn: 'Acknowledge', fb_acked: 'Acknowledged',
                 fb_acked_toast: 'You acknowledged the feedback', fb_write_err: 'Please write feedback',
                 fb_new_toast: 'New feedback from your coach!',
-                notif_settings_title: 'Notifications', notif_hint: 'Pops an alert when your coach sends feedback',
+                notif_settings_title: 'Notifications', notif_hint: 'Pops an alert on new messages and updates',
                 notif_on: 'Notifications enabled', notif_off: 'Notifications disabled',
                 notif_test: 'Notifications active ✓', notif_denied: 'Browser blocked notifications — allow in settings',
                 notif_unsupported: 'Your browser does not support notifications',
@@ -4338,6 +5141,26 @@
                 cd_add_fb: 'Send Feedback / Suggestion', cd_fb_ph: 'Write a suggestion or change for the competitor...', cd_send_fb: 'Send Feedback', fb_sent: 'Feedback sent',
                 cd_role_mgmt: 'Role Management', cd_is_coach: 'This user is a coach.', cd_is_competitor: 'This user is a competitor.',
                 cd_promote: 'Make Coach', cd_demote: 'Demote to Competitor', promote_done: 'User is now a coach', demote_done: 'User is now a competitor',
+                cd_no_videos: 'No videos', comp_no_history: 'No competition history', reply_delete: 'Delete this reply',
+                // Videos (real upload)
+                vid_type_err: 'Only video files can be uploaded', vid_size_err: 'Video too large — 500MB max', vid_busy: 'Another upload is still running',
+                vid_uploaded: 'Video uploaded successfully', vid_play: 'Click to play', vid_no_file: 'Legacy entry — file was not stored', vid_open: 'Open in new tab',
+                vid_delete_confirm: 'Delete this video permanently?',
+                vid_err_unauth: 'Not allowed to upload (is your account verified?)', vid_err_cancel: 'Upload cancelled', vid_err_quota: 'Storage quota is full — contact the admin',
+                vid_err_network: 'Network problem — try again', vid_err_generic: 'Upload failed, please try again',
+                vid_err_disabled: 'Video upload is not enabled yet — contact the admin',
+                // Coach inbox
+                nav_notifications: 'Notifications', cn_title: 'Athlete Notifications', cn_desc: 'Profile changes, competition sign-ups and uploads. Click an athlete\'s name to open their card.',
+                cn_mark_all: 'Mark all as read', cn_clear_read: 'Clear read items', cn_mark_read: 'Mark as read', cn_read: 'Read', cn_athlete: 'Athlete',
+                cn_empty: 'No new notifications', cn_empty_hint: 'When an athlete updates details, registers for a competition or uploads a file — it shows up here',
+                cn_new_one: 'New update from an athlete', cn_new_many: '{n} new updates from athletes', cn_all_read: 'All notifications marked as read', cn_nothing_read: 'No read notifications to clear',
+                cn_err: 'Action failed, please try again', cn_err_perm: 'No permission to read notifications — the updated Firestore rules must be published', cn_err_load: 'Failed to load notifications — refresh the page',
+                cn_t_profile: 'updated profile details', cn_t_competition: 'registered for a competition', cn_t_document: 'uploaded a document', cn_t_video: 'uploaded a video',
+                cn_f_nameHe: 'Hebrew name', cn_f_nameEn: 'English name', cn_f_weight: 'weight', cn_f_height: 'height', cn_f_category: 'category', cn_f_gym: 'gym',
+                // PDF export
+                pdf_export_all: 'Export all athletes (PDF)', pdf_export_one: 'Download PDF', pdf_building: 'Building PDF...', pdf_done: 'PDF created', pdf_err: 'PDF export failed — check your connection and try again',
+                pdf_generated: 'Generated on', pdf_personal: 'Personal details', pdf_file: 'File', pdf_size: 'Size', pdf_truncated: 'and {n} older entries not included',
+                pdf_roster_title: 'Rocky — Athlete Roster', pdf_roster: 'Athletes', pdf_athletes: 'athletes',
                 // Coach cards
                 coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Head Coach - Fighting', coach_gadi_bio: 'Coach and manager of Rocky team. Leading competitors to top results.',
                 coach_omer_name: 'Omer Emanueli', coach_omer_role: 'Senior Coach & Active Competitor', coach_omer_bio: 'Co-founder of Rocky team with Gadi, the head coach. Senior coach and active competitor leading by example.',
@@ -4453,7 +5276,7 @@
                 fb_empty: 'Noch kein Feedback vom Trainer.', fb_coach: 'Trainer', fb_ack_btn: 'Bestätigen', fb_acked: 'Bestätigt',
                 fb_acked_toast: 'Du hast das Feedback bestätigt', fb_write_err: 'Bitte Feedback schreiben',
                 fb_new_toast: 'Neues Feedback von deinem Trainer!',
-                notif_settings_title: 'Benachrichtigungen', notif_hint: 'Zeigt eine Meldung, wenn dein Trainer Feedback sendet',
+                notif_settings_title: 'Benachrichtigungen', notif_hint: 'Zeigt eine Meldung bei neuen Nachrichten und Aktualisierungen',
                 notif_on: 'Benachrichtigungen aktiviert', notif_off: 'Benachrichtigungen deaktiviert',
                 notif_test: 'Benachrichtigungen aktiv ✓', notif_denied: 'Browser hat Benachrichtigungen blockiert — in Einstellungen erlauben',
                 notif_unsupported: 'Dein Browser unterstützt keine Benachrichtigungen',
@@ -4464,6 +5287,26 @@
                 cd_add_fb: 'Feedback / Vorschlag senden', cd_fb_ph: 'Schreibe einen Vorschlag oder eine Änderung...', cd_send_fb: 'Feedback senden', fb_sent: 'Feedback gesendet',
                 cd_role_mgmt: 'Rollenverwaltung', cd_is_coach: 'Dieser Benutzer ist Trainer.', cd_is_competitor: 'Dieser Benutzer ist Wettkämpfer.',
                 cd_promote: 'Zum Trainer machen', cd_demote: 'Zu Wettkämpfer herabstufen', promote_done: 'Benutzer ist jetzt Trainer', demote_done: 'Benutzer ist jetzt Wettkämpfer',
+                cd_no_videos: 'Keine Videos', comp_no_history: 'Keine Wettkampfhistorie', reply_delete: 'Diese Antwort löschen',
+                // Videos (real upload)
+                vid_type_err: 'Nur Videodateien können hochgeladen werden', vid_size_err: 'Video zu groß — max. 500MB', vid_busy: 'Ein anderer Upload läuft noch',
+                vid_uploaded: 'Video erfolgreich hochgeladen', vid_play: 'Zum Abspielen klicken', vid_no_file: 'Alter Eintrag — Datei wurde nicht gespeichert', vid_open: 'In neuem Tab öffnen',
+                vid_delete_confirm: 'Dieses Video dauerhaft löschen?',
+                vid_err_unauth: 'Upload nicht erlaubt (ist dein Konto verifiziert?)', vid_err_cancel: 'Upload abgebrochen', vid_err_quota: 'Speicherkontingent voll — Admin kontaktieren',
+                vid_err_network: 'Netzwerkproblem — bitte erneut versuchen', vid_err_generic: 'Upload fehlgeschlagen, bitte erneut versuchen',
+                vid_err_disabled: 'Video-Upload ist noch nicht aktiviert — Admin kontaktieren',
+                // Coach inbox
+                nav_notifications: 'Benachrichtigungen', cn_title: 'Benachrichtigungen der Wettkämpfer', cn_desc: 'Profiländerungen, Wettkampfanmeldungen und Uploads. Klicke auf einen Namen, um die Karte zu öffnen.',
+                cn_mark_all: 'Alle als gelesen markieren', cn_clear_read: 'Gelesene entfernen', cn_mark_read: 'Als gelesen markieren', cn_read: 'Gelesen', cn_athlete: 'Wettkämpfer',
+                cn_empty: 'Keine neuen Benachrichtigungen', cn_empty_hint: 'Wenn ein Wettkämpfer Daten ändert, sich anmeldet oder eine Datei hochlädt — erscheint es hier',
+                cn_new_one: 'Neue Aktualisierung eines Wettkämpfers', cn_new_many: '{n} neue Aktualisierungen von Wettkämpfern', cn_all_read: 'Alle Benachrichtigungen als gelesen markiert', cn_nothing_read: 'Keine gelesenen Benachrichtigungen',
+                cn_err: 'Aktion fehlgeschlagen, bitte erneut versuchen', cn_err_perm: 'Keine Berechtigung — die aktualisierten Firestore-Regeln müssen veröffentlicht werden', cn_err_load: 'Laden fehlgeschlagen — Seite aktualisieren',
+                cn_t_profile: 'hat Profildaten aktualisiert', cn_t_competition: 'hat sich für einen Wettkampf angemeldet', cn_t_document: 'hat ein Dokument hochgeladen', cn_t_video: 'hat ein Video hochgeladen',
+                cn_f_nameHe: 'Hebräischer Name', cn_f_nameEn: 'Englischer Name', cn_f_weight: 'Gewicht', cn_f_height: 'Größe', cn_f_category: 'Kategorie', cn_f_gym: 'Verein',
+                // PDF export
+                pdf_export_all: 'Alle Wettkämpfer exportieren (PDF)', pdf_export_one: 'PDF herunterladen', pdf_building: 'PDF wird erstellt...', pdf_done: 'PDF erstellt', pdf_err: 'PDF-Export fehlgeschlagen — Verbindung prüfen und erneut versuchen',
+                pdf_generated: 'Erstellt am', pdf_personal: 'Persönliche Daten', pdf_file: 'Datei', pdf_size: 'Größe', pdf_truncated: 'und {n} ältere Einträge nicht enthalten',
+                pdf_roster_title: 'Rocky — Wettkämpferliste', pdf_roster: 'Wettkämpfer', pdf_athletes: 'Wettkämpfer',
                 // Coach cards
                 coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Cheftrainer - Kampfsport', coach_gadi_bio: 'Trainer und Leiter des Rocky-Teams. Führt die Wettkämpfer zu Spitzenleistungen.',
                 coach_omer_name: 'Omer Emanueli', coach_omer_role: 'Senior-Trainer & aktiver Wettkämpfer', coach_omer_bio: 'Mitgründer des Rocky-Teams mit Gadi. Senior-Trainer der mit persönlichem Beispiel vorangeht.',
@@ -4676,6 +5519,7 @@
                 else if (onclick.includes("'feedback'")) { const unread = (userData && userData.coachFeedback) ? userData.coachFeedback.filter(f => !f.ack).length : 0; btn.innerHTML = `<i class="fas fa-comments"></i> ${L(t.nav_feedback)} <span id="feedbackBadge" class="fb-badge" style="display:${unread ? '' : 'none'};">${unread}</span>`; }
                 else if (onclick.includes("'competitions'")) btn.innerHTML = `<i class="fas fa-medal"></i> ${L(t.dash_competitions)}`;
                 else if (onclick.includes("'coach'")) btn.innerHTML = isAdmin ? `<i class="fas fa-crown"></i> ${L(t.dash_manage_admin)}` : `<i class="fas fa-users-cog"></i> ${L(t.dash_manage)}`;
+                else if (onclick.includes("'notifications'")) { const n = (typeof coachInboxUnreadCount === 'function') ? coachInboxUnreadCount() : 0; btn.innerHTML = `<i class="fas fa-bell"></i> ${L(t.nav_notifications)} <span id="coachNotifBadge" class="fb-badge" style="display:${n ? '' : 'none'};">${n}</span>`; }
             });
             const headerLogoutLbl = document.getElementById('headerLogoutLabel');
             if (headerLogoutLbl) headerLogoutLbl.textContent = t.dash_logout;
@@ -4809,7 +5653,7 @@
             // Coach panel
             const coachH3 = document.querySelector('#panel-coach > h3');
             if (coachH3) coachH3.innerHTML = `<i class="fas fa-users-cog" style="color: var(--accent);"></i> ${t.dash_coach_title}`;
-            const coachDesc = document.querySelector('#panel-coach > p');
+            const coachDesc = document.getElementById('coachPanelDesc');
             if (coachDesc) coachDesc.textContent = t.dash_coach_desc;
 
             // Dashboard input placeholders

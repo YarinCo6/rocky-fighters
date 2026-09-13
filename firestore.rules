@@ -14,6 +14,14 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
     }
 
+    function isStaff() {
+      return isAdmin() || isCoach();
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
     match /users/{userId} {
       // Admin: full read/write on everyone.
       allow read, write: if isAdmin();
@@ -21,23 +29,82 @@ service cloud.firestore {
       // Coach: read all competitor docs.
       allow read: if isCoach();
 
-      // Coach: may write ONLY the coachFeedback field on a competitor doc.
-      // Cannot touch role, profile, or any other field.
+      // Coach: may write ONLY the fields that carry coach replies.
+      // Cannot touch role, profile, documents, videos, or anything else.
       allow update: if isCoach()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coachFeedback']);
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['coachFeedback', 'trainingLog', 'weeklyGoals']);
 
       // Owner: read own doc.
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId);
 
       // Owner create: only own doc, and role is forced to 'competitor'.
-      allow create: if request.auth != null
-        && request.auth.uid == userId
+      allow create: if isOwner(userId)
         && request.resource.data.role == 'competitor';
 
       // Owner update: own doc, but role can NOT be changed (only admin can).
-      allow update: if request.auth != null
-        && request.auth.uid == userId
+      allow update: if isOwner(userId)
         && request.resource.data.role == resource.data.role;
+    }
+
+    // Inbox for coaches/admin. Athletes append entries about their own changes
+    // (profile edits, competition sign-ups, uploads). Only staff can read them.
+    match /coachNotifications/{notifId} {
+      function isStr(v, max) {
+        return v is string && v.size() <= max;
+      }
+
+      function validPayload() {
+        let d = request.resource.data;
+        return (d.type == 'profile'
+                  && d.data.keys().hasOnly(['fields'])
+                  && d.data.fields is list
+                  && d.data.fields.size() >= 1
+                  && d.data.fields.size() <= 6
+                  && d.data.fields.hasOnly(['nameHe', 'nameEn', 'weight', 'height', 'category', 'gym']))
+            || (d.type == 'competition'
+                  && d.data.keys().hasAll(['name', 'date', 'location', 'weight'])
+                  && d.data.keys().hasOnly(['name', 'date', 'location', 'weight'])
+                  && isStr(d.data.name, 100)
+                  && isStr(d.data.date, 20)
+                  && isStr(d.data.location, 100)
+                  && isStr(d.data.weight, 30))
+            || (d.type == 'document'
+                  && d.data.keys().hasAll(['docType', 'name'])
+                  && d.data.keys().hasOnly(['docType', 'name'])
+                  && d.data.docType in ['medical', 'registration', 'passport', 'insurance', 'other']
+                  && isStr(d.data.name, 120))
+            || (d.type == 'video'
+                  && d.data.keys().hasAll(['title'])
+                  && d.data.keys().hasOnly(['title'])
+                  && isStr(d.data.title, 120));
+      }
+
+      allow read: if isStaff();
+
+      // Any signed-in user may append a notification about THEMSELVES only.
+      // Shape is fully validated so the inbox can never carry arbitrary payloads.
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['fromUid', 'fromName', 'type', 'data', 'createdAt', 'readBy', 'deletedBy'])
+        && request.resource.data.keys().hasOnly(['fromUid', 'fromName', 'type', 'data', 'createdAt', 'readBy', 'deletedBy'])
+        && request.resource.data.fromUid == request.auth.uid
+        && isStr(request.resource.data.fromName, 80)
+        && request.resource.data.type in ['profile', 'competition', 'document', 'video']
+        && request.resource.data.data is map
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.readBy == {}
+        && request.resource.data.deletedBy == {}
+        && validPayload();
+
+      // Staff may only flip their OWN read / deleted flag. Nothing else changes.
+      allow update: if isStaff()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'deletedBy'])
+        && request.resource.data.readBy.diff(resource.data.readBy).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.deletedBy.diff(resource.data.deletedBy).affectedKeys().hasOnly([request.auth.uid]);
+
+      // Hard delete: admin anytime; coaches only for stale entries (housekeeping).
+      allow delete: if isAdmin()
+        || (isCoach() && resource.data.createdAt < request.time - duration.value(60, 'd'));
     }
   }
 }
