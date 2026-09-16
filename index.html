@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a31db">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="images/rocky-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Rocky">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="description" content="Rocky - קבוצת מתחרים ישראלית בענף הלחימה. מסגרת אימונים מקצועית, פתוחה לכל מתחרה מכל מכון ואיגוד בישראל.">
     <title>Rocky - קבוצת מתחרים</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
@@ -1824,6 +1831,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" integrity="sha384-EkqK+ezBWJuvO3hfrSx2iVqr3YQbhmnzn8kPhOpBZ+0GMVU5oGSgptwIu8D84HjE" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" integrity="sha384-M481iNZJtbpypKgvlvZ+78Giq0BsewFLk5r2k+MOcGXlwKCc27DQRZ+WCV/zpmpC" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js" integrity="sha384-E3vxFxXu8FhW5kvqdQJ5Yf8ugrV7iCJP8jgnItRH2Rk8Q08cJzJGTi/oMC3FEp3j" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js" integrity="sha384-XtSlZdmg0Ad5zf0AX4W9TGdm+dGjaNK4KG3lNFjfgbnxkCEuT9ugWXkLExgQTJ+6" crossorigin="anonymous"></script>
     <script>
         firebase.initializeApp({
             apiKey: "AIzaSyAU2knBfIaTMBEXsQOduCcX-3KOAEfqFwo",
@@ -2300,6 +2308,7 @@
                                 <div>
                                     <h4 style="margin-bottom:4px;"><i class="fas fa-bell" style="color: var(--accent);"></i> <span data-i18n="notif_settings_title">התראות</span></h4>
                                     <div style="color: var(--text-secondary); font-size:0.92rem;" data-i18n="notif_hint">התראה קופצת על הודעות ועדכונים חדשים</div>
+                                    <div id="iosPushHint" style="display:none; color: var(--text-secondary); font-size:0.88rem; margin-top:8px; line-height:1.5;" data-i18n="notif_ios_hint">באייפון: לחץ על "שתף" בספארי ← "הוסף למסך הבית", פתח את Rocky מהמסך הראשי ואז הפעל כאן התראות.</div>
                                 </div>
                                 <label class="switch">
                                     <input type="checkbox" id="notifToggle" onchange="toggleNotifications(this.checked)">
@@ -3213,6 +3222,7 @@
                     enterDashboard();
                     setupUserDocListener(user.uid);
                     if (isCoach || isAdmin) setupCoachInboxListener(); else teardownCoachInboxListener();
+                    refreshPushOnLogin();
                 } else {
                     if (currentUser) {
                         teardownUserDocListener();
@@ -4064,6 +4074,7 @@
             const snap = await ref.get();
             const log = ((snap.data() && snap.data().trainingLog) || []).map(e => e.id === id ? { ...e, coachComment: text } : e);
             await ref.update({ trainingLog: log });
+            pushNotify('reply', { targetUid: uid });
             showToast(T('fb_sent'), 'success');
             showCompetitorDetail(uid);
         }
@@ -4076,6 +4087,7 @@
             const snap = await ref.get();
             const goals = ((snap.data() && snap.data().weeklyGoals) || []).map(g => g.id === id ? { ...g, coachComment: text } : g);
             await ref.update({ weeklyGoals: goals });
+            pushNotify('reply', { targetUid: uid });
             showToast(T('fb_sent'), 'success');
             showCompetitorDetail(uid);
         }
@@ -4095,11 +4107,65 @@
             return fb.filter(f => !f.ack).length;
         }
 
-        // Browser/OS push notifications for new coach feedback.
-        // Toggle persists per device in localStorage. Works while the tab is open
-        // (foreground or backgrounded); true closed-browser push would need FCM.
+        // ===== NOTIFICATIONS: real push (FCM) + in-tab fallback =====
+        // The toggle registers this device with Firebase Cloud Messaging; a tiny
+        // Cloudflare Worker relays sends (see push-worker/). If push isn't available
+        // (unsupported browser, iOS Safari outside "Add to Home Screen") we fall
+        // back to plain tab notifications like before.
+        const PUSH_WORKER_URL = 'https://rocky-push.rocky-push-worker.workers.dev';
+        const VAPID_KEY = 'BGwo_4-oKASk0Tjm7uDKMkkgqEZfddIbj7clOY7AKOC4RQSrGPKYHcVwy5d8ukfS-fqEjM2XOAetYBueDXTML0w';
+        let messagingInstance = null;
+        let swRegistration = null;
+
         function notifSupported() { return 'Notification' in window; }
         function notifEnabled() { return localStorage.getItem('rf_notif') === 'on'; }
+        function pushSupported() {
+            try { return 'serviceWorker' in navigator && 'PushManager' in window && firebase.messaging && firebase.messaging.isSupported(); }
+            catch (e) { return false; }
+        }
+        function isIosNotStandalone() {
+            const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            return ios && !standalone;
+        }
+        function pushTokenRef(tok) { return db.collection('pushTokens').doc(tok); }
+
+        async function getMessaging() {
+            if (messagingInstance) return messagingInstance;
+            swRegistration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+            messagingInstance = firebase.messaging();
+            messagingInstance.onMessage((payload) => {
+                const n = payload && payload.notification;
+                if (n && n.body) showToast(n.body);
+            });
+            return messagingInstance;
+        }
+
+        // Register (or refresh — FCM rotates tokens) this device for the signed-in user.
+        async function registerPush() {
+            if (!currentUser || !pushSupported() || Notification.permission !== 'granted') return false;
+            const m = await getMessaging();
+            const tok = await m.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swRegistration });
+            if (!tok) return false;
+            const prev = localStorage.getItem('rf_push_token');
+            if (prev && prev !== tok) { try { await pushTokenRef(prev).delete(); } catch (e) {} }
+            await pushTokenRef(tok).set({
+                uid: currentUser.uid,
+                lang: currentLang,
+                ua: navigator.userAgent.slice(0, 200),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            localStorage.setItem('rf_push_token', tok);
+            return true;
+        }
+
+        async function unregisterPush() {
+            const prev = localStorage.getItem('rf_push_token');
+            localStorage.removeItem('rf_push_token');
+            if (prev) { try { await pushTokenRef(prev).delete(); } catch (e) {} }
+            try { if (messagingInstance) await messagingInstance.deleteToken(); } catch (e) {}
+        }
 
         async function toggleNotifications(on) {
             const toggle = document.getElementById('notifToggle');
@@ -4118,24 +4184,52 @@
                     return;
                 }
                 localStorage.setItem('rf_notif', 'on');
-                showToast(T('notif_on'), 'success');
-                fireNativeNotification(T('notif_test'));
+                let pushed = false;
+                try { pushed = await registerPush(); }
+                catch (e) { console.warn('push registration failed, using tab notifications:', e && e.message); }
+                showToast(pushed ? T('notif_push_on') : T('notif_on'), 'success');
+                if (!pushed) fireNativeNotification(T('notif_test'));
             } else {
                 localStorage.setItem('rf_notif', 'off');
+                await unregisterPush();
                 showToast(T('notif_off'));
             }
         }
 
+        // Tab-only fallback. Skipped once real push is registered, so a backgrounded
+        // tab doesn't show the same alert twice.
         function fireNativeNotification(body) {
+            if (localStorage.getItem('rf_push_token')) return;
             if (!notifSupported() || !notifEnabled() || Notification.permission !== 'granted') return;
-            if (document.visibilityState === 'visible') return; // tab focused → toast already shown
-            try { new Notification('Rocky Fighters', { body, icon: 'https://yarinco6.github.io/rocky-fighters/favicon.ico' }); } catch (e) {}
+            if (document.visibilityState === 'visible') return;
+            try { new Notification('Rocky Fighters', { body, icon: 'images/rocky-icon.png' }); } catch (e) {}
         }
 
         function syncNotifToggle() {
             const toggle = document.getElementById('notifToggle');
             if (!toggle) return;
             toggle.checked = notifSupported() && notifEnabled() && Notification.permission === 'granted';
+            const hint = document.getElementById('iosPushHint');
+            if (hint) hint.style.display = isIosNotStandalone() ? '' : 'none';
+        }
+
+        // On every sign-in, silently refresh the device registration if the user opted in.
+        async function refreshPushOnLogin() {
+            if (!notifEnabled()) return;
+            try { await registerPush(); } catch (e) { console.warn('push refresh failed:', e && e.message); }
+        }
+
+        // Ask the relay to push. Never blocks the UI; the relay decides recipients and text.
+        async function pushNotify(kind, extra) {
+            try {
+                const body = { kind, ...(extra || {}) };
+                if (kind !== 'contact') {
+                    if (!auth.currentUser) return;
+                    body.idToken = await auth.currentUser.getIdToken();
+                }
+                const r = await fetch(PUSH_WORKER_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), keepalive: true });
+                if (!r.ok) console.warn('push relay:', r.status);
+            } catch (e) { console.warn('push relay unreachable:', e && e.message); }
         }
 
         // Count every non-empty coach reply on the athlete's journal + weekly goals.
@@ -4257,6 +4351,7 @@
             existing.push(entry);
             await db.collection('users').doc(uid).update({ coachFeedback: existing });
             input.value = '';
+            pushNotify('feedback', { targetUid: uid });
             showToast(T('fb_sent'));
             showCompetitorDetail(uid);
         }
@@ -4523,6 +4618,7 @@
                     readBy: {},
                     deletedBy: {}
                 });
+                pushNotify('athleteUpdate');
             } catch (e) {
                 console.warn('notifyCoaches failed (non-fatal):', e && e.code, e && e.message);
             }
@@ -4772,6 +4868,7 @@
             try {
                 teardownUserDocListener();
                 teardownCoachInboxListener();
+                await unregisterPush();
                 for (const col of ['coachNotifications', 'contactMessages']) {
                     try {
                         const snap = await db.collection(col).where('fromUid', '==', uid).get();
@@ -4917,6 +5014,54 @@
                     doc.setTextColor(0);
                     w.gap(2);
                 },
+                // Weekly board: one column per day, each cell stacks that day's blocks
+                // ("start–end" + type), mirroring the on-screen schedule.
+                weekGrid: (blocks) => {
+                    const names = dayNames();
+                    const days = rtl ? [0, 1, 2, 3, 4, 5, 6] : [0, 1, 2, 3, 4, 5, 6];
+                    const colW = maxW / 7;
+                    const headH = 7, lineH = 3.9, padY = 2.2;
+                    doc.setFont('Heebo', 'normal'); doc.setFontSize(7.5);
+                    const cells = days.map(day => {
+                        const items = blocks.filter(b => b.day === day).sort((a, b) => String(a.start || '').localeCompare(String(b.start || '')));
+                        const lines = [];
+                        items.forEach(b => {
+                            lines.push({ t: `${b.start || ''}–${b.end || ''}`, bold: true });
+                            if (b.type) doc.splitTextToSize(String(b.type), colW - 3).forEach(l => lines.push({ t: l, bold: false }));
+                            lines.push({ t: '', bold: false });
+                        });
+                        if (lines.length && lines[lines.length - 1].t === '') lines.pop();
+                        return lines;
+                    });
+                    const bodyH = Math.max(8, Math.max(...cells.map(c => c.length)) * lineH + padY * 2);
+                    ensure(headH + bodyH);
+                    const colX = (i) => rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
+                    // header
+                    doc.setFillColor(42, 49, 219); doc.rect(margin, y, maxW, headH, 'F');
+                    doc.setFont('Heebo', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255);
+                    days.forEach((day, i) => doc.text(names[day], colX(i) + colW / 2, y + 4.8, Object.assign({ align: 'center' }, bidi)));
+                    y += headH;
+                    // body
+                    doc.setDrawColor(200, 204, 230); doc.setLineWidth(0.25);
+                    doc.setFillColor(248, 249, 253); doc.rect(margin, y, maxW, bodyH, 'F');
+                    days.forEach((day, i) => {
+                        const x = colX(i);
+                        doc.rect(x, y, colW, bodyH, 'S');
+                        let ly = y + padY + 3;
+                        cells[i].forEach(line => {
+                            if (!line.t) { ly += lineH * 0.6; return; }
+                            doc.setFont('Heebo', line.bold ? 'bold' : 'normal'); doc.setFontSize(7.5);
+                            doc.setTextColor(line.bold ? 42 : 30, line.bold ? 49 : 30, line.bold ? 219 : 30);
+                            // Time ranges are digits only: skip bidi reordering so "09:00–12:00" keeps its order.
+                            doc.text(line.t, rtl ? x + colW - 1.5 : x + 1.5, ly, Object.assign({ align: rtl ? 'right' : 'left' }, line.bold ? { isInputVisual: true, isOutputVisual: true } : bidi));
+                            ly += lineH;
+                        });
+                        if (!cells[i].length) { doc.setTextColor(170); doc.setFontSize(8); doc.text('—', x + colW / 2, y + bodyH / 2 + 1, { align: 'center' }); }
+                    });
+                    doc.setTextColor(0);
+                    y += bodyH;
+                    w.gap(3);
+                },
                 finish: () => { footer(); }
             };
             return w;
@@ -4970,12 +5115,8 @@
 
             const blocks = Array.isArray(d.weeklySchedule) ? d.weeklySchedule : [];
             w.h2(T('cd_schedule'));
-            if (blocks.length) {
-                const names = dayNames();
-                const sorted = blocks.slice().sort((a, b) => (a.day - b.day) || String(a.start || '').localeCompare(String(b.start || '')));
-                w.table([T('sched_day'), T('sched_start'), T('sched_end'), T('sched_type')],
-                    sorted.map(b => [names[b.day] || s(b.day), s(b.start), s(b.end), s(b.type)]));
-            } else w.muted(T('cd_no_schedule'));
+            if (blocks.length) w.weekGrid(blocks);
+            else w.muted(T('cd_no_schedule'));
 
             const ex = Array.isArray(d.strengthProgram) ? d.strengthProgram : [];
             w.h2(T('cd_strength'));
@@ -5095,7 +5236,8 @@
             try {
                 const entry = { name, phone, message: msg, createdAt: firebase.firestore.FieldValue.serverTimestamp(), readBy: {}, deletedBy: {} };
                 if (auth.currentUser) entry.fromUid = auth.currentUser.uid;
-                await db.collection('contactMessages').add(entry);
+                const ref = await db.collection('contactMessages').add(entry);
+                pushNotify('contact', { refId: ref.id });
                 showToast(T('contact_sent'), 'success');
                 document.getElementById('contactName').value = '';
                 document.getElementById('contactPhone').value = '';
@@ -5244,7 +5386,8 @@
                 notif_settings_title: 'התראות', notif_hint: 'התראה קופצת על הודעות ועדכונים חדשים',
                 notif_on: 'התראות הופעלו', notif_off: 'התראות כובו',
                 notif_test: 'התראות פעילות ✓', notif_denied: 'הדפדפן חסם התראות — אשר בהגדרות',
-                notif_unsupported: 'הדפדפן לא תומך בהתראות',
+                notif_unsupported: 'הדפדפן לא תומך בהתראות', notif_push_on: 'התראות הופעלו — יגיעו גם כשהאתר סגור',
+                notif_ios_hint: 'באייפון: לחץ על "שתף" בספארי ← "הוסף למסך הבית", פתח את Rocky מהמסך הראשי ואז הפעל כאן התראות.',
                 remove: 'הסר', removed: 'הוסר',
                 cd_documents: 'מסמכים', cd_approved: 'אושר', cd_pending: 'בבדיקה', cd_no_docs: 'אין מסמכים',
                 cd_schedule: 'לוח אימונים', cd_no_schedule: 'אין לוח אימונים', cd_strength: 'תכנית כוח', cd_no_strength: 'אין תכנית כוח',
@@ -5400,7 +5543,8 @@
                 notif_settings_title: 'Notifications', notif_hint: 'Pops an alert on new messages and updates',
                 notif_on: 'Notifications enabled', notif_off: 'Notifications disabled',
                 notif_test: 'Notifications active ✓', notif_denied: 'Browser blocked notifications — allow in settings',
-                notif_unsupported: 'Your browser does not support notifications',
+                notif_unsupported: 'Your browser does not support notifications', notif_push_on: 'Notifications on — they arrive even when the site is closed',
+                notif_ios_hint: 'On iPhone: tap Share in Safari → "Add to Home Screen", open Rocky from the home screen, then enable notifications here.',
                 remove: 'Remove', removed: 'Removed',
                 cd_documents: 'Documents', cd_approved: 'Approved', cd_pending: 'Pending', cd_no_docs: 'No documents',
                 cd_schedule: 'Training Schedule', cd_no_schedule: 'No schedule', cd_strength: 'Strength Program', cd_no_strength: 'No strength program',
@@ -5556,7 +5700,8 @@
                 notif_settings_title: 'Benachrichtigungen', notif_hint: 'Zeigt eine Meldung bei neuen Nachrichten und Aktualisierungen',
                 notif_on: 'Benachrichtigungen aktiviert', notif_off: 'Benachrichtigungen deaktiviert',
                 notif_test: 'Benachrichtigungen aktiv ✓', notif_denied: 'Browser hat Benachrichtigungen blockiert — in Einstellungen erlauben',
-                notif_unsupported: 'Dein Browser unterstützt keine Benachrichtigungen',
+                notif_unsupported: 'Dein Browser unterstützt keine Benachrichtigungen', notif_push_on: 'Benachrichtigungen aktiv — sie kommen auch bei geschlossener Seite an',
+                notif_ios_hint: 'Auf dem iPhone: in Safari auf "Teilen" → "Zum Home-Bildschirm", Rocky vom Home-Bildschirm öffnen und dann hier Benachrichtigungen aktivieren.',
                 remove: 'Entfernen', removed: 'Entfernt',
                 cd_documents: 'Dokumente', cd_approved: 'Genehmigt', cd_pending: 'In Prüfung', cd_no_docs: 'Keine Dokumente',
                 cd_schedule: 'Trainingsplan', cd_no_schedule: 'Kein Trainingsplan', cd_strength: 'Kraftprogramm', cd_no_strength: 'Kein Kraftprogramm',

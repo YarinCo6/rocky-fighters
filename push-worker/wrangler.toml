@@ -1,0 +1,10 @@
+name = "rocky-push"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+PROJECT_ID = "rocky-fighters-il"
+SITE_URL = "https://yarinco6.github.io/rocky-fighters/"
+ALLOWED_ORIGINS = "https://yarinco6.github.io,http://localhost:8080,http://127.0.0.1:8080"
+
+# Secrets (never in this file):  wrangler secret put FIREBASE_SA / FIREBASE_WEB_API_KEY / ADMIN_EMAIL

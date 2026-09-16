@@ -1,0 +1,13 @@
+{
+  "name": "rocky-push-worker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Push-notification relay for the Rocky Fighters site (Cloudflare Worker)",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

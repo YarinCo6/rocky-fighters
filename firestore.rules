@@ -162,6 +162,20 @@ service cloud.firestore {
         || (isCoach() && resource.data.createdAt < request.time - duration.value(60, 'd'));
     }
 
+    // Push-notification device registrations. Doc id = FCM token. A user may
+    // register/refresh/remove their OWN devices; nobody reads them from the client
+    // (the relay reads with a service account, which bypasses these rules).
+    match /pushTokens/{token} {
+      allow read: if false;
+      allow create, update: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'lang', 'ua', 'createdAt', 'updatedAt'])
+        && request.resource.data.lang in ['he', 'en', 'de']
+        && request.resource.data.ua is string && request.resource.data.ua.size() <= 200
+        && token.size() >= 20 && token.size() <= 400;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
     // Public contact form. Anyone (even signed-out) may leave a message; only
     // staff can read it. Strict shape + sizes keep it from being a spam sink.
     match /contactMessages/{msgId} {
