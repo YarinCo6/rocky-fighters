@@ -1598,6 +1598,18 @@
         .collapse-toggle .chev { color: var(--text-secondary); transition: transform 0.25s; }
         .collapse-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
         .collapse-toggle:hover .chev { color: var(--accent); }
+        .field-acc { margin-bottom: 10px; }
+        .field-acc > summary {
+            list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-secondary);
+            cursor: pointer; user-select: none;
+        }
+        .field-acc > summary::-webkit-details-marker { display: none; }
+        .field-acc > summary label { margin: 0; cursor: pointer; pointer-events: none; }
+        .field-acc > summary .chev { color: var(--text-secondary); font-size: 0.85rem; transition: transform 0.25s; }
+        .field-acc[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-color: var(--accent); }
+        .field-acc[open] > summary .chev { transform: rotate(180deg); color: var(--accent); }
+        .field-acc > input { border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; }
         .danger-card { border-color: rgba(42,49,219,0.35) !important; }
         .danger-card h4 i { color: var(--accent); }
         .file-item .file-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -2250,30 +2262,30 @@
                                 <i class="fas fa-chevron-down chev"></i>
                             </button>
                             <div id="editProfileBody" hidden style="margin-top:14px;">
-                            <div class="form-group">
-                                <label id="nameHeLabel">שם מלא (עברית)</label>
+                            <details class="form-group field-acc">
+                                <summary><label id="nameHeLabel">שם מלא (עברית)</label><i class="fas fa-chevron-down chev"></i></summary>
                                 <input type="text" id="nameHeInput" placeholder="השם שלך בעברית">
-                            </div>
-                            <div class="form-group">
-                                <label id="nameEnLabel">Full name (English)</label>
+                            </details>
+                            <details class="form-group field-acc">
+                                <summary><label id="nameEnLabel">Full name (English)</label><i class="fas fa-chevron-down chev"></i></summary>
                                 <input type="text" id="nameEnInput" placeholder="Your name in English">
-                            </div>
-                            <div class="form-group">
-                                <label>משקל (ק"ג)</label>
+                            </details>
+                            <details class="form-group field-acc">
+                                <summary><label>משקל (ק"ג)</label><i class="fas fa-chevron-down chev"></i></summary>
                                 <input type="number" id="weightInput" placeholder="הכנס משקל" step="0.1" min="30" max="200">
-                            </div>
-                            <div class="form-group">
-                                <label>גובה (ס"מ)</label>
+                            </details>
+                            <details class="form-group field-acc">
+                                <summary><label>גובה (ס"מ)</label><i class="fas fa-chevron-down chev"></i></summary>
                                 <input type="number" id="heightInput" placeholder="הכנס גובה" step="1" min="100" max="230">
-                            </div>
-                            <div class="form-group">
-                                <label>קטגוריית משקל</label>
+                            </details>
+                            <details class="form-group field-acc">
+                                <summary><label>קטגוריית משקל</label><i class="fas fa-chevron-down chev"></i></summary>
                                 <input type="text" id="categoryInput" placeholder="למשל: -70 ק&quot;ג">
-                            </div>
-                            <div class="form-group">
-                                <label>מכון / מועדון</label>
+                            </details>
+                            <details class="form-group field-acc">
+                                <summary><label>מכון / מועדון</label><i class="fas fa-chevron-down chev"></i></summary>
                                 <input type="text" id="gymInput" placeholder="שם המכון">
-                            </div>
+                            </details>
                             <button class="form-submit" style="margin-top:18px;" onclick="updateProfile()">שמור שינויים</button>
                             </div>
                         </div>
@@ -2296,10 +2308,14 @@
                             </div>
                         </div>
                         <div class="profile-card" style="margin-top:20px;" id="pwCard">
-                            <h4 style="margin-bottom:6px;"><i class="fas fa-key" style="color: var(--accent);"></i> <span data-i18n="pw_title">שינוי סיסמה</span></h4>
+                            <button type="button" class="collapse-toggle" id="pwToggle" onclick="toggleCollapse('pwBody', 'pwToggle')" aria-expanded="false" aria-controls="pwBody">
+                                <h4 style="margin:0;"><i class="fas fa-key" style="color: var(--accent);"></i> <span data-i18n="pw_title">שינוי סיסמה</span></h4>
+                                <i class="fas fa-chevron-down chev"></i>
+                            </button>
+                            <div id="pwBody" hidden style="margin-top:12px;">
                             <p id="pwGoogleNote" style="display:none; color:var(--text-secondary); font-size:0.92rem;" data-i18n="pw_google_note">החשבון מחובר דרך Google — הסיסמה מנוהלת בחשבון Google שלך.</p>
                             <div id="pwForm">
-                                <div class="form-group" style="margin-top:12px;">
+                                <div class="form-group">
                                     <label data-i18n="pw_current">סיסמה נוכחית</label>
                                     <input type="password" id="pwCurrent" autocomplete="current-password">
                                 </div>
@@ -2312,6 +2328,7 @@
                                     <input type="password" id="pwConfirm" autocomplete="new-password">
                                 </div>
                                 <button class="form-submit" id="pwBtn" onclick="changePassword()"><i class="fas fa-lock"></i> <span data-i18n="pw_btn">עדכן סיסמה</span></button>
+                            </div>
                             </div>
                         </div>
                         <div class="profile-card danger-card" style="margin-top:20px;" id="deleteAccountCard">
@@ -3255,6 +3272,7 @@
             }
 
             toggleEditProfile(false);
+            toggleCollapse('pwBody', 'pwToggle', false);
 
             // Password card only makes sense for email/password accounts.
             const pwForm = document.getElementById('pwForm'), pwNote = document.getElementById('pwGoogleNote');
@@ -3616,15 +3634,24 @@
             Object.assign(userData, data);
         }
 
-        function toggleEditProfile(force) {
-            const body = document.getElementById('editProfileBody');
-            const btn = document.getElementById('editProfileToggle');
+        function toggleCollapse(bodyId, btnId, force) {
+            const body = document.getElementById(bodyId);
+            const btn = document.getElementById(btnId);
             if (!body || !btn) return;
             const open = typeof force === 'boolean' ? force : body.hidden;
             body.hidden = !open;
             btn.setAttribute('aria-expanded', String(open));
-            if (open) { const first = document.getElementById('nameHeInput'); if (first) first.focus(); }
         }
+        function toggleEditProfile(force) {
+            toggleCollapse('editProfileBody', 'editProfileToggle', force);
+            const body = document.getElementById('editProfileBody');
+            if (body && body.hidden) body.querySelectorAll('details.field-acc').forEach(d => { d.open = false; });
+        }
+        // Opening a field row focuses its input so it can be typed into immediately.
+        document.addEventListener('toggle', (e) => {
+            const d = e.target;
+            if (d && d.matches && d.matches('details.field-acc') && d.open) { const i = d.querySelector('input'); if (i) i.focus(); }
+        }, true);
 
         async function updateProfile() {
             if (!currentUser) return;
@@ -4706,6 +4733,7 @@
                 await reauthenticate(cur);
                 await currentUser.updatePassword(nw);
                 ['pwCurrent', 'pwNew', 'pwConfirm'].forEach(id => document.getElementById(id).value = '');
+                toggleCollapse('pwBody', 'pwToggle', false);
                 showToast(T('pw_changed'), 'success');
             } catch (err) {
                 console.error('changePassword failed:', err && err.code);
