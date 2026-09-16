@@ -6,7 +6,7 @@
     <meta name="description" content="Rocky - קבוצת מתחרים ישראלית בענף הלחימה. מסגרת אימונים מקצועית, פתוחה לכל מתחרה מכל מכון ואיגוד בישראל.">
     <title>Rocky - קבוצת מתחרים</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1572,6 +1572,42 @@
         }
         .video-card .video-actions button:hover { border-color: var(--accent); color: var(--accent); }
 
+        /* ===== Danger confirm modal (typed DELETE) ===== */
+        .confirm-modal {
+            position: fixed; inset: 0; z-index: 7000; display: none;
+            align-items: center; justify-content: center; padding: 20px;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+        }
+        .confirm-modal.active { display: flex; }
+        .confirm-box {
+            background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 18px;
+            width: 100%; max-width: 440px; padding: 28px 26px; box-shadow: var(--shadow-card-hover);
+        }
+        .confirm-box h3 { color: var(--white); font-size: 1.35rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .confirm-box h3 i { color: var(--accent); }
+        .confirm-box p { color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px; overflow-wrap: anywhere; }
+        .confirm-box .form-group { margin-bottom: 12px; }
+        .confirm-box .form-group label { font-size: 0.9rem; }
+        .confirm-box input { direction: ltr; text-align: center; letter-spacing: 2px; font-weight: 700; }
+        .confirm-box input.pw { direction: ltr; text-align: start; letter-spacing: normal; font-weight: 400; }
+        .confirm-actions { display: flex; gap: 10px; margin-top: 18px; }
+        .confirm-actions button { flex: 1; padding: 13px; border-radius: 10px; font-family: 'Heebo', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .confirm-cancel { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+        .confirm-cancel:hover { border-color: var(--text-secondary); }
+        .confirm-ok { background: var(--accent-fill); border: none; color: var(--white); }
+        .confirm-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+        .confirm-err { color: var(--accent); font-size: 0.9rem; min-height: 1.2em; margin-top: 6px; }
+
+        .danger-card { border-color: rgba(111,143,255,0.35) !important; }
+        .danger-card h4 i { color: var(--accent); }
+        .file-item .file-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .file-item .file-actions a, .file-item .file-actions button {
+            background: none; border: 1px solid var(--border); color: var(--text-secondary);
+            border-radius: 8px; padding: 5px 9px; cursor: pointer; font-size: 0.85rem; text-decoration: none; font-family: 'Heebo', sans-serif;
+        }
+        .file-item .file-actions a:hover, .file-item .file-actions button:hover { border-color: var(--accent); color: var(--accent); }
+        @media (max-width: 600px) { .file-item { flex-wrap: wrap; gap: 10px; } }
+
         /* ===== PDF export ===== */
         .btn-pdf {
             display: inline-flex; align-items: center; gap: 8px;
@@ -1771,10 +1807,12 @@
     </style>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+    <!-- Pinned versions + Subresource Integrity: a tampered CDN file is refused by the browser. -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" integrity="sha384-sEVIly94UBRLKWdkYoPpSG7GD/e79YHMrxVyZaOk712Ga7+EAw6w1EFi+xBzBdd+" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" integrity="sha384-EkqK+ezBWJuvO3hfrSx2iVqr3YQbhmnzn8kPhOpBZ+0GMVU5oGSgptwIu8D84HjE" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" integrity="sha384-M481iNZJtbpypKgvlvZ+78Giq0BsewFLk5r2k+MOcGXlwKCc27DQRZ+WCV/zpmpC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js" integrity="sha384-6I0gWsz4FIAr30c0TxIxJnPQuJiZ1FfILdZrgJdjxTH3R8dgPGTvexbyqTvReV6Z" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js" integrity="sha384-E3vxFxXu8FhW5kvqdQJ5Yf8ugrV7iCJP8jgnItRH2Rk8Q08cJzJGTi/oMC3FEp3j" crossorigin="anonymous"></script>
     <script>
         firebase.initializeApp({
             apiKey: "AIzaSyAU2knBfIaTMBEXsQOduCcX-3KOAEfqFwo",
@@ -1787,6 +1825,18 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
+
+        // App Check (reCAPTCHA v3): proves requests come from this site, not from a
+        // script that copied the public API key. Register the site in Firebase
+        // console → App Check → Web app → reCAPTCHA v3, paste the SITE key here,
+        // then turn on enforcement for Firestore / Storage / Auth.
+        const APP_CHECK_SITE_KEY = '';
+        if (APP_CHECK_SITE_KEY) {
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                self.FIREBASE_APPCHECK_DEBUG_TOKEN = true; // prints a debug token to register in console
+            }
+            firebase.appCheck().activate(APP_CHECK_SITE_KEY, true);
+        }
     </script>
 </head>
 <body>
@@ -2134,6 +2184,10 @@
                     <p class="upload-hint">PDF, JPG, PNG - עד 10MB</p>
                     <input type="file" id="fileInput" style="display:none" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this)">
                 </div>
+                <div class="upload-progress" id="docProgress" style="margin-top:14px;">
+                    <div class="row"><span id="docProgressName"></span><span id="docProgressPct">0%</span></div>
+                    <div class="load-progress-track"><div class="load-progress-fill" id="docProgressFill" style="width:0%"></div></div>
+                </div>
 
                 <h3 style="margin: 30px 0 16px; color: var(--white);"><i class="fas fa-folder" style="color: var(--accent);"></i> המסמכים שלי</h3>
                 <div class="file-list" id="fileList"></div>
@@ -2238,6 +2292,30 @@
                                     <span class="switch-slider"></span>
                                 </label>
                             </div>
+                        </div>
+                        <div class="profile-card" style="margin-top:20px;" id="pwCard">
+                            <h4 style="margin-bottom:6px;"><i class="fas fa-key" style="color: var(--accent);"></i> <span data-i18n="pw_title">שינוי סיסמה</span></h4>
+                            <p id="pwGoogleNote" style="display:none; color:var(--text-secondary); font-size:0.92rem;" data-i18n="pw_google_note">החשבון מחובר דרך Google — הסיסמה מנוהלת בחשבון Google שלך.</p>
+                            <div id="pwForm">
+                                <div class="form-group" style="margin-top:12px;">
+                                    <label data-i18n="pw_current">סיסמה נוכחית</label>
+                                    <input type="password" id="pwCurrent" autocomplete="current-password">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="pw_new">סיסמה חדשה (לפחות 8 תווים)</label>
+                                    <input type="password" id="pwNew" autocomplete="new-password">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="pw_confirm">אימות סיסמה חדשה</label>
+                                    <input type="password" id="pwConfirm" autocomplete="new-password">
+                                </div>
+                                <button class="form-submit" id="pwBtn" onclick="changePassword()"><i class="fas fa-lock"></i> <span data-i18n="pw_btn">עדכן סיסמה</span></button>
+                            </div>
+                        </div>
+                        <div class="profile-card danger-card" style="margin-top:20px;" id="deleteAccountCard">
+                            <h4 style="margin-bottom:6px;"><i class="fas fa-user-slash"></i> <span data-i18n="del_title">מחיקת חשבון</span></h4>
+                            <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:14px;" data-i18n="del_desc">מוחק לצמיתות את הפרופיל, המסמכים, הסרטונים, יומן האימונים והמשובים. אין דרך לשחזר.</p>
+                            <button class="btn-pdf" style="width:100%; justify-content:center;" onclick="deleteMyAccount()"><i class="fas fa-trash" style="color:var(--accent);"></i> <span data-i18n="del_btn">מחק את החשבון שלי</span></button>
                         </div>
                     </div>
                 </div>
@@ -2539,6 +2617,27 @@
         </div>
     </div>
 
+    <!-- Danger confirm modal: important deletions require typing DELETE -->
+    <div class="confirm-modal" id="confirmModal" role="dialog" aria-modal="true">
+        <div class="confirm-box">
+            <h3><i class="fas fa-triangle-exclamation"></i> <span id="confirmTitle"></span></h3>
+            <p id="confirmMsg"></p>
+            <div class="form-group" id="confirmPwWrap" style="display:none;">
+                <label id="confirmPwLabel"></label>
+                <input type="password" id="confirmPw" class="pw" autocomplete="current-password">
+            </div>
+            <div class="form-group">
+                <label id="confirmTypeLabel"></label>
+                <input type="text" id="confirmInput" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="DELETE">
+            </div>
+            <div class="confirm-err" id="confirmErr"></div>
+            <div class="confirm-actions">
+                <button class="confirm-cancel" id="confirmCancel"></button>
+                <button class="confirm-ok" id="confirmOk" disabled></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast">
         <i class="fas fa-check-circle" style="color: var(--success);"></i>
@@ -2601,17 +2700,88 @@
             return d.toLocaleString(langLocale(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
         const loadedScripts = {};
+        const SRI = {
+            'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js': 'sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk'
+        };
         function loadScript(url) {
             if (!loadedScripts[url]) {
                 loadedScripts[url] = new Promise((resolve, reject) => {
                     const s = document.createElement('script');
                     s.src = url;
+                    if (SRI[url]) { s.integrity = SRI[url]; s.crossOrigin = 'anonymous'; }
                     s.onload = resolve;
                     s.onerror = () => { delete loadedScripts[url]; reject(new Error('script load failed: ' + url)); };
                     document.head.appendChild(s);
                 });
             }
             return loadedScripts[url];
+        }
+
+        // Typed-confirmation dialog for destructive actions. Resolves with
+        // { ok: true, password } or { ok: false }. The OK button stays disabled
+        // until the user types the exact word, so a stray tap can never delete.
+        function confirmDanger(opts) {
+            const modal = document.getElementById('confirmModal');
+            const input = document.getElementById('confirmInput');
+            const pwWrap = document.getElementById('confirmPwWrap');
+            const pw = document.getElementById('confirmPw');
+            const ok = document.getElementById('confirmOk');
+            const cancel = document.getElementById('confirmCancel');
+            const err = document.getElementById('confirmErr');
+            const word = (opts.word || 'DELETE');
+            document.getElementById('confirmTitle').textContent = opts.title || T('confirm_title');
+            document.getElementById('confirmMsg').textContent = opts.message || '';
+            document.getElementById('confirmTypeLabel').textContent = T('confirm_type').replace('{word}', word);
+            document.getElementById('confirmPwLabel').textContent = T('confirm_pw');
+            ok.textContent = opts.okText || T('confirm_ok');
+            cancel.textContent = T('confirm_cancel');
+            input.value = ''; pw.value = ''; err.textContent = opts.error || '';
+            pwWrap.style.display = opts.password ? '' : 'none';
+            ok.disabled = true;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            (opts.password ? pw : input).focus();
+            return new Promise((resolve) => {
+                const valid = () => input.value.trim() === word && (!opts.password || pw.value.length > 0);
+                const onInput = () => { ok.disabled = !valid(); };
+                const close = (result) => {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    input.removeEventListener('input', onInput); pw.removeEventListener('input', onInput);
+                    ok.onclick = null; cancel.onclick = null; modal.onclick = null; document.removeEventListener('keydown', onKey);
+                    resolve(result);
+                };
+                const onKey = (e) => {
+                    if (e.key === 'Escape') close({ ok: false });
+                    if (e.key === 'Enter' && valid()) close({ ok: true, password: pw.value });
+                };
+                input.addEventListener('input', onInput); pw.addEventListener('input', onInput);
+                ok.onclick = () => { if (valid()) close({ ok: true, password: pw.value }); };
+                cancel.onclick = () => close({ ok: false });
+                modal.onclick = (e) => { if (e.target === modal) close({ ok: false }); };
+                document.addEventListener('keydown', onKey);
+            });
+        }
+
+        // Only Firebase Storage download URLs for THIS bucket are ever rendered as
+        // links or media sources. Doc fields are user-controlled, so this blocks
+        // javascript: URLs and foreign hosts in the coach's session.
+        function safeStorageUrl(u, kind) {
+            if (typeof u !== 'string') return '';
+            const re = new RegExp('^https://firebasestorage\\.googleapis\\.com/v0/b/rocky-fighters-il\\.firebasestorage\\.app/o/' + kind + '%2F[^\\s"\'<>]+$', 'i');
+            return re.test(u) ? u : '';
+        }
+        function hasPasswordProvider() {
+            return !!(currentUser && (currentUser.providerData || []).some(p => p && p.providerId === 'password'));
+        }
+        // Firebase requires a fresh sign-in before password change / account deletion.
+        async function reauthenticate(password) {
+            if (hasPasswordProvider()) {
+                const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, password || '');
+                await currentUser.reauthenticateWithCredential(cred);
+            } else {
+                await currentUser.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());
+            }
         }
 
         // Pick a user's name for the current UI language, with fallback to the other.
@@ -2907,8 +3077,8 @@
                 showToast('נא למלא שם בעברית ובאנגלית, אימייל וסיסמה');
                 return;
             }
-            if (pass.length < 6) {
-                showToast('הסיסמה חייבת להכיל לפחות 6 תווים');
+            if (pass.length < 8) {
+                showToast(T('pw_too_short'), 'error');
                 return;
             }
 
@@ -2961,7 +3131,8 @@
                 const msgs = {
                     'auth/email-already-in-use': 'האימייל כבר רשום במערכת',
                     'auth/invalid-email': 'אימייל לא תקין',
-                    'auth/weak-password': 'הסיסמה חלשה מדי'
+                    'auth/weak-password': T('pw_too_short'),
+                    'auth/password-does-not-meet-requirements': T('pw_too_short')
                 };
                 showToast(msgs[err.code] || 'שגיאה בהרשמה');
             }
@@ -3069,6 +3240,12 @@
                 document.getElementById('coachPanelBtn').style.display = 'none';
                 document.getElementById('notifPanelBtn').style.display = 'none';
             }
+
+            // Password card only makes sense for email/password accounts.
+            const pwForm = document.getElementById('pwForm'), pwNote = document.getElementById('pwGoogleNote');
+            if (pwForm && pwNote) { const hasPw = hasPasswordProvider(); pwForm.style.display = hasPw ? '' : 'none'; pwNote.style.display = hasPw ? 'none' : ''; }
+            const delCard = document.getElementById('deleteAccountCard');
+            if (delCard) delCard.style.display = isAdmin ? 'none' : '';
 
             // Render weight history
             renderWeightHistory();
@@ -3243,7 +3420,7 @@
                     <div class="home-card-head"><i class="fas fa-bell"></i> ${T('cn_title')}
                         ${unreadN ? `<span class="count-pill alert">${unreadN} ${T('home_new')}</span>` : ''}</div>
                     <div class="home-card-body">${latest
-                        ? `<strong>${sanitize(latest.fromName || T('cn_athlete'))}:</strong> ${coachNotifText(latest)}`
+                        ? `<strong>${sanitize(latest.kind === 'contact' ? (latest.name || T('cn_contact_from')) : (latest.fromName || T('cn_athlete')))}:</strong> ${coachNotifText(latest)}`
                         : T('cn_empty')}</div>
                 </div>`);
                 cards.push(`<div class="home-card" onclick="switchPanel('coach')">
@@ -3276,38 +3453,106 @@
         setupDragDrop('uploadZoneFile', 'fileInput');
         setupDragDrop('uploadZoneVideo', 'videoInput');
 
-        // ===== FILE UPLOAD =====
+        // ===== DOCUMENT UPLOAD (Firebase Storage) =====
+        const DOC_MAX_BYTES = 10 * 1024 * 1024; // must match storage.rules
+        const DOC_TYPES = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png' };
+        let docUploadTask = null;
+
+        function setDocProgress(pct, label) {
+            const wrap = document.getElementById('docProgress');
+            if (!wrap) return;
+            if (pct == null) { wrap.classList.remove('active'); return; }
+            wrap.classList.add('active');
+            document.getElementById('docProgressFill').style.width = pct + '%';
+            document.getElementById('docProgressPct').textContent = pct + '%';
+            if (label != null) document.getElementById('docProgressName').textContent = label;
+        }
+
         async function handleFileUpload(input) {
-            if (input.files.length === 0) return;
+            if (input.files.length === 0 || !currentUser) return;
             const file = input.files[0];
-            if (file.size > 10 * 1024 * 1024) {
-                showToast('הקובץ גדול מדי - מקסימום 10MB');
-                input.value = '';
-                return;
-            }
-
             const docType = document.getElementById('docType').value;
-            const typeNames = { medical: 'אישור רופא', registration: 'טופס הרשמה', passport: 'פספורט', insurance: 'ביטוח', other: 'מסמך' };
+            if (!docType) { showToast(T('doc_type_err'), 'error'); input.value = ''; return; }
+            if (!DOC_TYPES[file.type]) { showToast(T('doc_kind_err'), 'error'); input.value = ''; return; }
+            if (file.size > DOC_MAX_BYTES) { showToast(T('doc_size_err'), 'error'); input.value = ''; return; }
+            if (docUploadTask) { showToast(T('vid_busy'), 'error'); return; }
 
-            const docEntry = {
-                name: file.name,
-                type: docType || 'other',
-                typeName: typeNames[docType] || 'מסמך',
-                date: new Date().toLocaleDateString('he-IL'),
-                status: 'pending'
-            };
-
-            // Save to Firestore
-            if (currentUser) {
+            const typeNames = { medical: T('dash_doc_medical'), registration: T('dash_doc_registration'), passport: T('dash_doc_passport'), insurance: T('dash_doc_insurance'), other: T('dash_doc_other') };
+            const id = uid4();
+            const storagePath = `documents/${currentUser.uid}/${id}/file.${DOC_TYPES[file.type]}`;
+            const ref = storage.ref(storagePath);
+            const zone = document.getElementById('uploadZoneFile');
+            zone.style.pointerEvents = 'none'; zone.style.opacity = '0.6';
+            setDocProgress(0, file.name);
+            let uploaded = false;
+            try {
+                docUploadTask = ref.put(file, { contentType: file.type });
+                await new Promise((resolve, reject) => {
+                    docUploadTask.on('state_changed', (snap) => {
+                        setDocProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100), `${file.name} · ${formatBytes(snap.bytesTransferred)} / ${formatBytes(snap.totalBytes)}`);
+                    }, reject, resolve);
+                });
+                uploaded = true;
+                const url = await ref.getDownloadURL();
+                const docEntry = {
+                    id,
+                    name: String(file.name).slice(0, 200),
+                    type: docType,
+                    typeName: typeNames[docType] || T('dash_doc_other'),
+                    date: new Date().toLocaleDateString('he-IL'),
+                    status: 'pending',
+                    storagePath, url,
+                    size: file.size,
+                    contentType: file.type,
+                    uploadedAt: new Date().toISOString()
+                };
                 await db.collection('users').doc(currentUser.uid).update({
                     documents: firebase.firestore.FieldValue.arrayUnion(docEntry)
                 });
-                // No optimistic mutation: the snapshot listener re-renders from Firestore.
-                notifyCoaches('document', { docType: docEntry.type, name: String(file.name).slice(0, 120) });
+                notifyCoaches('document', { docType, name: docEntry.name.slice(0, 120) });
+                showToast(T('doc_uploaded'), 'success');
+            } catch (err) {
+                console.error('document upload failed:', err);
+                if (uploaded) { try { await ref.delete(); } catch (e) {} }
+                const msgs = {
+                    'storage/unauthorized': T('vid_err_unauth'),
+                    'storage/canceled': T('vid_err_cancel'),
+                    'storage/quota-exceeded': T('vid_err_quota'),
+                    'storage/retry-limit-exceeded': T('vid_err_network'),
+                    'storage/bucket-not-found': T('doc_err_disabled'),
+                    'storage/project-not-found': T('doc_err_disabled'),
+                    'storage/unknown': T('doc_err_disabled')
+                };
+                showToast(msgs[err && err.code] || T('vid_err_generic'), 'error');
+            } finally {
+                docUploadTask = null;
+                setDocProgress(null);
+                zone.style.pointerEvents = ''; zone.style.opacity = '';
+                input.value = '';
             }
+        }
 
-            showToast(`הקובץ "${file.name}" הועלה בהצלחה`);
-            input.value = '';
+        function documentItemHtml(d, opts) {
+            const canDelete = opts && opts.canDelete;
+            const url = safeStorageUrl(d.url, 'documents');
+            const icon = String(d.name || '').toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
+            const statusClass = d.status === 'approved' ? 'status-approved' : 'status-pending';
+            const statusText = d.status === 'approved' ? T('dash_doc_approved') : T('dash_doc_pending');
+            const id = String(d.id || '');
+            return `<div class="file-item">
+                <div class="file-info">
+                    <i class="fas ${icon} file-icon"></i>
+                    <div>
+                        <div class="file-name">${sanitize(d.name)}</div>
+                        <div class="file-date">${sanitize(d.date)} | ${sanitize(d.typeName)}${d.size ? ` · ${formatBytes(Number(d.size) || 0)}` : ''}${!url ? ` · <i class="fas fa-triangle-exclamation" style="color:var(--gold);"></i> ${T('doc_no_file')}` : ''}</div>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <span class="file-status ${statusClass}">${statusText}</span>
+                    ${url ? `<a href="${escAttr(url)}" target="_blank" rel="noopener noreferrer" title="${escAttr(T('vid_open'))}"><i class="fas fa-up-right-from-square"></i></a>` : ''}
+                    ${canDelete && id ? `<button type="button" onclick="deleteDocument(${jsArg(id)})" title="${escAttr(T('remove'))}"><i class="fas fa-trash"></i></button>` : ''}
+                </div>
+            </div>`;
         }
 
         function renderDocuments() {
@@ -3317,21 +3562,27 @@
                 list.innerHTML = emptyState('fa-folder-open', T('doc_empty_title'), T('doc_empty_hint'));
                 return;
             }
-            list.innerHTML = docs.map(d => {
-                const icon = String(d.name || '').toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
-                const statusClass = d.status === 'approved' ? 'status-approved' : 'status-pending';
-                const statusText = d.status === 'approved' ? T('dash_doc_approved') : T('dash_doc_pending');
-                return `<div class="file-item">
-                    <div class="file-info">
-                        <i class="fas ${icon} file-icon"></i>
-                        <div>
-                            <div class="file-name">${sanitize(d.name)}</div>
-                            <div class="file-date">${sanitize(d.date)} | ${sanitize(d.typeName)}</div>
-                        </div>
-                    </div>
-                    <span class="file-status ${statusClass}">${statusText}</span>
-                </div>`;
-            }).join('');
+            list.innerHTML = docs.slice().reverse().map(d => documentItemHtml(d, { canDelete: true })).join('');
+        }
+
+        async function deleteDocument(id) {
+            if (!currentUser) return;
+            const docs = userData.documents || [];
+            const d = docs.find(x => x.id === id);
+            if (!d) return;
+            const res = await confirmDanger({ title: T('doc_delete_title'), message: T('doc_delete_msg').replace('{name}', d.name || '') });
+            if (!res.ok) return;
+            try {
+                if (d.storagePath) {
+                    try { await storage.ref(d.storagePath).delete(); }
+                    catch (e) { if (!e || e.code !== 'storage/object-not-found') throw e; }
+                }
+                await db.collection('users').doc(currentUser.uid).update({ documents: docs.filter(x => x.id !== id) });
+                showToast(T('removed'));
+            } catch (err) {
+                console.error('deleteDocument failed:', err);
+                showToast(T('vid_err_generic'), 'error');
+            }
         }
 
         // ===== VIDEO UPLOAD (Firebase Storage) =====
@@ -3425,12 +3676,7 @@
             }
         }
 
-        // Only Firebase Storage download URLs are ever rendered as links / sources.
-        // A doc field is user-controlled, so this blocks javascript: and foreign hosts.
-        function safeVideoUrl(v) {
-            const u = v && typeof v.url === 'string' ? v.url : '';
-            return /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/[a-z0-9.\-]+\/o\/[^\s"'<>]+$/i.test(u) ? u : '';
-        }
+        function safeVideoUrl(v) { return safeStorageUrl(v && v.url, 'videos'); }
 
         function videoCardHtml(v, opts) {
             const canDelete = opts && opts.canDelete;
@@ -3485,7 +3731,8 @@
             const videos = userData.videos || [];
             const v = videos.find(x => x.id === id);
             if (!v) return;
-            if (!confirm(T('vid_delete_confirm'))) return;
+            const res = await confirmDanger({ title: T('vid_delete_title'), message: T('vid_delete_confirm').replace('{name}', v.title || '') });
+            if (!res.ok) return;
             try {
                 if (v.storagePath) {
                     try { await storage.ref(v.storagePath).delete(); }
@@ -4300,15 +4547,7 @@
                 </tbody></table>` : `<p style="color:var(--text-secondary);">${T('home_no_comp')}</p>`}
 
                 <h4 style="color:var(--white); margin:20px 0 12px;">${T('cd_documents')} (${(d.documents || []).length})</h4>
-                ${(d.documents || []).length ? d.documents.map(doc => `
-                    <div class="file-item" style="margin-bottom:8px;">
-                        <div class="file-info">
-                            <i class="fas fa-file file-icon"></i>
-                            <div><div class="file-name">${sanitize(doc.name)}</div><div class="file-date">${sanitize(doc.date)} | ${sanitize(doc.typeName)}</div></div>
-                        </div>
-                        <span class="file-status ${doc.status === 'approved' ? 'status-approved' : 'status-pending'}">${doc.status === 'approved' ? T('cd_approved') : T('cd_pending')}</span>
-                    </div>
-                `).join('') : `<p style="color:var(--text-secondary);">${T('cd_no_docs')}</p>`}
+                ${(d.documents || []).length ? d.documents.slice().reverse().map(doc => documentItemHtml(doc, { canDelete: false })).join('') : `<p style="color:var(--text-secondary);">${T('cd_no_docs')}</p>`}
 
                 <h4 style="color:var(--white); margin:20px 0 12px;"><i class="fas fa-video" style="color:var(--accent);"></i> ${T('dash_videos')} (${(d.videos || []).length})</h4>
                 ${cdVideosHtml(d.videos || [])}
@@ -4388,64 +4627,78 @@
             }
         }
 
-        // Coach side: live listener over the shared inbox, filtered per coach.
+        // Coach side: live listeners over both inboxes (athlete notifications and
+        // public contact-form messages), merged and filtered per coach.
+        const INBOX_SOURCES = { notif: 'coachNotifications', contact: 'contactMessages' };
+        let inboxParts = { notif: null, contact: null }; // null until first snapshot
+        let inboxUnsubs = [];
+
         function setupCoachInboxListener() {
             teardownCoachInboxListener();
             const myUid = currentUser.uid;
             coachInboxError = null;
-            coachInboxUnsub = db.collection('coachNotifications')
+            const attach = (kind) => db.collection(INBOX_SOURCES[kind])
                 .orderBy('createdAt', 'desc')
                 .limit(100)
                 .onSnapshot((snap) => {
                     let fresh = 0;
-                    if (coachInboxReady) {
+                    if (inboxParts[kind] !== null) {
                         snap.docChanges().forEach(ch => {
                             if (ch.type === 'added' && !ch.doc.metadata.hasPendingWrites) fresh++;
                         });
                     }
-                    coachInbox = [];
+                    const items = [];
                     snap.forEach(doc => {
                         const n = doc.data();
-                        const deletedBy = n.deletedBy || {};
-                        if (deletedBy[myUid]) return;
-                        coachInbox.push({ id: doc.id, ...n, isRead: !!((n.readBy || {})[myUid]) });
+                        if ((n.deletedBy || {})[myUid]) return;
+                        items.push({ id: doc.id, kind, ...n, type: kind === 'contact' ? 'contact' : n.type, isRead: !!((n.readBy || {})[myUid]) });
                     });
+                    inboxParts[kind] = items;
                     if (fresh > 0) {
-                        const msg = fresh === 1 ? T('cn_new_one') : T('cn_new_many').replace('{n}', fresh);
+                        const msg = kind === 'contact'
+                            ? (fresh === 1 ? T('cn_new_contact') : T('cn_new_contact_many').replace('{n}', fresh))
+                            : (fresh === 1 ? T('cn_new_one') : T('cn_new_many').replace('{n}', fresh));
                         showToast(msg);
                         fireNativeNotification(msg);
                     }
-                    coachInboxReady = true;
-                    updateCoachNotifBadge();
-                    const active = document.querySelector('.dash-panel.active');
-                    if (active && (active.id === 'panel-notifications' || active.id === 'panel-overview')) refreshActivePanel();
-                    purgeStaleCoachNotifs(snap);
+                    rebuildCoachInbox();
+                    purgeStaleInbox(kind, snap);
                 }, (err) => {
-                    console.error('coach inbox listener failed:', err);
+                    console.error('inbox listener failed (' + kind + '):', err);
                     coachInboxError = err && err.code === 'permission-denied' ? 'permission' : 'generic';
-                    const active = document.querySelector('.dash-panel.active');
-                    if (active && active.id === 'panel-notifications') renderCoachInbox();
+                    inboxParts[kind] = [];
+                    rebuildCoachInbox();
                 });
+            inboxUnsubs = [attach('notif'), attach('contact')];
+        }
+
+        function rebuildCoachInbox() {
+            const ms = (x) => (x.createdAt && typeof x.createdAt.toMillis === 'function') ? x.createdAt.toMillis() : 0;
+            coachInbox = [...(inboxParts.notif || []), ...(inboxParts.contact || [])].sort((a, b) => ms(b) - ms(a));
+            coachInboxReady = inboxParts.notif !== null && inboxParts.contact !== null;
+            updateCoachNotifBadge();
+            const active = document.querySelector('.dash-panel.active');
+            if (active && (active.id === 'panel-notifications' || active.id === 'panel-overview')) refreshActivePanel();
         }
 
         function teardownCoachInboxListener() {
-            if (coachInboxUnsub) { try { coachInboxUnsub(); } catch (e) {} coachInboxUnsub = null; }
+            inboxUnsubs.forEach(u => { try { u(); } catch (e) {} });
+            inboxUnsubs = [];
+            inboxParts = { notif: null, contact: null };
             coachInbox = [];
             coachInboxReady = false;
             updateCoachNotifBadge();
         }
 
         // Housekeeping: rules let coaches hard-delete entries older than 60 days.
-        let purgedOnce = false;
-        function purgeStaleCoachNotifs(snap) {
-            if (purgedOnce) return;
-            purgedOnce = true;
+        const purgedCollections = {};
+        function purgeStaleInbox(kind, snap) {
+            if (purgedCollections[kind]) return;
+            purgedCollections[kind] = true;
             const cutoff = Date.now() - 61 * 24 * 60 * 60 * 1000;
             snap.forEach(doc => {
                 const ts = doc.data().createdAt;
-                if (ts && typeof ts.toMillis === 'function' && ts.toMillis() < cutoff) {
-                    doc.ref.delete().catch(() => {});
-                }
+                if (ts && typeof ts.toMillis === 'function' && ts.toMillis() < cutoff) doc.ref.delete().catch(() => {});
             });
         }
 
@@ -4459,7 +4712,7 @@
             else badge.style.display = 'none';
         }
 
-        const NOTIF_ICONS = { profile: 'fa-user-pen', competition: 'fa-medal', document: 'fa-file-arrow-up', video: 'fa-film' };
+        const NOTIF_ICONS = { profile: 'fa-user-pen', competition: 'fa-medal', document: 'fa-file-arrow-up', video: 'fa-film', contact: 'fa-envelope-open-text' };
 
         // Human-readable line for one notification, in the COACH's UI language.
         // Payload values are athlete-controlled → always sanitized.
@@ -4479,6 +4732,11 @@
                 }
                 case 'video':
                     return `${T('cn_t_video')}: <strong>${sanitize(d.title || '')}</strong>`;
+                case 'contact': {
+                    const phone = String(n.phone || '').trim();
+                    const tel = phone.replace(/[^0-9+]/g, '');
+                    return `${sanitize(n.message || '')}${phone ? `<div class="video-meta"><i class="fas fa-phone"></i> ${/^[0-9+]{6,20}$/.test(tel) ? `<a href="tel:${escAttr(tel)}" style="color:var(--accent);">${sanitize(phone)}</a>` : sanitize(phone)}</div>` : ''}`;
+                }
                 default:
                     return sanitize(n.type || '');
             }
@@ -4500,13 +4758,15 @@
                 <div class="notif-item ${n.isRead ? '' : 'unread'}">
                     <div class="notif-icon"><i class="fas ${NOTIF_ICONS[n.type] || 'fa-bell'}"></i></div>
                     <div class="notif-body">
-                        <div class="notif-title"><a onclick="openAthleteFromNotif(${jsArg(n.id)}, ${jsArg(n.fromUid)})">${sanitize(n.fromName || T('cn_athlete'))}</a></div>
+                        <div class="notif-title">${n.kind === 'contact'
+                            ? `<i class="fas fa-envelope" style="color:var(--gold);"></i> ${T('cn_contact_from')}: ${sanitize(n.name || '')}`
+                            : `<a onclick="openAthleteFromNotif(${jsArg(n.id)}, ${jsArg(n.fromUid)})">${sanitize(n.fromName || T('cn_athlete'))}</a>`}</div>
                         <div class="notif-text">${coachNotifText(n)}</div>
                         <div class="notif-time"><i class="fas fa-clock"></i> ${sanitize(fmtDateTime(n.createdAt))}${n.isRead ? ` · <i class="fas fa-check-double"></i> ${T('cn_read')}` : ''}</div>
                     </div>
                     <div class="notif-actions">
-                        ${n.isRead ? '' : `<button onclick="markCoachNotifRead(${jsArg(n.id)})" title="${escAttr(T('cn_mark_read'))}"><i class="fas fa-check"></i></button>`}
-                        <button onclick="deleteCoachNotif(${jsArg(n.id)})" title="${escAttr(T('remove'))}"><i class="fas fa-trash"></i></button>
+                        ${n.isRead ? '' : `<button onclick="markCoachNotifRead(${jsArg(n.id)}, ${jsArg(n.kind)})" title="${escAttr(T('cn_mark_read'))}"><i class="fas fa-check"></i></button>`}
+                        <button onclick="deleteCoachNotif(${jsArg(n.id)}, ${jsArg(n.kind)})" title="${escAttr(T('remove'))}"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>`).join('');
         }
@@ -4515,15 +4775,16 @@
             // Dot-path update → touches only readBy.<uid> / deletedBy.<uid>, as the rules require.
             return { [field + '.' + currentUser.uid]: true };
         }
-        async function markCoachNotifRead(id) {
+        function inboxRef(id, kind) { return db.collection(INBOX_SOURCES[kind] || INBOX_SOURCES.notif).doc(id); }
+        async function markCoachNotifRead(id, kind) {
             if (!currentUser) return;
-            try { await db.collection('coachNotifications').doc(id).update(myFlag('readBy')); }
+            try { await inboxRef(id, kind).update(myFlag('readBy')); }
             catch (e) { console.error('markCoachNotifRead failed:', e); showToast(T('cn_err'), 'error'); }
         }
-        async function deleteCoachNotif(id) {
+        async function deleteCoachNotif(id, kind) {
             if (!currentUser) return;
             try {
-                await db.collection('coachNotifications').doc(id).update({ ...myFlag('readBy'), ...myFlag('deletedBy') });
+                await inboxRef(id, kind).update({ ...myFlag('readBy'), ...myFlag('deletedBy') });
                 showToast(T('removed'));
             } catch (e) { console.error('deleteCoachNotif failed:', e); showToast(T('cn_err'), 'error'); }
         }
@@ -4533,7 +4794,7 @@
             if (unread.length === 0) return;
             try {
                 const batch = db.batch();
-                unread.forEach(n => batch.update(db.collection('coachNotifications').doc(n.id), myFlag('readBy')));
+                unread.forEach(n => batch.update(inboxRef(n.id, n.kind), myFlag('readBy')));
                 await batch.commit();
                 showToast(T('cn_all_read'));
             } catch (e) { console.error('markAllCoachNotifsRead failed:', e); showToast(T('cn_err'), 'error'); }
@@ -4544,14 +4805,89 @@
             if (read.length === 0) { showToast(T('cn_nothing_read')); return; }
             try {
                 const batch = db.batch();
-                read.forEach(n => batch.update(db.collection('coachNotifications').doc(n.id), myFlag('deletedBy')));
+                read.forEach(n => batch.update(inboxRef(n.id, n.kind), myFlag('deletedBy')));
                 await batch.commit();
                 showToast(T('removed'));
             } catch (e) { console.error('deleteReadCoachNotifs failed:', e); showToast(T('cn_err'), 'error'); }
         }
         function openAthleteFromNotif(id, uid) {
-            markCoachNotifRead(id);
+            markCoachNotifRead(id, 'notif');
             if (uid) showCompetitorDetail(uid);
+        }
+
+        // ===== ACCOUNT: change password / delete account =====
+        async function changePassword() {
+            if (!currentUser || !hasPasswordProvider()) return;
+            const cur = document.getElementById('pwCurrent').value;
+            const nw = document.getElementById('pwNew').value;
+            const conf = document.getElementById('pwConfirm').value;
+            if (!cur) { showToast(T('pw_need_current'), 'error'); return; }
+            if (nw.length < 8) { showToast(T('pw_too_short'), 'error'); return; }
+            if (nw !== conf) { showToast(T('pw_mismatch'), 'error'); return; }
+            if (nw === cur) { showToast(T('pw_same'), 'error'); return; }
+            const btn = document.getElementById('pwBtn');
+            const orig = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = `<span class="loading-spinner"></span>`;
+            try {
+                await reauthenticate(cur);
+                await currentUser.updatePassword(nw);
+                ['pwCurrent', 'pwNew', 'pwConfirm'].forEach(id => document.getElementById(id).value = '');
+                showToast(T('pw_changed'), 'success');
+            } catch (err) {
+                console.error('changePassword failed:', err && err.code);
+                const m = {
+                    'auth/wrong-password': T('pw_wrong'), 'auth/invalid-credential': T('pw_wrong'),
+                    'auth/weak-password': T('pw_too_short'), 'auth/password-does-not-meet-requirements': T('pw_too_short'), 'auth/too-many-requests': T('reset_too_many')
+                };
+                showToast(m[err && err.code] || T('pw_err'), 'error');
+            } finally {
+                btn.disabled = false; btn.innerHTML = orig;
+            }
+        }
+
+        // Full self-service removal: storage files → inbox entries → user doc → auth user.
+        // Order matters: the auth user goes last so every Firestore/Storage rule still
+        // sees the owner while data is being removed.
+        async function deleteMyAccount() {
+            if (!currentUser || isAdmin) return;
+            const res = await confirmDanger({
+                title: T('del_title'),
+                message: T('del_confirm_msg'),
+                okText: T('del_btn'),
+                password: hasPasswordProvider()
+            });
+            if (!res.ok) return;
+            const uid = currentUser.uid;
+            showToast(T('del_working'));
+            try {
+                await reauthenticate(res.password);
+            } catch (err) {
+                console.error('reauth failed:', err && err.code);
+                const m = { 'auth/wrong-password': T('pw_wrong'), 'auth/invalid-credential': T('pw_wrong'), 'auth/popup-closed-by-user': T('del_popup_closed') };
+                showToast(m[err && err.code] || T('pw_err'), 'error');
+                return;
+            }
+            try {
+                teardownUserDocListener();
+                teardownCoachInboxListener();
+                const files = [...(userData.videos || []), ...(userData.documents || [])].map(x => x && x.storagePath).filter(Boolean);
+                await Promise.all(files.map(path => storage.ref(path).delete().catch(() => {})));
+                for (const col of ['coachNotifications', 'contactMessages']) {
+                    try {
+                        const snap = await db.collection(col).where('fromUid', '==', uid).get();
+                        const batch = db.batch();
+                        snap.forEach(d => batch.delete(d.ref));
+                        if (!snap.empty) await batch.commit();
+                    } catch (e) { console.warn('inbox cleanup skipped:', col, e && e.code); }
+                }
+                await db.collection('users').doc(uid).delete();
+                await currentUser.delete();
+                showToast(T('del_done'), 'success');
+            } catch (err) {
+                console.error('deleteMyAccount failed:', err);
+                showToast(T('del_err'), 'error');
+                try { await auth.signOut(); } catch (e) {}
+            }
         }
 
         // ===== PDF EXPORT (coach / admin only) =====
@@ -4845,14 +5181,32 @@
         }
 
         // ===== CONTACT =====
-        function sendContact() {
-            const name = document.getElementById('contactName').value.trim();
-            const msg = document.getElementById('contactMsg').value.trim();
-            if (!name || !msg) { showToast('נא למלא שם והודעה'); return; }
-            showToast('ההודעה נשלחה בהצלחה! נחזור אליך בקרוב');
-            document.getElementById('contactName').value = '';
-            document.getElementById('contactPhone').value = '';
-            document.getElementById('contactMsg').value = '';
+        let contactSending = false;
+        async function sendContact() {
+            const name = document.getElementById('contactName').value.trim().slice(0, 80);
+            const phone = document.getElementById('contactPhone').value.trim().slice(0, 30);
+            const msg = document.getElementById('contactMsg').value.trim().slice(0, 1000);
+            if (!name || !msg) { showToast(T('contact_fill_err'), 'error'); return; }
+            if (contactSending) return;
+            contactSending = true;
+            const btn = document.querySelector('#contact .form-submit');
+            const orig = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = `<span class="loading-spinner"></span> ${T('contact_sending')}`; }
+            try {
+                const entry = { name, phone, message: msg, createdAt: firebase.firestore.FieldValue.serverTimestamp(), readBy: {}, deletedBy: {} };
+                if (auth.currentUser) entry.fromUid = auth.currentUser.uid;
+                await db.collection('contactMessages').add(entry);
+                showToast(T('contact_sent'), 'success');
+                document.getElementById('contactName').value = '';
+                document.getElementById('contactPhone').value = '';
+                document.getElementById('contactMsg').value = '';
+            } catch (err) {
+                console.error('sendContact failed:', err);
+                showToast(T('contact_err'), 'error');
+            } finally {
+                contactSending = false;
+                if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+            }
         }
 
         // ===== SCROLL ANIMATIONS =====
@@ -5004,7 +5358,7 @@
                 // Videos (real upload)
                 vid_type_err: 'ניתן להעלות קבצי וידאו בלבד', vid_size_err: 'הסרטון גדול מדי — מקסימום 500MB', vid_busy: 'העלאה אחרת עדיין רצה',
                 vid_uploaded: 'הסרטון הועלה בהצלחה', vid_play: 'לחץ לניגון', vid_no_file: 'רשומה ישנה — הקובץ לא נשמר', vid_open: 'פתח בחלון חדש',
-                vid_delete_confirm: 'למחוק את הסרטון לצמיתות?',
+                vid_delete_confirm: 'הסרטון "{name}" יימחק לצמיתות מהמערכת.',
                 vid_err_unauth: 'אין הרשאה להעלות (בדוק שהחשבון מאומת)', vid_err_cancel: 'ההעלאה בוטלה', vid_err_quota: 'מכסת האחסון מלאה — פנה למנהל',
                 vid_err_network: 'בעיית רשת — נסה שוב', vid_err_generic: 'ההעלאה נכשלה, נסה שוב',
                 vid_err_disabled: 'העלאת סרטונים עדיין לא הופעלה במערכת — פנה למנהל',
@@ -5013,6 +5367,19 @@
                 cn_mark_all: 'סמן הכל כנקרא', cn_clear_read: 'נקה את מה שנקרא', cn_mark_read: 'סמן כנקרא', cn_read: 'נקרא', cn_athlete: 'מתחרה',
                 cn_empty: 'אין התראות חדשות', cn_empty_hint: 'כשמתחרה יעדכן פרטים, יירשם לתחרות או יעלה קובץ — זה יופיע כאן',
                 cn_new_one: 'עדכון חדש ממתחרה', cn_new_many: '{n} עדכונים חדשים ממתחרים', cn_all_read: 'כל ההתראות סומנו כנקראו', cn_nothing_read: 'אין התראות שנקראו',
+                cn_new_contact: 'הודעה חדשה מטופס צור קשר', cn_new_contact_many: '{n} הודעות חדשות מטופס צור קשר', cn_contact_from: 'צור קשר',
+                contact_fill_err: 'נא למלא שם והודעה', contact_sending: 'שולח...', contact_sent: 'ההודעה נשלחה! נחזור אליך בקרוב', contact_err: 'שליחת ההודעה נכשלה — נסה שוב או התקשר',
+                doc_type_err: 'בחר סוג מסמך לפני ההעלאה', doc_kind_err: 'ניתן להעלות PDF, JPG או PNG בלבד', doc_size_err: 'הקובץ גדול מדי — מקסימום 10MB',
+                doc_uploaded: 'המסמך הועלה בהצלחה', doc_no_file: 'רשומה ישנה — הקובץ לא נשמר', doc_err_disabled: 'העלאת מסמכים עדיין לא הופעלה במערכת — פנה למנהל',
+                doc_delete_title: 'מחיקת מסמך', doc_delete_msg: 'המסמך "{name}" יימחק לצמיתות מהמערכת.',
+                vid_delete_title: 'מחיקת סרטון',
+                confirm_title: 'אישור מחיקה', confirm_type: 'הקלד {word} כדי לאשר', confirm_pw: 'הסיסמה שלך (נדרש לאימות)', confirm_ok: 'מחק', confirm_cancel: 'ביטול',
+                pw_title: 'שינוי סיסמה', pw_google_note: 'החשבון מחובר דרך Google — הסיסמה מנוהלת בחשבון Google שלך.', pw_current: 'סיסמה נוכחית', pw_new: 'סיסמה חדשה (לפחות 8 תווים)', pw_confirm: 'אימות סיסמה חדשה', pw_btn: 'עדכן סיסמה',
+                pw_need_current: 'הזן את הסיסמה הנוכחית', pw_too_short: 'הסיסמה חייבת להכיל לפחות 8 תווים', pw_mismatch: 'הסיסמאות לא תואמות', pw_same: 'הסיסמה החדשה זהה לנוכחית',
+                pw_changed: 'הסיסמה עודכנה בהצלחה', pw_wrong: 'הסיסמה הנוכחית שגויה', pw_err: 'העדכון נכשל, נסה שוב',
+                del_title: 'מחיקת חשבון', del_desc: 'מוחק לצמיתות את הפרופיל, המסמכים, הסרטונים, יומן האימונים והמשובים. אין דרך לשחזר.', del_btn: 'מחק את החשבון שלי',
+                del_confirm_msg: 'כל הנתונים שלך יימחקו לצמיתות: פרופיל, מסמכים, סרטונים, יומן אימונים, מטרות ומשובים. הפעולה אינה הפיכה.',
+                del_working: 'מוחק את החשבון...', del_done: 'החשבון נמחק. להתראות!', del_err: 'המחיקה נכשלה — פנה למנהל', del_popup_closed: 'חלון האימות נסגר לפני השלמה',
                 cn_err: 'הפעולה נכשלה, נסה שוב', cn_err_perm: 'אין הרשאה לקרוא התראות — יש לפרסם את חוקי Firestore המעודכנים', cn_err_load: 'טעינת ההתראות נכשלה — רענן את הדף',
                 cn_t_profile: 'עדכן פרטי פרופיל', cn_t_competition: 'נרשם לתחרות', cn_t_document: 'העלה מסמך', cn_t_video: 'העלה סרטון',
                 cn_f_nameHe: 'שם בעברית', cn_f_nameEn: 'שם באנגלית', cn_f_weight: 'משקל', cn_f_height: 'גובה', cn_f_category: 'קטגוריה', cn_f_gym: 'מכון',
@@ -5150,7 +5517,7 @@
                 // Videos (real upload)
                 vid_type_err: 'Only video files can be uploaded', vid_size_err: 'Video too large — 500MB max', vid_busy: 'Another upload is still running',
                 vid_uploaded: 'Video uploaded successfully', vid_play: 'Click to play', vid_no_file: 'Legacy entry — file was not stored', vid_open: 'Open in new tab',
-                vid_delete_confirm: 'Delete this video permanently?',
+                vid_delete_confirm: 'The video "{name}" will be permanently deleted.',
                 vid_err_unauth: 'Not allowed to upload (is your account verified?)', vid_err_cancel: 'Upload cancelled', vid_err_quota: 'Storage quota is full — contact the admin',
                 vid_err_network: 'Network problem — try again', vid_err_generic: 'Upload failed, please try again',
                 vid_err_disabled: 'Video upload is not enabled yet — contact the admin',
@@ -5159,6 +5526,19 @@
                 cn_mark_all: 'Mark all as read', cn_clear_read: 'Clear read items', cn_mark_read: 'Mark as read', cn_read: 'Read', cn_athlete: 'Athlete',
                 cn_empty: 'No new notifications', cn_empty_hint: 'When an athlete updates details, registers for a competition or uploads a file — it shows up here',
                 cn_new_one: 'New update from an athlete', cn_new_many: '{n} new updates from athletes', cn_all_read: 'All notifications marked as read', cn_nothing_read: 'No read notifications to clear',
+                cn_new_contact: 'New message from the contact form', cn_new_contact_many: '{n} new messages from the contact form', cn_contact_from: 'Contact form',
+                contact_fill_err: 'Please fill in name and message', contact_sending: 'Sending...', contact_sent: 'Message sent! We will get back to you soon', contact_err: 'Sending failed — try again or call us',
+                doc_type_err: 'Choose a document type before uploading', doc_kind_err: 'Only PDF, JPG or PNG can be uploaded', doc_size_err: 'File too large — 10MB max',
+                doc_uploaded: 'Document uploaded successfully', doc_no_file: 'Legacy entry — file was not stored', doc_err_disabled: 'Document upload is not enabled yet — contact the admin',
+                doc_delete_title: 'Delete document', doc_delete_msg: 'The document "{name}" will be permanently deleted.',
+                vid_delete_title: 'Delete video',
+                confirm_title: 'Confirm deletion', confirm_type: 'Type {word} to confirm', confirm_pw: 'Your password (required to verify)', confirm_ok: 'Delete', confirm_cancel: 'Cancel',
+                pw_title: 'Change password', pw_google_note: 'This account signs in with Google — the password is managed in your Google account.', pw_current: 'Current password', pw_new: 'New password (at least 8 characters)', pw_confirm: 'Confirm new password', pw_btn: 'Update password',
+                pw_need_current: 'Enter your current password', pw_too_short: 'Password must be at least 8 characters', pw_mismatch: 'Passwords do not match', pw_same: 'New password is the same as the current one',
+                pw_changed: 'Password updated', pw_wrong: 'Current password is incorrect', pw_err: 'Update failed, please try again',
+                del_title: 'Delete account', del_desc: 'Permanently deletes your profile, documents, videos, training log and feedback. This cannot be undone.', del_btn: 'Delete my account',
+                del_confirm_msg: 'All your data will be permanently deleted: profile, documents, videos, training log, goals and feedback. This cannot be undone.',
+                del_working: 'Deleting account...', del_done: 'Account deleted. Goodbye!', del_err: 'Deletion failed — contact the admin', del_popup_closed: 'The verification window was closed',
                 cn_err: 'Action failed, please try again', cn_err_perm: 'No permission to read notifications — the updated Firestore rules must be published', cn_err_load: 'Failed to load notifications — refresh the page',
                 cn_t_profile: 'updated profile details', cn_t_competition: 'registered for a competition', cn_t_document: 'uploaded a document', cn_t_video: 'uploaded a video',
                 cn_f_nameHe: 'Hebrew name', cn_f_nameEn: 'English name', cn_f_weight: 'weight', cn_f_height: 'height', cn_f_category: 'category', cn_f_gym: 'gym',
@@ -5296,7 +5676,7 @@
                 // Videos (real upload)
                 vid_type_err: 'Nur Videodateien können hochgeladen werden', vid_size_err: 'Video zu groß — max. 500MB', vid_busy: 'Ein anderer Upload läuft noch',
                 vid_uploaded: 'Video erfolgreich hochgeladen', vid_play: 'Zum Abspielen klicken', vid_no_file: 'Alter Eintrag — Datei wurde nicht gespeichert', vid_open: 'In neuem Tab öffnen',
-                vid_delete_confirm: 'Dieses Video dauerhaft löschen?',
+                vid_delete_confirm: 'Das Video "{name}" wird dauerhaft gelöscht.',
                 vid_err_unauth: 'Upload nicht erlaubt (ist dein Konto verifiziert?)', vid_err_cancel: 'Upload abgebrochen', vid_err_quota: 'Speicherkontingent voll — Admin kontaktieren',
                 vid_err_network: 'Netzwerkproblem — bitte erneut versuchen', vid_err_generic: 'Upload fehlgeschlagen, bitte erneut versuchen',
                 vid_err_disabled: 'Video-Upload ist noch nicht aktiviert — Admin kontaktieren',
@@ -5305,6 +5685,19 @@
                 cn_mark_all: 'Alle als gelesen markieren', cn_clear_read: 'Gelesene entfernen', cn_mark_read: 'Als gelesen markieren', cn_read: 'Gelesen', cn_athlete: 'Wettkämpfer',
                 cn_empty: 'Keine neuen Benachrichtigungen', cn_empty_hint: 'Wenn ein Wettkämpfer Daten ändert, sich anmeldet oder eine Datei hochlädt — erscheint es hier',
                 cn_new_one: 'Neue Aktualisierung eines Wettkämpfers', cn_new_many: '{n} neue Aktualisierungen von Wettkämpfern', cn_all_read: 'Alle Benachrichtigungen als gelesen markiert', cn_nothing_read: 'Keine gelesenen Benachrichtigungen',
+                cn_new_contact: 'Neue Nachricht über das Kontaktformular', cn_new_contact_many: '{n} neue Nachrichten über das Kontaktformular', cn_contact_from: 'Kontaktformular',
+                contact_fill_err: 'Bitte Name und Nachricht ausfüllen', contact_sending: 'Wird gesendet...', contact_sent: 'Nachricht gesendet! Wir melden uns bald', contact_err: 'Senden fehlgeschlagen — erneut versuchen oder anrufen',
+                doc_type_err: 'Wähle vor dem Upload einen Dokumenttyp', doc_kind_err: 'Nur PDF, JPG oder PNG möglich', doc_size_err: 'Datei zu groß — max. 10MB',
+                doc_uploaded: 'Dokument erfolgreich hochgeladen', doc_no_file: 'Alter Eintrag — Datei wurde nicht gespeichert', doc_err_disabled: 'Dokument-Upload ist noch nicht aktiviert — Admin kontaktieren',
+                doc_delete_title: 'Dokument löschen', doc_delete_msg: 'Das Dokument "{name}" wird dauerhaft gelöscht.',
+                vid_delete_title: 'Video löschen',
+                confirm_title: 'Löschen bestätigen', confirm_type: 'Tippe {word} zur Bestätigung', confirm_pw: 'Dein Passwort (zur Verifizierung)', confirm_ok: 'Löschen', confirm_cancel: 'Abbrechen',
+                pw_title: 'Passwort ändern', pw_google_note: 'Dieses Konto meldet sich mit Google an — das Passwort wird im Google-Konto verwaltet.', pw_current: 'Aktuelles Passwort', pw_new: 'Neues Passwort (mind. 8 Zeichen)', pw_confirm: 'Neues Passwort bestätigen', pw_btn: 'Passwort aktualisieren',
+                pw_need_current: 'Aktuelles Passwort eingeben', pw_too_short: 'Das Passwort muss mindestens 8 Zeichen haben', pw_mismatch: 'Passwörter stimmen nicht überein', pw_same: 'Neues Passwort ist identisch mit dem aktuellen',
+                pw_changed: 'Passwort aktualisiert', pw_wrong: 'Aktuelles Passwort ist falsch', pw_err: 'Aktualisierung fehlgeschlagen, bitte erneut versuchen',
+                del_title: 'Konto löschen', del_desc: 'Löscht dauerhaft Profil, Dokumente, Videos, Trainingslog und Feedback. Kann nicht rückgängig gemacht werden.', del_btn: 'Mein Konto löschen',
+                del_confirm_msg: 'Alle deine Daten werden dauerhaft gelöscht: Profil, Dokumente, Videos, Trainingslog, Ziele und Feedback. Nicht rückgängig zu machen.',
+                del_working: 'Konto wird gelöscht...', del_done: 'Konto gelöscht. Auf Wiedersehen!', del_err: 'Löschen fehlgeschlagen — Admin kontaktieren', del_popup_closed: 'Das Verifizierungsfenster wurde geschlossen',
                 cn_err: 'Aktion fehlgeschlagen, bitte erneut versuchen', cn_err_perm: 'Keine Berechtigung — die aktualisierten Firestore-Regeln müssen veröffentlicht werden', cn_err_load: 'Laden fehlgeschlagen — Seite aktualisieren',
                 cn_t_profile: 'hat Profildaten aktualisiert', cn_t_competition: 'hat sich für einen Wettkampf angemeldet', cn_t_document: 'hat ein Dokument hochgeladen', cn_t_video: 'hat ein Video hochgeladen',
                 cn_f_nameHe: 'Hebräischer Name', cn_f_nameEn: 'Englischer Name', cn_f_weight: 'Gewicht', cn_f_height: 'Größe', cn_f_category: 'Kategorie', cn_f_gym: 'Verein',

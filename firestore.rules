@@ -2,11 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Admin is identified ONLY by a hardcoded email from the auth token.
+    // Admin is identified ONLY by a verified email from the auth token.
     // It can never be granted from the client, so it can't be self-assigned.
     function isAdmin() {
       return request.auth != null
-        && request.auth.token.email == 'yarin5cohen@gmail.com';
+        && request.auth.token.email == 'yarin5cohen@gmail.com'
+        && request.auth.token.email_verified == true;
     }
 
     function isCoach() {
@@ -22,7 +23,49 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    // ---- shared validators ----
+    function optStr(d, k, max) {
+      return !(k in d) || (d[k] is string && d[k].size() <= max);
+    }
+    function optNum(d, k, min, max) {
+      return !(k in d) || d[k] == null || (d[k] is number && d[k] >= min && d[k] <= max);
+    }
+    function optInt(d, k, max) {
+      return !(k in d) || d[k] == null || (d[k] is int && d[k] >= 0 && d[k] <= max);
+    }
+    function optList(d, k, max) {
+      return !(k in d) || (d[k] is list && d[k].size() <= max);
+    }
+
     match /users/{userId} {
+      // Every field an athlete doc may carry. Array lengths are capped so a doc can
+      // never grow towards Firestore's 1 MB limit; legacy fields are kept so old
+      // accounts keep working. Rules can't loop over arrays, so per-item shape is
+      // enforced client-side and bounded here by count.
+      function validUserDoc() {
+        let d = request.resource.data;
+        return d.keys().hasOnly([
+              'name', 'nameHe', 'nameEn', 'email', 'phone', 'gym', 'role',
+              'weight', 'height', 'category', 'createdAt',
+              'documents', 'videos', 'competitions', 'weightHistory', 'weeklySchedule',
+              'strengthProgram', 'trainingLog', 'weeklyGoals', 'coachFeedback',
+              'wins', 'losses', 'draws', 'skills', 'experience'])
+          && d.role in ['competitor', 'coach']
+          && optStr(d, 'name', 100) && optStr(d, 'nameHe', 100) && optStr(d, 'nameEn', 100)
+          && optStr(d, 'email', 254) && optStr(d, 'phone', 30) && optStr(d, 'gym', 100)
+          && optStr(d, 'category', 40)
+          && optNum(d, 'weight', 0, 400) && optNum(d, 'height', 0, 300)
+          && optInt(d, 'wins', 10000) && optInt(d, 'losses', 10000) && optInt(d, 'draws', 10000)
+          && optInt(d, 'experience', 100)
+          && (!('skills' in d) || d.skills is map)
+          && (!('createdAt' in d) || d.createdAt is timestamp)
+          && optList(d, 'documents', 200) && optList(d, 'videos', 200)
+          && optList(d, 'competitions', 300) && optList(d, 'weightHistory', 500)
+          && optList(d, 'weeklySchedule', 100) && optList(d, 'strengthProgram', 300)
+          && optList(d, 'trainingLog', 1000) && optList(d, 'weeklyGoals', 300)
+          && optList(d, 'coachFeedback', 500);
+      }
+
       // Admin: full read/write on everyone.
       allow read, write: if isAdmin();
 
@@ -33,18 +76,26 @@ service cloud.firestore {
       // Cannot touch role, profile, documents, videos, or anything else.
       allow update: if isCoach()
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['coachFeedback', 'trainingLog', 'weeklyGoals']);
+             .hasOnly(['coachFeedback', 'trainingLog', 'weeklyGoals'])
+        && optList(request.resource.data, 'coachFeedback', 500)
+        && optList(request.resource.data, 'trainingLog', 1000)
+        && optList(request.resource.data, 'weeklyGoals', 300);
 
       // Owner: read own doc.
       allow read: if isOwner(userId);
 
       // Owner create: only own doc, and role is forced to 'competitor'.
       allow create: if isOwner(userId)
-        && request.resource.data.role == 'competitor';
+        && request.resource.data.role == 'competitor'
+        && validUserDoc();
 
       // Owner update: own doc, but role can NOT be changed (only admin can).
       allow update: if isOwner(userId)
-        && request.resource.data.role == resource.data.role;
+        && request.resource.data.role == resource.data.role
+        && validUserDoc();
+
+      // Owner delete: self-service account removal.
+      allow delete: if isOwner(userId);
     }
 
     // Inbox for coaches/admin. Athletes append entries about their own changes
@@ -80,7 +131,9 @@ service cloud.firestore {
                   && isStr(d.data.title, 120));
       }
 
-      allow read: if isStaff();
+      // Staff read the inbox; a sender may list their own entries (account removal).
+      allow read: if isStaff()
+        || (request.auth != null && resource.data.fromUid == request.auth.uid);
 
       // Any signed-in user may append a notification about THEMSELVES only.
       // Shape is fully validated so the inbox can never carry arbitrary payloads.
@@ -102,8 +155,39 @@ service cloud.firestore {
         && request.resource.data.readBy.diff(resource.data.readBy).affectedKeys().hasOnly([request.auth.uid])
         && request.resource.data.deletedBy.diff(resource.data.deletedBy).affectedKeys().hasOnly([request.auth.uid]);
 
-      // Hard delete: admin anytime; coaches only for stale entries (housekeeping).
+      // Hard delete: admin anytime; the sender when removing their account;
+      // coaches only for stale entries (housekeeping).
       allow delete: if isAdmin()
+        || (request.auth != null && resource.data.fromUid == request.auth.uid)
+        || (isCoach() && resource.data.createdAt < request.time - duration.value(60, 'd'));
+    }
+
+    // Public contact form. Anyone (even signed-out) may leave a message; only
+    // staff can read it. Strict shape + sizes keep it from being a spam sink.
+    match /contactMessages/{msgId} {
+      allow read: if isStaff()
+        || (request.auth != null && resource.data.fromUid == request.auth.uid);
+
+      allow create: if request.resource.data.keys().hasAll(['name', 'phone', 'message', 'createdAt', 'readBy', 'deletedBy'])
+        && request.resource.data.keys().hasOnly(['name', 'phone', 'message', 'createdAt', 'readBy', 'deletedBy', 'fromUid'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 80
+        && request.resource.data.phone is string && request.resource.data.phone.size() <= 30
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 1 && request.resource.data.message.size() <= 1000
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.readBy == {}
+        && request.resource.data.deletedBy == {}
+        && (!('fromUid' in request.resource.data)
+            || (request.auth != null && request.resource.data.fromUid == request.auth.uid));
+
+      allow update: if isStaff()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'deletedBy'])
+        && request.resource.data.readBy.diff(resource.data.readBy).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.deletedBy.diff(resource.data.deletedBy).affectedKeys().hasOnly([request.auth.uid]);
+
+      allow delete: if isAdmin()
+        || (request.auth != null && resource.data.fromUid == request.auth.uid)
         || (isCoach() && resource.data.createdAt < request.time - duration.value(60, 'd'));
     }
   }
