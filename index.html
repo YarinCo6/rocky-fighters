@@ -1591,6 +1591,13 @@
         .confirm-ok:disabled { opacity: 0.4; cursor: not-allowed; }
         .confirm-err { color: var(--accent); font-size: 0.9rem; min-height: 1.2em; margin-top: 6px; }
 
+        .collapse-toggle {
+            width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            background: none; border: none; padding: 0; cursor: pointer; color: var(--white); font-family: 'Heebo', sans-serif; text-align: start;
+        }
+        .collapse-toggle .chev { color: var(--text-secondary); transition: transform 0.25s; }
+        .collapse-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+        .collapse-toggle:hover .chev { color: var(--accent); }
         .danger-card { border-color: rgba(42,49,219,0.35) !important; }
         .danger-card h4 i { color: var(--accent); }
         .file-item .file-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -2237,8 +2244,12 @@
                             </div>
                         </div>
 
-                        <div class="profile-card" style="margin-top: 20px;">
-                            <h4 style="margin-bottom:14px;">עדכון פרטים</h4>
+                        <div class="profile-card" style="margin-top: 20px;" id="editProfileCard">
+                            <button type="button" class="collapse-toggle" id="editProfileToggle" onclick="toggleEditProfile()" aria-expanded="false" aria-controls="editProfileBody">
+                                <h4 style="margin:0;"><i class="fas fa-user-pen" style="color:var(--accent);"></i> עדכון פרטים</h4>
+                                <i class="fas fa-chevron-down chev"></i>
+                            </button>
+                            <div id="editProfileBody" hidden style="margin-top:14px;">
                             <div class="form-group">
                                 <label id="nameHeLabel">שם מלא (עברית)</label>
                                 <input type="text" id="nameHeInput" placeholder="השם שלך בעברית">
@@ -2264,6 +2275,7 @@
                                 <input type="text" id="gymInput" placeholder="שם המכון">
                             </div>
                             <button class="form-submit" style="margin-top:18px;" onclick="updateProfile()">שמור שינויים</button>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -3242,6 +3254,8 @@
                 document.getElementById('notifPanelBtn').style.display = 'none';
             }
 
+            toggleEditProfile(false);
+
             // Password card only makes sense for email/password accounts.
             const pwForm = document.getElementById('pwForm'), pwNote = document.getElementById('pwGoogleNote');
             if (pwForm && pwNote) { const hasPw = hasPasswordProvider(); pwForm.style.display = hasPw ? '' : 'none'; pwNote.style.display = hasPw ? 'none' : ''; }
@@ -3602,6 +3616,16 @@
             Object.assign(userData, data);
         }
 
+        function toggleEditProfile(force) {
+            const body = document.getElementById('editProfileBody');
+            const btn = document.getElementById('editProfileToggle');
+            if (!body || !btn) return;
+            const open = typeof force === 'boolean' ? force : body.hidden;
+            body.hidden = !open;
+            btn.setAttribute('aria-expanded', String(open));
+            if (open) { const first = document.getElementById('nameHeInput'); if (first) first.focus(); }
+        }
+
         async function updateProfile() {
             if (!currentUser) return;
 
@@ -3649,10 +3673,11 @@
             // Re-render dashboard
             enterDashboard();
 
-            // Clear form
+            // Clear form and fold it back up
             ['nameHeInput','nameEnInput','weightInput','heightInput','categoryInput','gymInput'].forEach(id => {
                 document.getElementById(id).value = '';
             });
+            toggleEditProfile(false);
 
             showToast('הפרופיל עודכן בהצלחה');
         }
@@ -5802,7 +5827,7 @@
             const profileCards = document.querySelectorAll('#panel-profile .profile-card');
             if (profileCards[1]) {
                 const pfH4 = profileCards[1].querySelector('h4');
-                if (pfH4) pfH4.textContent = t.dash_update_details;
+                if (pfH4) pfH4.innerHTML = `<i class="fas fa-user-pen" style="color:var(--accent);"></i> ${t.dash_update_details}`;
                 const pfLabels = profileCards[1].querySelectorAll('.form-group label');
                 // pfLabels[0]=nameHe, [1]=nameEn are static bilingual labels, skip.
                 if (pfLabels[2]) pfLabels[2].textContent = t.dash_weight_kg;
