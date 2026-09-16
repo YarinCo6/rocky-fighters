@@ -49,6 +49,15 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Public (marketing) page: cards are a clear grey so they stand off the white page. */
+        .public-content {
+            --bg-card: #e3e5ec;
+            --bg-card-hover: #d8dbe5;
+            --border-light: rgba(20, 26, 94, 0.14);
+        }
+        .public-content .form-group input,
+        .public-content .form-group textarea { background: #ffffff; }
+
         /* The logo PNG has white lettering: give it a navy badge on the light page. */
         /* Placed at the END of the stylesheet-order-sensitive selectors below so the
            badge (black square) always wins over per-element radius/object-fit. */
