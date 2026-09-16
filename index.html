@@ -843,39 +843,6 @@
             margin-top: 4px;
         }
 
-        /* Upload Zone */
-        .upload-zone {
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 44px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-            background: var(--bg-card);
-        }
-
-        .upload-zone:hover,
-        .upload-zone.dragover {
-            border-color: var(--accent);
-            background: rgba(111,143,255,0.06);
-        }
-
-        .upload-zone i {
-            font-size: 2.7rem;
-            color: var(--accent);
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .upload-zone p { color: var(--text-secondary); }
-
-        .upload-zone .upload-hint {
-            font-size: 0.9rem;
-            margin-top: 8px;
-            opacity: 0.85;
-        }
-
         /* File List */
         .file-list { display: flex; flex-direction: column; gap: 10px; }
 
@@ -1558,12 +1525,14 @@
         }
         .notif-actions button:hover { color: var(--accent); background: rgba(111,143,255,0.08); }
 
-        /* ===== Video upload / playback ===== */
-        .upload-progress { margin: -14px 0 24px; display: none; }
-        .upload-progress.active { display: block; }
-        .upload-progress .row { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px; }
+        /* ===== Video links / playback ===== */
         .video-thumbnail { cursor: pointer; position: relative; }
-        .video-thumbnail video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .video-thumbnail iframe { width: 100%; height: 100%; border: 0; background: #000; }
+        .video-thumbnail .host-badge {
+            position: absolute; bottom: 8px; inset-inline-start: 10px; font-size: 0.75rem; color: var(--text-secondary);
+            background: rgba(7,11,42,0.75); padding: 2px 8px; border-radius: 6px; direction: ltr;
+        }
+        .link-form { display: grid; gap: 0; }
         .video-meta { color: var(--text-secondary); font-size: 0.85rem; margin-top: 6px; }
         .video-card .video-actions { display: flex; justify-content: flex-end; gap: 6px; padding: 0 12px 12px; }
         .video-card .video-actions button {
@@ -1811,7 +1780,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" integrity="sha384-sEVIly94UBRLKWdkYoPpSG7GD/e79YHMrxVyZaOk712Ga7+EAw6w1EFi+xBzBdd+" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" integrity="sha384-EkqK+ezBWJuvO3hfrSx2iVqr3YQbhmnzn8kPhOpBZ+0GMVU5oGSgptwIu8D84HjE" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" integrity="sha384-M481iNZJtbpypKgvlvZ+78Giq0BsewFLk5r2k+MOcGXlwKCc27DQRZ+WCV/zpmpC" crossorigin="anonymous"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js" integrity="sha384-6I0gWsz4FIAr30c0TxIxJnPQuJiZ1FfILdZrgJdjxTH3R8dgPGTvexbyqTvReV6Z" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js" integrity="sha384-E3vxFxXu8FhW5kvqdQJ5Yf8ugrV7iCJP8jgnItRH2Rk8Q08cJzJGTi/oMC3FEp3j" crossorigin="anonymous"></script>
     <script>
         firebase.initializeApp({
@@ -1824,7 +1792,6 @@
         });
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         // App Check (reCAPTCHA v3): proves requests come from this site, not from a
         // script that copied the public API key. Register the site in Firebase
@@ -2162,58 +2129,57 @@
                 <div class="home-grid" id="homeGrid"></div>
             </div>
 
-            <!-- Documents -->
+            <!-- Documents (links) -->
             <div class="dash-panel" id="panel-documents">
-                <h3 style="margin-bottom: 20px; color: var(--white);"><i class="fas fa-cloud-upload-alt" style="color: var(--accent);"></i> העלאת מסמכים</h3>
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-folder-open" style="color: var(--accent);"></i> <span data-i18n="dash_upload_docs">מסמכים</span></h3>
+                <p style="color:var(--text-secondary); margin-bottom:20px;" data-i18n="doc_link_intro">שמור את המסמך ב-Google Drive / Dropbox / iCloud, הגדר שיתוף "לכל מי שיש לו את הקישור", והדבק כאן את הקישור.</p>
 
-                <div class="form-group">
-                    <label>סוג מסמך</label>
-                    <select id="docType">
-                        <option value="">בחר סוג מסמך</option>
-                        <option value="medical">אישור רופא</option>
-                        <option value="registration">טופס הרשמה לתחרות</option>
-                        <option value="passport">פספורט</option>
-                        <option value="insurance">ביטוח</option>
-                        <option value="other">אחר</option>
-                    </select>
+                <div class="profile-card" style="margin-bottom:22px;">
+                    <div class="form-group">
+                        <label data-i18n="dash_doc_type">סוג מסמך</label>
+                        <select id="docType">
+                            <option value="">בחר סוג מסמך</option>
+                            <option value="medical">אישור רופא</option>
+                            <option value="registration">טופס הרשמה לתחרות</option>
+                            <option value="passport">פספורט</option>
+                            <option value="insurance">ביטוח</option>
+                            <option value="other">אחר</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="doc_name_label">שם המסמך (אופציונלי)</label>
+                        <input type="text" id="docName" maxlength="120" placeholder="למשל: אישור רפואי 2026" data-i18n-ph="doc_name_ph">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="doc_link_label">קישור למסמך</label>
+                        <input type="url" id="docLink" maxlength="2048" inputmode="url" dir="ltr" placeholder="https://drive.google.com/..." autocomplete="off">
+                    </div>
+                    <button class="form-submit" id="docAddBtn" onclick="addDocumentLink()"><i class="fas fa-link"></i> <span data-i18n="doc_add_btn">הוסף מסמך</span></button>
                 </div>
 
-                <div class="upload-zone" id="uploadZoneFile" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>לחץ כאן או גרור קובץ להעלאה</p>
-                    <p class="upload-hint">PDF, JPG, PNG - עד 10MB</p>
-                    <input type="file" id="fileInput" style="display:none" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this)">
-                </div>
-                <div class="upload-progress" id="docProgress" style="margin-top:14px;">
-                    <div class="row"><span id="docProgressName"></span><span id="docProgressPct">0%</span></div>
-                    <div class="load-progress-track"><div class="load-progress-fill" id="docProgressFill" style="width:0%"></div></div>
-                </div>
-
-                <h3 style="margin: 30px 0 16px; color: var(--white);"><i class="fas fa-folder" style="color: var(--accent);"></i> המסמכים שלי</h3>
+                <h3 style="margin: 30px 0 16px; color: var(--white);"><i class="fas fa-folder" style="color: var(--accent);"></i> <span data-i18n="dash_my_docs">המסמכים שלי</span></h3>
                 <div class="file-list" id="fileList"></div>
             </div>
 
-            <!-- Videos -->
+            <!-- Videos (links) -->
             <div class="dash-panel" id="panel-videos">
-                <h3 style="margin-bottom: 20px; color: var(--white);"><i class="fas fa-video" style="color: var(--accent);"></i> סרטוני קרבות</h3>
+                <h3 style="margin-bottom: 8px; color: var(--white);"><i class="fas fa-video" style="color: var(--accent);"></i> <span data-i18n="dash_fight_videos">סרטוני קרבות</span></h3>
+                <p style="color:var(--text-secondary); margin-bottom:20px;" data-i18n="vid_link_intro">העלה את הסרטון ל-YouTube (אפשר כ"לא רשום") או ל-Drive, והדבק כאן את הקישור. סרטוני YouTube מתנגנים כאן ישירות.</p>
 
-                <div class="form-group">
-                    <label>שם / תיאור הסרטון</label>
-                    <input type="text" id="videoTitle" placeholder="למשל: קרב חצי גמר - אליפות הדרום">
-                </div>
-                <div class="form-group">
-                    <label>הערות לניתוח (אופציונלי)</label>
-                    <textarea id="videoNotes" rows="2" placeholder="נקודות לשיפור, טכניקות לשים לב אליהן..."></textarea>
-                </div>
-                <div class="upload-zone" id="uploadZoneVideo" onclick="document.getElementById('videoInput').click()" style="margin-bottom:28px;">
-                    <i class="fas fa-film"></i>
-                    <p>העלה סרטון קרב לניתוח</p>
-                    <p class="upload-hint">MP4, MOV - עד 500MB</p>
-                    <input type="file" id="videoInput" style="display:none" accept="video/*" onchange="handleVideoUpload(this)">
-                </div>
-                <div class="upload-progress" id="videoProgress">
-                    <div class="row"><span id="videoProgressName"></span><span id="videoProgressPct">0%</span></div>
-                    <div class="load-progress-track"><div class="load-progress-fill" id="videoProgressFill" style="width:0%"></div></div>
+                <div class="profile-card" style="margin-bottom:28px;">
+                    <div class="form-group">
+                        <label data-i18n="dash_video_name">שם / תיאור הסרטון</label>
+                        <input type="text" id="videoTitle" maxlength="120" placeholder="למשל: קרב חצי גמר - אליפות הדרום" data-i18n-ph="dash_video_name_ph">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="vid_link_label">קישור לסרטון</label>
+                        <input type="url" id="videoLink" maxlength="2048" inputmode="url" dir="ltr" placeholder="https://youtu.be/..." autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dash_video_notes">הערות לניתוח (אופציונלי)</label>
+                        <textarea id="videoNotes" rows="2" maxlength="1000" placeholder="נקודות לשיפור, טכניקות לשים לב אליהן..." data-i18n-ph="dash_video_notes_ph"></textarea>
+                    </div>
+                    <button class="form-submit" id="videoAddBtn" onclick="addVideoLink()"><i class="fas fa-link"></i> <span data-i18n="vid_add_btn">הוסף סרטון</span></button>
                 </div>
 
                 <div class="videos-grid" id="videosGrid"></div>
@@ -2664,7 +2630,6 @@
         let coachInbox = [];           // latest snapshot of coach notifications (visible ones)
         let coachInboxReady = false;   // false until the first snapshot lands (suppresses alerts on load)
         let coachInboxError = null;    // 'permission' | 'generic' when the listener fails
-        const VIDEO_MAX_BYTES = 500 * 1024 * 1024; // must match storage.rules
 
         // ===== HELPERS =====
         // All user-provided strings are escaped before touching innerHTML. Athlete
@@ -2684,12 +2649,6 @@
         // (JS-safe), then attribute-escape (HTML-safe). Survives both decoders.
         function jsArg(v) {
             return escAttr(JSON.stringify(String(v == null ? '' : v)));
-        }
-        function formatBytes(n) {
-            if (!n || n < 1024) return (n || 0) + ' B';
-            if (n < 1024 * 1024) return (n / 1024).toFixed(0) + ' KB';
-            if (n < 1024 * 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + ' MB';
-            return (n / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
         }
         function langLocale() {
             return currentLang === 'he' ? 'he-IL' : currentLang === 'de' ? 'de-DE' : 'en-GB';
@@ -2763,13 +2722,31 @@
             });
         }
 
-        // Only Firebase Storage download URLs for THIS bucket are ever rendered as
-        // links or media sources. Doc fields are user-controlled, so this blocks
-        // javascript: URLs and foreign hosts in the coach's session.
-        function safeStorageUrl(u, kind) {
-            if (typeof u !== 'string') return '';
-            const re = new RegExp('^https://firebasestorage\\.googleapis\\.com/v0/b/rocky-fighters-il\\.firebasestorage\\.app/o/' + kind + '%2F[^\\s"\'<>]+$', 'i');
-            return re.test(u) ? u : '';
+        // External links are user-controlled: only absolute http(s) URLs are ever
+        // rendered as hrefs, so javascript:/data: payloads can't reach a coach.
+        function safeHttpUrl(u) {
+            if (typeof u !== 'string' || u.length > 2048) return '';
+            try {
+                const p = new URL(u.trim());
+                return (p.protocol === 'https:' || p.protocol === 'http:') ? p.href : '';
+            } catch (e) { return ''; }
+        }
+        function urlHost(u) {
+            try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
+        }
+        // YouTube video id from watch / youtu.be / shorts / embed / live URLs; '' otherwise.
+        function youtubeId(u) {
+            try {
+                const p = new URL(u);
+                const host = p.hostname.replace(/^(www|m|music)\./, '');
+                let id = '';
+                if (host === 'youtu.be') id = p.pathname.slice(1).split('/')[0];
+                else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+                    if (p.pathname === '/watch') id = p.searchParams.get('v') || '';
+                    else { const m = p.pathname.match(/^\/(shorts|embed|live|v)\/([^/?#]+)/); if (m) id = m[2]; }
+                }
+                return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : '';
+            } catch (e) { return ''; }
         }
         function hasPasswordProvider() {
             return !!(currentUser && (currentUser.providerData || []).some(p => p && p.providerId === 'password'));
@@ -3432,124 +3409,48 @@
             grid.innerHTML = cards.join('');
         }
 
-        // ===== DRAG & DROP =====
-        function setupDragDrop(zoneId, inputId) {
-            const zone = document.getElementById(zoneId);
-            if (!zone) return;
-            ['dragenter', 'dragover'].forEach(evt => {
-                zone.addEventListener(evt, (e) => { e.preventDefault(); zone.classList.add('dragover'); });
-            });
-            ['dragleave', 'drop'].forEach(evt => {
-                zone.addEventListener(evt, (e) => { e.preventDefault(); zone.classList.remove('dragover'); });
-            });
-            zone.addEventListener('drop', (e) => {
-                const input = document.getElementById(inputId);
-                if (e.dataTransfer.files.length > 0) {
-                    input.files = e.dataTransfer.files;
-                    input.dispatchEvent(new Event('change'));
-                }
-            });
-        }
-        setupDragDrop('uploadZoneFile', 'fileInput');
-        setupDragDrop('uploadZoneVideo', 'videoInput');
-
-        // ===== DOCUMENT UPLOAD (Firebase Storage) =====
-        const DOC_MAX_BYTES = 10 * 1024 * 1024; // must match storage.rules
-        const DOC_TYPES = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png' };
-        let docUploadTask = null;
-
-        function setDocProgress(pct, label) {
-            const wrap = document.getElementById('docProgress');
-            if (!wrap) return;
-            if (pct == null) { wrap.classList.remove('active'); return; }
-            wrap.classList.add('active');
-            document.getElementById('docProgressFill').style.width = pct + '%';
-            document.getElementById('docProgressPct').textContent = pct + '%';
-            if (label != null) document.getElementById('docProgressName').textContent = label;
-        }
-
-        async function handleFileUpload(input) {
-            if (input.files.length === 0 || !currentUser) return;
-            const file = input.files[0];
+        // ===== DOCUMENTS (external links) =====
+        async function addDocumentLink() {
+            if (!currentUser) return;
             const docType = document.getElementById('docType').value;
-            if (!docType) { showToast(T('doc_type_err'), 'error'); input.value = ''; return; }
-            if (!DOC_TYPES[file.type]) { showToast(T('doc_kind_err'), 'error'); input.value = ''; return; }
-            if (file.size > DOC_MAX_BYTES) { showToast(T('doc_size_err'), 'error'); input.value = ''; return; }
-            if (docUploadTask) { showToast(T('vid_busy'), 'error'); return; }
-
+            const nameEl = document.getElementById('docName');
+            const linkEl = document.getElementById('docLink');
+            const link = safeHttpUrl(linkEl.value);
+            if (!docType) { showToast(T('doc_type_err'), 'error'); return; }
+            if (!link) { showToast(T('link_err'), 'error'); linkEl.focus(); return; }
+            if ((userData.documents || []).length >= 200) { showToast(T('list_full'), 'error'); return; }
             const typeNames = { medical: T('dash_doc_medical'), registration: T('dash_doc_registration'), passport: T('dash_doc_passport'), insurance: T('dash_doc_insurance'), other: T('dash_doc_other') };
-            const id = uid4();
-            const storagePath = `documents/${currentUser.uid}/${id}/file.${DOC_TYPES[file.type]}`;
-            const ref = storage.ref(storagePath);
-            const zone = document.getElementById('uploadZoneFile');
-            zone.style.pointerEvents = 'none'; zone.style.opacity = '0.6';
-            setDocProgress(0, file.name);
-            let uploaded = false;
+            const name = (nameEl.value.trim() || typeNames[docType]).slice(0, 120);
+            const entry = { id: uid4(), name, type: docType, typeName: typeNames[docType], date: new Date().toLocaleDateString('he-IL'), status: 'pending', link, addedAt: new Date().toISOString() };
+            const btn = document.getElementById('docAddBtn'); btn.disabled = true;
             try {
-                docUploadTask = ref.put(file, { contentType: file.type });
-                await new Promise((resolve, reject) => {
-                    docUploadTask.on('state_changed', (snap) => {
-                        setDocProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100), `${file.name} · ${formatBytes(snap.bytesTransferred)} / ${formatBytes(snap.totalBytes)}`);
-                    }, reject, resolve);
-                });
-                uploaded = true;
-                const url = await ref.getDownloadURL();
-                const docEntry = {
-                    id,
-                    name: String(file.name).slice(0, 200),
-                    type: docType,
-                    typeName: typeNames[docType] || T('dash_doc_other'),
-                    date: new Date().toLocaleDateString('he-IL'),
-                    status: 'pending',
-                    storagePath, url,
-                    size: file.size,
-                    contentType: file.type,
-                    uploadedAt: new Date().toISOString()
-                };
-                await db.collection('users').doc(currentUser.uid).update({
-                    documents: firebase.firestore.FieldValue.arrayUnion(docEntry)
-                });
-                notifyCoaches('document', { docType, name: docEntry.name.slice(0, 120) });
-                showToast(T('doc_uploaded'), 'success');
+                await db.collection('users').doc(currentUser.uid).update({ documents: firebase.firestore.FieldValue.arrayUnion(entry) });
+                notifyCoaches('document', { docType, name: name.slice(0, 120) });
+                nameEl.value = ''; linkEl.value = ''; document.getElementById('docType').value = '';
+                showToast(T('doc_added'), 'success');
             } catch (err) {
-                console.error('document upload failed:', err);
-                if (uploaded) { try { await ref.delete(); } catch (e) {} }
-                const msgs = {
-                    'storage/unauthorized': T('vid_err_unauth'),
-                    'storage/canceled': T('vid_err_cancel'),
-                    'storage/quota-exceeded': T('vid_err_quota'),
-                    'storage/retry-limit-exceeded': T('vid_err_network'),
-                    'storage/bucket-not-found': T('doc_err_disabled'),
-                    'storage/project-not-found': T('doc_err_disabled'),
-                    'storage/unknown': T('doc_err_disabled')
-                };
-                showToast(msgs[err && err.code] || T('vid_err_generic'), 'error');
-            } finally {
-                docUploadTask = null;
-                setDocProgress(null);
-                zone.style.pointerEvents = ''; zone.style.opacity = '';
-                input.value = '';
-            }
+                console.error('addDocumentLink failed:', err);
+                showToast(T('save_err'), 'error');
+            } finally { btn.disabled = false; }
         }
 
         function documentItemHtml(d, opts) {
             const canDelete = opts && opts.canDelete;
-            const url = safeStorageUrl(d.url, 'documents');
-            const icon = String(d.name || '').toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
+            const link = safeHttpUrl(d.link);
             const statusClass = d.status === 'approved' ? 'status-approved' : 'status-pending';
             const statusText = d.status === 'approved' ? T('dash_doc_approved') : T('dash_doc_pending');
             const id = String(d.id || '');
             return `<div class="file-item">
                 <div class="file-info">
-                    <i class="fas ${icon} file-icon"></i>
+                    <i class="fas fa-file-lines file-icon"></i>
                     <div>
                         <div class="file-name">${sanitize(d.name)}</div>
-                        <div class="file-date">${sanitize(d.date)} | ${sanitize(d.typeName)}${d.size ? ` · ${formatBytes(Number(d.size) || 0)}` : ''}${!url ? ` · <i class="fas fa-triangle-exclamation" style="color:var(--gold);"></i> ${T('doc_no_file')}` : ''}</div>
+                        <div class="file-date">${sanitize(d.date)} | ${sanitize(d.typeName)}${link ? ` · <span dir="ltr">${sanitize(urlHost(link))}</span>` : ` · <i class="fas fa-triangle-exclamation" style="color:var(--gold);"></i> ${T('no_link')}`}</div>
                     </div>
                 </div>
                 <div class="file-actions">
                     <span class="file-status ${statusClass}">${statusText}</span>
-                    ${url ? `<a href="${escAttr(url)}" target="_blank" rel="noopener noreferrer" title="${escAttr(T('vid_open'))}"><i class="fas fa-up-right-from-square"></i></a>` : ''}
+                    ${link ? `<a href="${escAttr(link)}" target="_blank" rel="noopener noreferrer" title="${escAttr(T('vid_open'))}"><i class="fas fa-up-right-from-square"></i></a>` : ''}
                     ${canDelete && id ? `<button type="button" onclick="deleteDocument(${jsArg(id)})" title="${escAttr(T('remove'))}"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             </div>`;
@@ -3573,145 +3474,73 @@
             const res = await confirmDanger({ title: T('doc_delete_title'), message: T('doc_delete_msg').replace('{name}', d.name || '') });
             if (!res.ok) return;
             try {
-                if (d.storagePath) {
-                    try { await storage.ref(d.storagePath).delete(); }
-                    catch (e) { if (!e || e.code !== 'storage/object-not-found') throw e; }
-                }
                 await db.collection('users').doc(currentUser.uid).update({ documents: docs.filter(x => x.id !== id) });
                 showToast(T('removed'));
             } catch (err) {
                 console.error('deleteDocument failed:', err);
-                showToast(T('vid_err_generic'), 'error');
+                showToast(T('save_err'), 'error');
             }
         }
 
-        // ===== VIDEO UPLOAD (Firebase Storage) =====
-        let videoUploadTask = null;
-
-        function setVideoProgress(pct, label) {
-            const wrap = document.getElementById('videoProgress');
-            if (!wrap) return;
-            if (pct == null) { wrap.classList.remove('active'); return; }
-            wrap.classList.add('active');
-            document.getElementById('videoProgressFill').style.width = pct + '%';
-            document.getElementById('videoProgressPct').textContent = pct + '%';
-            if (label != null) document.getElementById('videoProgressName').textContent = label;
-        }
-
-        async function handleVideoUpload(input) {
-            if (input.files.length === 0 || !currentUser) return;
-            const file = input.files[0];
+        // ===== VIDEOS (external links; YouTube embeds inline) =====
+        async function addVideoLink() {
+            if (!currentUser) return;
             const titleEl = document.getElementById('videoTitle');
+            const linkEl = document.getElementById('videoLink');
             const notesEl = document.getElementById('videoNotes');
-            const title = (titleEl.value.trim() || file.name).slice(0, 120);
-            const notes = notesEl.value.trim().slice(0, 1000);
-
-            if (!file.type || !file.type.startsWith('video/')) {
-                showToast(T('vid_type_err'), 'error'); input.value = ''; return;
-            }
-            if (file.size > VIDEO_MAX_BYTES) {
-                showToast(T('vid_size_err'), 'error'); input.value = ''; return;
-            }
-            if (videoUploadTask) { showToast(T('vid_busy'), 'error'); return; }
-
-            const id = uid4();
-            // Keep only safe filename characters; the original name is stored separately.
-            const ext = (file.name.match(/\.([a-z0-9]{1,5})$/i) || [, 'mp4'])[1].toLowerCase();
-            const storagePath = `videos/${currentUser.uid}/${id}/video.${ext}`;
-            const ref = storage.ref(storagePath);
-            const zone = document.getElementById('uploadZoneVideo');
-            zone.style.pointerEvents = 'none';
-            zone.style.opacity = '0.6';
-            setVideoProgress(0, file.name);
-
-            let uploaded = false;
+            const link = safeHttpUrl(linkEl.value);
+            if (!link) { showToast(T('link_err'), 'error'); linkEl.focus(); return; }
+            if ((userData.videos || []).length >= 200) { showToast(T('list_full'), 'error'); return; }
+            const title = (titleEl.value.trim() || urlHost(link)).slice(0, 120);
+            const entry = { id: uid4(), title, notes: notesEl.value.trim().slice(0, 1000), date: new Date().toLocaleDateString('he-IL'), link, addedAt: new Date().toISOString() };
+            const btn = document.getElementById('videoAddBtn'); btn.disabled = true;
             try {
-                videoUploadTask = ref.put(file, { contentType: file.type });
-                await new Promise((resolve, reject) => {
-                    videoUploadTask.on('state_changed', (snap) => {
-                        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-                        setVideoProgress(pct, `${file.name} · ${formatBytes(snap.bytesTransferred)} / ${formatBytes(snap.totalBytes)}`);
-                    }, reject, resolve);
-                });
-                uploaded = true;
-                const url = await ref.getDownloadURL();
-                const videoEntry = {
-                    id, title, notes,
-                    date: new Date().toLocaleDateString('he-IL'),
-                    fileName: String(file.name).slice(0, 200),
-                    storagePath, url,
-                    size: file.size,
-                    contentType: file.type,
-                    uploadedAt: new Date().toISOString()
-                };
-                await db.collection('users').doc(currentUser.uid).update({
-                    videos: firebase.firestore.FieldValue.arrayUnion(videoEntry)
-                });
-                // No optimistic mutation: the snapshot listener re-renders from Firestore.
+                await db.collection('users').doc(currentUser.uid).update({ videos: firebase.firestore.FieldValue.arrayUnion(entry) });
                 notifyCoaches('video', { title });
-                showToast(T('vid_uploaded'), 'success');
-                titleEl.value = '';
-                notesEl.value = '';
+                titleEl.value = ''; linkEl.value = ''; notesEl.value = '';
+                showToast(T('vid_added'), 'success');
             } catch (err) {
-                console.error('video upload failed:', err);
-                // The file landed but the Firestore write failed → remove the orphan object.
-                if (uploaded) { try { await ref.delete(); } catch (e) {} }
-                const msgs = {
-                    'storage/unauthorized': T('vid_err_unauth'),
-                    'storage/canceled': T('vid_err_cancel'),
-                    'storage/quota-exceeded': T('vid_err_quota'),
-                    'storage/retry-limit-exceeded': T('vid_err_network'),
-                    // Storage not enabled on the Firebase project yet.
-                    'storage/bucket-not-found': T('vid_err_disabled'),
-                    'storage/project-not-found': T('vid_err_disabled'),
-                    'storage/unknown': T('vid_err_disabled')
-                };
-                showToast(msgs[err && err.code] || T('vid_err_generic'), 'error');
-            } finally {
-                videoUploadTask = null;
-                setVideoProgress(null);
-                zone.style.pointerEvents = '';
-                zone.style.opacity = '';
-                input.value = '';
-            }
+                console.error('addVideoLink failed:', err);
+                showToast(T('save_err'), 'error');
+            } finally { btn.disabled = false; }
         }
-
-        function safeVideoUrl(v) { return safeStorageUrl(v && v.url, 'videos'); }
 
         function videoCardHtml(v, opts) {
             const canDelete = opts && opts.canDelete;
-            const url = safeVideoUrl(v);
-            const hasFile = !!url;
+            const link = safeHttpUrl(v.link);
+            const yt = link ? youtubeId(link) : '';
             const id = String(v.id || '');
+            const thumb = yt
+                ? `<div class="video-thumbnail" onclick="playYoutube(this, ${jsArg(yt)})" title="${escAttr(T('vid_play'))}" style="background:#000 url('https://i.ytimg.com/vi/${escAttr(yt)}/hqdefault.jpg') center/cover no-repeat;"><i class="fas fa-play-circle"></i><span class="host-badge">YouTube</span></div>`
+                : (link
+                    ? `<a class="video-thumbnail" href="${escAttr(link)}" target="_blank" rel="noopener noreferrer" title="${escAttr(T('vid_open'))}" style="display:flex;"><i class="fas fa-up-right-from-square"></i><span class="host-badge">${sanitize(urlHost(link))}</span></a>`
+                    : `<div class="video-thumbnail" style="cursor:default;" title="${escAttr(T('no_link'))}"><i class="fas fa-video-slash"></i></div>`);
             return `
                 <div class="video-card" data-video-id="${escAttr(id)}">
-                    <div class="video-thumbnail" ${hasFile ? `onclick="playVideo(this, ${jsArg(url)})"` : ''} title="${hasFile ? escAttr(T('vid_play')) : escAttr(T('vid_no_file'))}">
-                        <i class="fas ${hasFile ? 'fa-play-circle' : 'fa-video-slash'}"></i>
-                    </div>
+                    ${thumb}
                     <div class="video-info">
                         <h4>${sanitize(v.title)}</h4>
-                        <p><i class="fas fa-calendar-alt"></i> ${sanitize(v.date)}${v.size ? ` · ${formatBytes(Number(v.size) || 0)}` : ''}</p>
+                        <p><i class="fas fa-calendar-alt"></i> ${sanitize(v.date)}</p>
                         ${v.notes ? `<p style="margin-top:6px; color:var(--text-secondary); font-size:0.9rem; font-style:italic;"><i class="fas fa-comment-alt" style="color:var(--accent);"></i> ${sanitize(v.notes)}</p>` : ''}
-                        ${!hasFile ? `<p class="video-meta"><i class="fas fa-triangle-exclamation" style="color:var(--gold);"></i> ${T('vid_no_file')}</p>` : ''}
                     </div>
-                    ${(canDelete || hasFile) ? `<div class="video-actions">
-                        ${hasFile ? `<a href="${escAttr(url)}" target="_blank" rel="noopener noreferrer"><button type="button"><i class="fas fa-up-right-from-square"></i> ${T('vid_open')}</button></a>` : ''}
+                    ${(canDelete || link) ? `<div class="video-actions">
+                        ${link ? `<a href="${escAttr(link)}" target="_blank" rel="noopener noreferrer"><button type="button"><i class="fas fa-up-right-from-square"></i> ${T('vid_open')}</button></a>` : ''}
                         ${canDelete ? `<button type="button" onclick="deleteVideo(${jsArg(id)})"><i class="fas fa-trash"></i> ${T('remove')}</button>` : ''}
                     </div>` : ''}
                 </div>`;
         }
 
-        // Swap the poster for a real <video> only on demand, so a grid of clips does
-        // not pull bytes for every file at once.
-        function playVideo(thumbEl, url) {
-            if (!safeVideoUrl({ url })) return;
-            const vid = document.createElement('video');
-            vid.controls = true;
-            vid.autoplay = true;
-            vid.playsInline = true;
-            vid.src = url;
+        // Privacy-enhanced embed, created only on click so a grid of clips loads nothing up front.
+        function playYoutube(thumbEl, ytId) {
+            if (!/^[A-Za-z0-9_-]{11}$/.test(ytId)) return;
+            const f = document.createElement('iframe');
+            f.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0`;
+            f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+            f.allowFullscreen = true;
+            f.referrerPolicy = 'strict-origin-when-cross-origin';
             thumbEl.innerHTML = '';
-            thumbEl.appendChild(vid);
+            thumbEl.style.background = '#000';
+            thumbEl.appendChild(f);
             thumbEl.onclick = null;
             thumbEl.style.cursor = 'default';
         }
@@ -3734,15 +3563,11 @@
             const res = await confirmDanger({ title: T('vid_delete_title'), message: T('vid_delete_confirm').replace('{name}', v.title || '') });
             if (!res.ok) return;
             try {
-                if (v.storagePath) {
-                    try { await storage.ref(v.storagePath).delete(); }
-                    catch (e) { if (!e || e.code !== 'storage/object-not-found') throw e; }
-                }
                 await db.collection('users').doc(currentUser.uid).update({ videos: videos.filter(x => x.id !== id) });
                 showToast(T('removed'));
             } catch (err) {
                 console.error('deleteVideo failed:', err);
-                showToast(T('vid_err_generic'), 'error');
+                showToast(T('save_err'), 'error');
             }
         }
 
@@ -4845,7 +4670,7 @@
             }
         }
 
-        // Full self-service removal: storage files → inbox entries → user doc → auth user.
+        // Full self-service removal: inbox entries → user doc → auth user.
         // Order matters: the auth user goes last so every Firestore/Storage rule still
         // sees the owner while data is being removed.
         async function deleteMyAccount() {
@@ -4870,8 +4695,6 @@
             try {
                 teardownUserDocListener();
                 teardownCoachInboxListener();
-                const files = [...(userData.videos || []), ...(userData.documents || [])].map(x => x && x.storagePath).filter(Boolean);
-                await Promise.all(files.map(path => storage.ref(path).delete().catch(() => {})));
                 for (const col of ['coachNotifications', 'contactMessages']) {
                     try {
                         const snap = await db.collection(col).where('fromUid', '==', uid).get();
@@ -5057,15 +4880,15 @@
             const docs = Array.isArray(d.documents) ? d.documents : [];
             w.h2(`${T('cd_documents')} (${docs.length})`);
             if (docs.length) {
-                w.table([T('dash_doc_type'), T('pdf_file'), T('dash_th_date'), T('dash_th_status')],
-                    docs.map(x => [s(x.typeName), s(x.name), s(x.date), x.status === 'approved' ? T('cd_approved') : T('cd_pending')]));
+                w.table([T('dash_doc_type'), T('pdf_file'), T('dash_th_date'), T('pdf_link'), T('dash_th_status')],
+                    docs.map(x => [s(x.typeName), s(x.name), s(x.date), safeHttpUrl(x.link) ? urlHost(x.link) : '--', x.status === 'approved' ? T('cd_approved') : T('cd_pending')]));
             } else w.muted(T('cd_no_docs'));
 
             const vids = Array.isArray(d.videos) ? d.videos : [];
             w.h2(`${T('dash_videos')} (${vids.length})`);
             if (vids.length) {
-                w.table([T('dash_video_name'), T('dash_th_date'), T('pdf_size')],
-                    vids.map(v => [s(v.title), s(v.date), v.size ? formatBytes(Number(v.size) || 0) : '--']));
+                w.table([T('dash_video_name'), T('dash_th_date'), T('pdf_link')],
+                    vids.map(v => [s(v.title), s(v.date), safeHttpUrl(v.link) ? urlHost(v.link) : '--']));
             } else w.muted(T('vid_empty_title'));
 
             const blocks = Array.isArray(d.weeklySchedule) ? d.weeklySchedule : [];
@@ -5237,7 +5060,7 @@
                 coaches_title: 'הצוות המקצועי', coaches_sub: 'המאמנים שלנו',
                 // Features
                 feat_title: 'מה אנחנו מציעים', feat_sub: 'כלים ושירותים למתחרים',
-                feat_docs: 'ניהול מסמכים', feat_docs_desc: 'העלאת אישורי רופא, טפסי הרשמה, פספורט, ביטוח ועוד - הכל מרוכז במקום אחד.',
+                feat_docs: 'ניהול מסמכים', feat_docs_desc: 'אישורי רופא, טפסי הרשמה, פספורט, ביטוח ועוד - הכל מרוכז במקום אחד.',
                 feat_video: 'ניתוח סרטונים', feat_video_desc: 'שיתוף סרטוני קרבות לניתוח ושיפור. למידה מכל קרב לשדרוג הביצועים.',
                 feat_track: 'מעקב התקדמות', feat_track_desc: 'מעקב על כוח, משקל ויכולות טכניות של כל מתחרה. נתונים שעוזרים לשפר.',
                 feat_comp: 'ניהול תחרויות', feat_comp_desc: 'מערכת מרוכזת לניהול הרשמה לתחרויות, מעקב אחר תאריכים ודרישות.',
@@ -5270,7 +5093,7 @@
                 dash_hello: 'שלום', dash_welcome: 'ברוך הבא לאזור האישי שלך',
                 dash_overview: 'סקירה', dash_home: 'בית', dash_documents: 'מסמכים', dash_videos: 'סרטונים',
                 home_new: 'חדש', home_no_fb: 'אין משוב עדיין', home_sched_has: 'לחץ לצפייה בלוח האימונים השבועי', home_sched_empty: 'עדיין לא הוגדר לוח אימונים', home_no_comp: 'אין תחרויות רשומות', home_stats: 'נתונים מהירים', home_manage_hint: 'צפייה וניהול המתחרים ומשובים',
-                doc_empty_title: 'אין מסמכים עדיין', doc_empty_hint: 'העלה את המסמך הראשון שלך', vid_empty_title: 'אין סרטונים עדיין', vid_empty_hint: 'העלה סרטון קרב ראשון', cmp_empty_title: 'אין משתמשים רשומים', cmp_empty_hint: 'מתחרים שיירשמו יופיעו כאן',
+                doc_empty_title: 'אין מסמכים עדיין', doc_empty_hint: 'הוסף קישור למסמך הראשון שלך', vid_empty_title: 'אין סרטונים עדיין', vid_empty_hint: 'הוסף קישור לסרטון קרב ראשון', cmp_empty_title: 'אין משתמשים רשומים', cmp_empty_hint: 'מתחרים שיירשמו יופיעו כאן',
                 dash_profile: 'פרופיל', dash_competitions: 'תחרויות',
                 dash_manage: 'ניהול מתחרים', dash_manage_admin: 'ניהול משתמשים', dash_logout: 'יציאה', dash_collapse: 'כווץ תפריט',
                 // Stats
@@ -5280,11 +5103,10 @@
                 dash_upcoming_comp_desc: 'אליפות ישראל - נא לוודא שכל המסמכים מעודכנים',
                 dash_medical_approved: 'אישור רפואי', dash_medical_approved_desc: 'האישור הרפואי שלך אושר בהצלחה',
                 // Documents
-                dash_upload_docs: 'העלאת מסמכים', dash_doc_type: 'סוג מסמך',
+                dash_upload_docs: 'מסמכים', dash_doc_type: 'סוג מסמך',
                 dash_doc_select: 'בחר סוג מסמך', dash_doc_medical: 'אישור רופא',
                 dash_doc_registration: 'טופס הרשמה לתחרות', dash_doc_passport: 'פספורט',
                 dash_doc_insurance: 'ביטוח', dash_doc_other: 'אחר',
-                dash_upload_click: 'לחץ כאן או גרור קובץ להעלאה', dash_upload_hint: 'PDF, JPG, PNG - עד 10MB',
                 dash_my_docs: 'המסמכים שלי',
                 dash_doc_approved: 'אושר', dash_doc_pending: 'בבדיקה',
                 // Videos
@@ -5292,7 +5114,6 @@
                 dash_video_name_ph: 'למשל: קרב חצי גמר - אליפות הדרום',
                 dash_video_notes: 'הערות לניתוח (אופציונלי)',
                 dash_video_notes_ph: 'נקודות לשיפור, טכניקות לשים לב אליהן...',
-                dash_upload_video: 'העלה סרטון קרב לניתוח', dash_upload_video_hint: 'MP4, MOV - עד 500MB',
                 // Profile
                 dash_profile_title: 'פרופיל מתחרה',
                 dash_prof_weight: 'משקל', dash_prof_height: 'גובה', dash_prof_category: 'קטגוריה',
@@ -5355,13 +5176,13 @@
                 cd_role_mgmt: 'ניהול הרשאות', cd_is_coach: 'משתמש זה הוא מאמן.', cd_is_competitor: 'משתמש זה הוא מתחרה.',
                 cd_promote: 'הפוך למאמן', cd_demote: 'הורד למתחרה', promote_done: 'המשתמש הפך למאמן', demote_done: 'המשתמש הפך למתחרה',
                 cd_no_videos: 'אין סרטונים', comp_no_history: 'אין היסטוריית תחרויות', reply_delete: 'מחק תגובה זו',
-                // Videos (real upload)
-                vid_type_err: 'ניתן להעלות קבצי וידאו בלבד', vid_size_err: 'הסרטון גדול מדי — מקסימום 500MB', vid_busy: 'העלאה אחרת עדיין רצה',
-                vid_uploaded: 'הסרטון הועלה בהצלחה', vid_play: 'לחץ לניגון', vid_no_file: 'רשומה ישנה — הקובץ לא נשמר', vid_open: 'פתח בחלון חדש',
-                vid_delete_confirm: 'הסרטון "{name}" יימחק לצמיתות מהמערכת.',
-                vid_err_unauth: 'אין הרשאה להעלות (בדוק שהחשבון מאומת)', vid_err_cancel: 'ההעלאה בוטלה', vid_err_quota: 'מכסת האחסון מלאה — פנה למנהל',
-                vid_err_network: 'בעיית רשת — נסה שוב', vid_err_generic: 'ההעלאה נכשלה, נסה שוב',
-                vid_err_disabled: 'העלאת סרטונים עדיין לא הופעלה במערכת — פנה למנהל',
+                // Links (documents / videos)
+                doc_link_intro: 'שמור את המסמך ב-Google Drive / Dropbox / iCloud, הגדר שיתוף "לכל מי שיש לו את הקישור", והדבק כאן את הקישור.',
+                doc_name_label: 'שם המסמך (אופציונלי)', doc_name_ph: 'למשל: אישור רפואי 2026', doc_link_label: 'קישור למסמך', doc_add_btn: 'הוסף מסמך', doc_added: 'המסמך נוסף',
+                vid_link_intro: 'העלה את הסרטון ל-YouTube (אפשר כ"לא רשום") או ל-Drive, והדבק כאן את הקישור. סרטוני YouTube מתנגנים כאן ישירות.',
+                vid_link_label: 'קישור לסרטון', vid_add_btn: 'הוסף סרטון', vid_added: 'הסרטון נוסף',
+                link_err: 'קישור לא תקין — חייב להתחיל ב-https://', no_link: 'אין קישור', list_full: 'הגעת למקסימום הפריטים ברשימה', save_err: 'השמירה נכשלה, נסה שוב',
+                vid_play: 'לחץ לניגון', vid_open: 'פתח בחלון חדש', vid_delete_confirm: 'הסרטון "{name}" יימחק לצמיתות מהמערכת.',
                 // Coach inbox
                 nav_notifications: 'התראות', cn_title: 'התראות מהמתחרים', cn_desc: 'עדכונים על שינויי פרטים, הרשמות לתחרויות והעלאות. לחץ על שם המתחרה לפתיחת הכרטיס שלו.',
                 cn_mark_all: 'סמן הכל כנקרא', cn_clear_read: 'נקה את מה שנקרא', cn_mark_read: 'סמן כנקרא', cn_read: 'נקרא', cn_athlete: 'מתחרה',
@@ -5369,8 +5190,7 @@
                 cn_new_one: 'עדכון חדש ממתחרה', cn_new_many: '{n} עדכונים חדשים ממתחרים', cn_all_read: 'כל ההתראות סומנו כנקראו', cn_nothing_read: 'אין התראות שנקראו',
                 cn_new_contact: 'הודעה חדשה מטופס צור קשר', cn_new_contact_many: '{n} הודעות חדשות מטופס צור קשר', cn_contact_from: 'צור קשר',
                 contact_fill_err: 'נא למלא שם והודעה', contact_sending: 'שולח...', contact_sent: 'ההודעה נשלחה! נחזור אליך בקרוב', contact_err: 'שליחת ההודעה נכשלה — נסה שוב או התקשר',
-                doc_type_err: 'בחר סוג מסמך לפני ההעלאה', doc_kind_err: 'ניתן להעלות PDF, JPG או PNG בלבד', doc_size_err: 'הקובץ גדול מדי — מקסימום 10MB',
-                doc_uploaded: 'המסמך הועלה בהצלחה', doc_no_file: 'רשומה ישנה — הקובץ לא נשמר', doc_err_disabled: 'העלאת מסמכים עדיין לא הופעלה במערכת — פנה למנהל',
+                doc_type_err: 'בחר סוג מסמך לפני ההעלאה',
                 doc_delete_title: 'מחיקת מסמך', doc_delete_msg: 'המסמך "{name}" יימחק לצמיתות מהמערכת.',
                 vid_delete_title: 'מחיקת סרטון',
                 confirm_title: 'אישור מחיקה', confirm_type: 'הקלד {word} כדי לאשר', confirm_pw: 'הסיסמה שלך (נדרש לאימות)', confirm_ok: 'מחק', confirm_cancel: 'ביטול',
@@ -5385,7 +5205,7 @@
                 cn_f_nameHe: 'שם בעברית', cn_f_nameEn: 'שם באנגלית', cn_f_weight: 'משקל', cn_f_height: 'גובה', cn_f_category: 'קטגוריה', cn_f_gym: 'מכון',
                 // PDF export
                 pdf_export_all: 'ייצוא כל המתחרים (PDF)', pdf_export_one: 'הורד PDF', pdf_building: 'מכין PDF...', pdf_done: 'קובץ ה-PDF נוצר', pdf_err: 'יצירת ה-PDF נכשלה — בדוק חיבור ונסה שוב',
-                pdf_generated: 'הופק בתאריך', pdf_personal: 'פרטים אישיים', pdf_file: 'קובץ', pdf_size: 'גודל', pdf_truncated: 'ועוד {n} רשומות ישנות שלא נכללו',
+                pdf_generated: 'הופק בתאריך', pdf_personal: 'פרטים אישיים', pdf_file: 'קובץ', pdf_link: 'קישור', pdf_truncated: 'ועוד {n} רשומות ישנות שלא נכללו',
                 pdf_roster_title: 'Rocky — רשימת מתחרים', pdf_roster: 'טבלת מתחרים', pdf_athletes: 'מתחרים',
                 // Coach cards
                 coach_gadi_name: 'גדי שור', coach_gadi_role: 'מאמן ראשי - לחימה', coach_gadi_bio: 'מאמן ומנהל קבוצת Rocky. מוביל את המתחרים לתוצאות ברמה הגבוהה ביותר.',
@@ -5436,25 +5256,23 @@
                 dash_hello: 'Hello', dash_welcome: 'Welcome to your personal area',
                 dash_overview: 'Overview', dash_home: 'Home', dash_documents: 'Documents', dash_videos: 'Videos',
                 home_new: 'new', home_no_fb: 'No feedback yet', home_sched_has: 'Tap to view your weekly training board', home_sched_empty: 'No training schedule set yet', home_no_comp: 'No competitions registered', home_stats: 'Quick stats', home_manage_hint: 'View and manage competitors and feedback',
-                doc_empty_title: 'No documents yet', doc_empty_hint: 'Upload your first document', vid_empty_title: 'No videos yet', vid_empty_hint: 'Upload your first fight video', cmp_empty_title: 'No users registered', cmp_empty_hint: 'Competitors who sign up will appear here',
+                doc_empty_title: 'No documents yet', doc_empty_hint: 'Add a link to your first document', vid_empty_title: 'No videos yet', vid_empty_hint: 'Add a link to your first fight video', cmp_empty_title: 'No users registered', cmp_empty_hint: 'Competitors who sign up will appear here',
                 dash_profile: 'Profile', dash_competitions: 'Competitions',
                 dash_manage: 'Manage Competitors', dash_manage_admin: 'Manage Users', dash_logout: 'Logout', dash_collapse: 'Collapse menu',
                 stat_fights: 'Fights', stat_wins: 'Wins', stat_weight: 'Weight (kg)', stat_docs: 'Documents',
                 dash_updates: 'Recent Updates', dash_upcoming_comp: 'Upcoming Competition',
                 dash_upcoming_comp_desc: 'Israel Championship - please ensure all documents are up to date',
                 dash_medical_approved: 'Medical Certificate', dash_medical_approved_desc: 'Your medical certificate has been approved',
-                dash_upload_docs: 'Upload Documents', dash_doc_type: 'Document Type',
+                dash_upload_docs: 'Documents', dash_doc_type: 'Document Type',
                 dash_doc_select: 'Select document type', dash_doc_medical: 'Medical Certificate',
                 dash_doc_registration: 'Competition Registration Form', dash_doc_passport: 'Passport',
                 dash_doc_insurance: 'Insurance', dash_doc_other: 'Other',
-                dash_upload_click: 'Click here or drag a file to upload', dash_upload_hint: 'PDF, JPG, PNG - up to 10MB',
                 dash_my_docs: 'My Documents',
                 dash_doc_approved: 'Approved', dash_doc_pending: 'Pending',
                 dash_fight_videos: 'Fight Videos', dash_video_name: 'Video Name / Description',
                 dash_video_name_ph: 'e.g.: Semi-final fight - Southern Championship',
                 dash_video_notes: 'Analysis Notes (optional)',
                 dash_video_notes_ph: 'Points to improve, techniques to watch...',
-                dash_upload_video: 'Upload a fight video for analysis', dash_upload_video_hint: 'MP4, MOV - up to 500MB',
                 dash_profile_title: 'Competitor Profile',
                 dash_prof_weight: 'Weight', dash_prof_height: 'Height', dash_prof_category: 'Category',
                 dash_prof_exp: 'Experience', dash_prof_gym: 'Gym / Club',
@@ -5514,13 +5332,13 @@
                 cd_role_mgmt: 'Role Management', cd_is_coach: 'This user is a coach.', cd_is_competitor: 'This user is a competitor.',
                 cd_promote: 'Make Coach', cd_demote: 'Demote to Competitor', promote_done: 'User is now a coach', demote_done: 'User is now a competitor',
                 cd_no_videos: 'No videos', comp_no_history: 'No competition history', reply_delete: 'Delete this reply',
-                // Videos (real upload)
-                vid_type_err: 'Only video files can be uploaded', vid_size_err: 'Video too large — 500MB max', vid_busy: 'Another upload is still running',
-                vid_uploaded: 'Video uploaded successfully', vid_play: 'Click to play', vid_no_file: 'Legacy entry — file was not stored', vid_open: 'Open in new tab',
-                vid_delete_confirm: 'The video "{name}" will be permanently deleted.',
-                vid_err_unauth: 'Not allowed to upload (is your account verified?)', vid_err_cancel: 'Upload cancelled', vid_err_quota: 'Storage quota is full — contact the admin',
-                vid_err_network: 'Network problem — try again', vid_err_generic: 'Upload failed, please try again',
-                vid_err_disabled: 'Video upload is not enabled yet — contact the admin',
+                // Links (documents / videos)
+                doc_link_intro: 'Save the document in Google Drive / Dropbox / iCloud, set sharing to "anyone with the link", and paste the link here.',
+                doc_name_label: 'Document name (optional)', doc_name_ph: 'e.g. Medical clearance 2026', doc_link_label: 'Document link', doc_add_btn: 'Add document', doc_added: 'Document added',
+                vid_link_intro: 'Upload the video to YouTube (unlisted is fine) or Drive and paste the link here. YouTube videos play right here.',
+                vid_link_label: 'Video link', vid_add_btn: 'Add video', vid_added: 'Video added',
+                link_err: 'Invalid link — it must start with https://', no_link: 'No link', list_full: 'You reached the maximum number of items', save_err: 'Saving failed, please try again',
+                vid_play: 'Click to play', vid_open: 'Open in new tab', vid_delete_confirm: 'The video "{name}" will be permanently deleted.',
                 // Coach inbox
                 nav_notifications: 'Notifications', cn_title: 'Athlete Notifications', cn_desc: 'Profile changes, competition sign-ups and uploads. Click an athlete\'s name to open their card.',
                 cn_mark_all: 'Mark all as read', cn_clear_read: 'Clear read items', cn_mark_read: 'Mark as read', cn_read: 'Read', cn_athlete: 'Athlete',
@@ -5528,8 +5346,7 @@
                 cn_new_one: 'New update from an athlete', cn_new_many: '{n} new updates from athletes', cn_all_read: 'All notifications marked as read', cn_nothing_read: 'No read notifications to clear',
                 cn_new_contact: 'New message from the contact form', cn_new_contact_many: '{n} new messages from the contact form', cn_contact_from: 'Contact form',
                 contact_fill_err: 'Please fill in name and message', contact_sending: 'Sending...', contact_sent: 'Message sent! We will get back to you soon', contact_err: 'Sending failed — try again or call us',
-                doc_type_err: 'Choose a document type before uploading', doc_kind_err: 'Only PDF, JPG or PNG can be uploaded', doc_size_err: 'File too large — 10MB max',
-                doc_uploaded: 'Document uploaded successfully', doc_no_file: 'Legacy entry — file was not stored', doc_err_disabled: 'Document upload is not enabled yet — contact the admin',
+                doc_type_err: 'Choose a document type before uploading',
                 doc_delete_title: 'Delete document', doc_delete_msg: 'The document "{name}" will be permanently deleted.',
                 vid_delete_title: 'Delete video',
                 confirm_title: 'Confirm deletion', confirm_type: 'Type {word} to confirm', confirm_pw: 'Your password (required to verify)', confirm_ok: 'Delete', confirm_cancel: 'Cancel',
@@ -5544,7 +5361,7 @@
                 cn_f_nameHe: 'Hebrew name', cn_f_nameEn: 'English name', cn_f_weight: 'weight', cn_f_height: 'height', cn_f_category: 'category', cn_f_gym: 'gym',
                 // PDF export
                 pdf_export_all: 'Export all athletes (PDF)', pdf_export_one: 'Download PDF', pdf_building: 'Building PDF...', pdf_done: 'PDF created', pdf_err: 'PDF export failed — check your connection and try again',
-                pdf_generated: 'Generated on', pdf_personal: 'Personal details', pdf_file: 'File', pdf_size: 'Size', pdf_truncated: 'and {n} older entries not included',
+                pdf_generated: 'Generated on', pdf_personal: 'Personal details', pdf_file: 'File', pdf_link: 'Link', pdf_truncated: 'and {n} older entries not included',
                 pdf_roster_title: 'Rocky — Athlete Roster', pdf_roster: 'Athletes', pdf_athletes: 'athletes',
                 // Coach cards
                 coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Head Coach - Fighting', coach_gadi_bio: 'Coach and manager of Rocky team. Leading competitors to top results.',
@@ -5595,25 +5412,23 @@
                 dash_hello: 'Hallo', dash_welcome: 'Willkommen in deinem persoenlichen Bereich',
                 dash_overview: 'Uebersicht', dash_home: 'Start', dash_documents: 'Dokumente', dash_videos: 'Videos',
                 home_new: 'neu', home_no_fb: 'Noch kein Feedback', home_sched_has: 'Zum Wochen-Trainingsplan tippen', home_sched_empty: 'Noch kein Trainingsplan festgelegt', home_no_comp: 'Keine Wettkaempfe eingetragen', home_stats: 'Schnelluebersicht', home_manage_hint: 'Wettkaempfer und Feedback verwalten',
-                doc_empty_title: 'Noch keine Dokumente', doc_empty_hint: 'Lade dein erstes Dokument hoch', vid_empty_title: 'Noch keine Videos', vid_empty_hint: 'Lade dein erstes Kampfvideo hoch', cmp_empty_title: 'Keine Benutzer registriert', cmp_empty_hint: 'Registrierte Wettkaempfer erscheinen hier',
+                doc_empty_title: 'Noch keine Dokumente', doc_empty_hint: 'Füge einen Link zu deinem ersten Dokument hinzu', vid_empty_title: 'Noch keine Videos', vid_empty_hint: 'Füge einen Link zu deinem ersten Kampfvideo hinzu', cmp_empty_title: 'Keine Benutzer registriert', cmp_empty_hint: 'Registrierte Wettkaempfer erscheinen hier',
                 dash_profile: 'Profil', dash_competitions: 'Wettkaempfe',
                 dash_manage: 'Wettkämpfer verwalten', dash_manage_admin: 'Benutzer verwalten', dash_logout: 'Abmelden', dash_collapse: 'Menü einklappen',
                 stat_fights: 'Kämpfe', stat_wins: 'Siege', stat_weight: 'Gewicht (kg)', stat_docs: 'Dokumente',
                 dash_updates: 'Letzte Aktualisierungen', dash_upcoming_comp: 'Bevorstehender Wettkampf',
                 dash_upcoming_comp_desc: 'Israel-Meisterschaft - bitte alle Dokumente aktualisieren',
                 dash_medical_approved: 'Ärztliches Attest', dash_medical_approved_desc: 'Dein ärztliches Attest wurde genehmigt',
-                dash_upload_docs: 'Dokumente hochladen', dash_doc_type: 'Dokumenttyp',
+                dash_upload_docs: 'Dokumente', dash_doc_type: 'Dokumenttyp',
                 dash_doc_select: 'Dokumenttyp wählen', dash_doc_medical: 'Ärztliches Attest',
                 dash_doc_registration: 'Wettkampf-Anmeldeformular', dash_doc_passport: 'Reisepass',
                 dash_doc_insurance: 'Versicherung', dash_doc_other: 'Sonstiges',
-                dash_upload_click: 'Hier klicken oder Datei hierher ziehen', dash_upload_hint: 'PDF, JPG, PNG - bis 10MB',
                 dash_my_docs: 'Meine Dokumente',
                 dash_doc_approved: 'Genehmigt', dash_doc_pending: 'In Prüfung',
                 dash_fight_videos: 'Kampfvideos', dash_video_name: 'Videoname / Beschreibung',
                 dash_video_name_ph: 'z.B.: Halbfinale - Südmeisterschaft',
                 dash_video_notes: 'Analysenotizen (optional)',
                 dash_video_notes_ph: 'Verbesserungspunkte, Techniken...',
-                dash_upload_video: 'Kampfvideo zur Analyse hochladen', dash_upload_video_hint: 'MP4, MOV - bis 500MB',
                 dash_profile_title: 'Wettkämpfer-Profil',
                 dash_prof_weight: 'Gewicht', dash_prof_height: 'Größe', dash_prof_category: 'Kategorie',
                 dash_prof_exp: 'Erfahrung', dash_prof_gym: 'Studio / Verein',
@@ -5673,13 +5488,13 @@
                 cd_role_mgmt: 'Rollenverwaltung', cd_is_coach: 'Dieser Benutzer ist Trainer.', cd_is_competitor: 'Dieser Benutzer ist Wettkämpfer.',
                 cd_promote: 'Zum Trainer machen', cd_demote: 'Zu Wettkämpfer herabstufen', promote_done: 'Benutzer ist jetzt Trainer', demote_done: 'Benutzer ist jetzt Wettkämpfer',
                 cd_no_videos: 'Keine Videos', comp_no_history: 'Keine Wettkampfhistorie', reply_delete: 'Diese Antwort löschen',
-                // Videos (real upload)
-                vid_type_err: 'Nur Videodateien können hochgeladen werden', vid_size_err: 'Video zu groß — max. 500MB', vid_busy: 'Ein anderer Upload läuft noch',
-                vid_uploaded: 'Video erfolgreich hochgeladen', vid_play: 'Zum Abspielen klicken', vid_no_file: 'Alter Eintrag — Datei wurde nicht gespeichert', vid_open: 'In neuem Tab öffnen',
-                vid_delete_confirm: 'Das Video "{name}" wird dauerhaft gelöscht.',
-                vid_err_unauth: 'Upload nicht erlaubt (ist dein Konto verifiziert?)', vid_err_cancel: 'Upload abgebrochen', vid_err_quota: 'Speicherkontingent voll — Admin kontaktieren',
-                vid_err_network: 'Netzwerkproblem — bitte erneut versuchen', vid_err_generic: 'Upload fehlgeschlagen, bitte erneut versuchen',
-                vid_err_disabled: 'Video-Upload ist noch nicht aktiviert — Admin kontaktieren',
+                // Links (documents / videos)
+                doc_link_intro: 'Speichere das Dokument in Google Drive / Dropbox / iCloud, stelle die Freigabe auf "Jeder mit dem Link" und füge den Link hier ein.',
+                doc_name_label: 'Dokumentname (optional)', doc_name_ph: 'z.B. Ärztliche Freigabe 2026', doc_link_label: 'Dokument-Link', doc_add_btn: 'Dokument hinzufügen', doc_added: 'Dokument hinzugefügt',
+                vid_link_intro: 'Lade das Video auf YouTube (auch "nicht gelistet") oder Drive hoch und füge den Link hier ein. YouTube-Videos laufen direkt hier.',
+                vid_link_label: 'Video-Link', vid_add_btn: 'Video hinzufügen', vid_added: 'Video hinzugefügt',
+                link_err: 'Ungültiger Link — muss mit https:// beginnen', no_link: 'Kein Link', list_full: 'Maximale Anzahl an Einträgen erreicht', save_err: 'Speichern fehlgeschlagen, bitte erneut versuchen',
+                vid_play: 'Zum Abspielen klicken', vid_open: 'In neuem Tab öffnen', vid_delete_confirm: 'Das Video "{name}" wird dauerhaft gelöscht.',
                 // Coach inbox
                 nav_notifications: 'Benachrichtigungen', cn_title: 'Benachrichtigungen der Wettkämpfer', cn_desc: 'Profiländerungen, Wettkampfanmeldungen und Uploads. Klicke auf einen Namen, um die Karte zu öffnen.',
                 cn_mark_all: 'Alle als gelesen markieren', cn_clear_read: 'Gelesene entfernen', cn_mark_read: 'Als gelesen markieren', cn_read: 'Gelesen', cn_athlete: 'Wettkämpfer',
@@ -5687,8 +5502,7 @@
                 cn_new_one: 'Neue Aktualisierung eines Wettkämpfers', cn_new_many: '{n} neue Aktualisierungen von Wettkämpfern', cn_all_read: 'Alle Benachrichtigungen als gelesen markiert', cn_nothing_read: 'Keine gelesenen Benachrichtigungen',
                 cn_new_contact: 'Neue Nachricht über das Kontaktformular', cn_new_contact_many: '{n} neue Nachrichten über das Kontaktformular', cn_contact_from: 'Kontaktformular',
                 contact_fill_err: 'Bitte Name und Nachricht ausfüllen', contact_sending: 'Wird gesendet...', contact_sent: 'Nachricht gesendet! Wir melden uns bald', contact_err: 'Senden fehlgeschlagen — erneut versuchen oder anrufen',
-                doc_type_err: 'Wähle vor dem Upload einen Dokumenttyp', doc_kind_err: 'Nur PDF, JPG oder PNG möglich', doc_size_err: 'Datei zu groß — max. 10MB',
-                doc_uploaded: 'Dokument erfolgreich hochgeladen', doc_no_file: 'Alter Eintrag — Datei wurde nicht gespeichert', doc_err_disabled: 'Dokument-Upload ist noch nicht aktiviert — Admin kontaktieren',
+                doc_type_err: 'Wähle vor dem Upload einen Dokumenttyp',
                 doc_delete_title: 'Dokument löschen', doc_delete_msg: 'Das Dokument "{name}" wird dauerhaft gelöscht.',
                 vid_delete_title: 'Video löschen',
                 confirm_title: 'Löschen bestätigen', confirm_type: 'Tippe {word} zur Bestätigung', confirm_pw: 'Dein Passwort (zur Verifizierung)', confirm_ok: 'Löschen', confirm_cancel: 'Abbrechen',
@@ -5703,7 +5517,7 @@
                 cn_f_nameHe: 'Hebräischer Name', cn_f_nameEn: 'Englischer Name', cn_f_weight: 'Gewicht', cn_f_height: 'Größe', cn_f_category: 'Kategorie', cn_f_gym: 'Verein',
                 // PDF export
                 pdf_export_all: 'Alle Wettkämpfer exportieren (PDF)', pdf_export_one: 'PDF herunterladen', pdf_building: 'PDF wird erstellt...', pdf_done: 'PDF erstellt', pdf_err: 'PDF-Export fehlgeschlagen — Verbindung prüfen und erneut versuchen',
-                pdf_generated: 'Erstellt am', pdf_personal: 'Persönliche Daten', pdf_file: 'Datei', pdf_size: 'Größe', pdf_truncated: 'und {n} ältere Einträge nicht enthalten',
+                pdf_generated: 'Erstellt am', pdf_personal: 'Persönliche Daten', pdf_file: 'Datei', pdf_link: 'Link', pdf_truncated: 'und {n} ältere Einträge nicht enthalten',
                 pdf_roster_title: 'Rocky — Wettkämpferliste', pdf_roster: 'Wettkämpfer', pdf_athletes: 'Wettkämpfer',
                 // Coach cards
                 coach_gadi_name: 'Gadi Shor', coach_gadi_role: 'Cheftrainer - Kampfsport', coach_gadi_bio: 'Trainer und Leiter des Rocky-Teams. Führt die Wettkämpfer zu Spitzenleistungen.',
@@ -5939,11 +5753,7 @@
             const updatesTitle = document.querySelector('#panel-overview .profile-card h4');
             if (updatesTitle) updatesTitle.innerHTML = `<i class="fas fa-bell" style="color: var(--accent);"></i> ${t.dash_updates}`;
 
-            // Documents panel
-            const docsH3 = document.querySelector('#panel-documents > h3');
-            if (docsH3) docsH3.innerHTML = `<i class="fas fa-cloud-upload-alt" style="color: var(--accent);"></i> ${t.dash_upload_docs}`;
-            const docTypeLabel = document.querySelector('#panel-documents .form-group label');
-            if (docTypeLabel) docTypeLabel.textContent = t.dash_doc_type;
+            // Documents / videos panels: static labels carry data-i18n; only the select needs code.
             const docTypeSelect = document.getElementById('docType');
             if (docTypeSelect) {
                 docTypeSelect.options[0].textContent = t.dash_doc_select;
@@ -5953,31 +5763,7 @@
                 docTypeSelect.options[4].textContent = t.dash_doc_insurance;
                 docTypeSelect.options[5].textContent = t.dash_doc_other;
             }
-            const uploadZoneFile = document.getElementById('uploadZoneFile');
-            if (uploadZoneFile) {
-                const uploadP = uploadZoneFile.querySelectorAll('p');
-                if (uploadP[0]) uploadP[0].textContent = t.dash_upload_click;
-                if (uploadP[1]) uploadP[1].textContent = t.dash_upload_hint;
-            }
-            const myDocsH3 = document.querySelectorAll('#panel-documents > h3');
-            if (myDocsH3[1]) myDocsH3[1].innerHTML = `<i class="fas fa-folder" style="color: var(--accent);"></i> ${t.dash_my_docs}`;
-
-            // Videos panel
-            const videosH3 = document.querySelector('#panel-videos > h3');
-            if (videosH3) videosH3.innerHTML = `<i class="fas fa-video" style="color: var(--accent);"></i> ${t.dash_fight_videos}`;
-            const videoLabels = document.querySelectorAll('#panel-videos .form-group label');
-            if (videoLabels[0]) videoLabels[0].textContent = t.dash_video_name;
-            if (videoLabels[1]) videoLabels[1].textContent = t.dash_video_notes;
-            const videoTitleInput = document.getElementById('videoTitle');
-            if (videoTitleInput) videoTitleInput.placeholder = t.dash_video_name_ph;
-            const videoNotesInput = document.getElementById('videoNotes');
-            if (videoNotesInput) videoNotesInput.placeholder = t.dash_video_notes_ph;
-            const uploadZoneVideo = document.getElementById('uploadZoneVideo');
-            if (uploadZoneVideo) {
-                const vUploadP = uploadZoneVideo.querySelectorAll('p');
-                if (vUploadP[0]) vUploadP[0].textContent = t.dash_upload_video;
-                if (vUploadP[1]) vUploadP[1].textContent = t.dash_upload_video_hint;
-            }
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { const k = el.getAttribute('data-i18n-ph'); if (t[k]) el.placeholder = t[k]; });
 
             // Profile panel
             const profileH3 = document.querySelector('#panel-profile > h3');
