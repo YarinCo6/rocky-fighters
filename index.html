@@ -25,15 +25,15 @@
             --accent-tint: rgba(42, 49, 219, 0.08);
             --accent-grad: linear-gradient(135deg, #3340f0 0%, #2229c4 100%);
             --on-accent: #ffffff;
-            --text-primary: #1e2452;
-            --text-secondary: #525a8c;
-            --white: #141a5e;
+            --text-primary: #000000;
+            --text-secondary: #3f4457;
+            --white: #000000;
             --border: #d9ddf2;
             --border-light: rgba(20, 26, 94, 0.10);
             --gold: #4353cc;
             --gold-glow: rgba(67, 83, 204, 0.18);
             --success: #2a31db;
-            --logo-bg: #0c1240;
+            --logo-bg: #000000;
             --shadow-card: 0 4px 24px rgba(20, 26, 94, 0.07);
             --shadow-card-hover: 0 12px 32px rgba(20, 26, 94, 0.14);
             --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
@@ -50,10 +50,18 @@
         }
 
         /* The logo PNG has white lettering: give it a navy badge on the light page. */
+        /* Placed at the END of the stylesheet-order-sensitive selectors below so the
+           badge (black square) always wins over per-element radius/object-fit. */
         .logo img, .hero-logo, .auth-logo, .sidebar-brand img, #bootLoader .boot-logo {
-            background: var(--logo-bg); border-radius: 22%; padding: 5%;
-            box-sizing: border-box;
+            background: var(--logo-bg) !important; border-radius: 18% !important;
+            object-fit: contain !important; box-sizing: border-box;
         }
+        .logo img { padding: 5px; }
+        .sidebar-brand img { padding: 3px; }
+        .auth-logo { padding: 8px; }
+        #bootLoader .boot-logo { padding: 10px; }
+        .hero-logo { padding: 22px; }
+        @media (max-width: 768px) { .hero-logo { padding: 14px; } }
 
         /* Display headings: Oswald for Latin, Heebo per-glyph fallback for Hebrew */
         h1, h2, h3, .sidebar-brand span, .logo-text {
