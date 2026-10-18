@@ -1786,6 +1786,14 @@
             gap: 8px; padding: 8px 4px;
         }
         .auth-back:hover { color: var(--text-primary); }
+        .panel-back {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center;
+            gap: 8px; padding: 6px 2px; margin-bottom: 12px; font-family: inherit;
+        }
+        .panel-back:hover { color: var(--text-primary); }
+        .panel-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+        [dir="ltr"] .panel-back i, [dir="ltr"] .auth-back i { transform: scaleX(-1); }
         .auth-card {
             width: 100%; max-width: 460px; margin-top: 4vh;
             background: var(--bg-secondary); border: 1px solid var(--border);
@@ -3363,6 +3371,7 @@
 
         // ===== DASHBOARD PANELS =====
         function switchPanel(panel, btn) {
+            if (typeof panelStack !== 'undefined' && panelStack) { const from = currentPanel(); if (!navFromBack && panel !== from) { if (panel === 'overview') panelStack.length = 0; else { panelStack.push(from); if (panelStack.length > 30) panelStack.shift(); } } }
             document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-' + panel).classList.add('active');
             document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('active'));
@@ -5905,7 +5914,7 @@
             const loginLabels = document.querySelectorAll('#loginPage .form-group label');
             if (loginLabels[0]) loginLabels[0].textContent = t.login_email;
             if (loginLabels[1]) loginLabels[1].textContent = t.login_pass;
-            document.querySelectorAll('.auth-page [data-i18n="login_back"]').forEach(el => el.textContent = t.login_back);
+            document.querySelectorAll('[data-i18n="login_back"]').forEach(el => el.textContent = t.login_back);
             const loginBtnEl = document.getElementById('loginBtn');
             if (loginBtnEl && !loginBtnEl.disabled) loginBtnEl.textContent = t.login_btn;
             const loginPassInput = document.getElementById('loginPass');
@@ -6098,6 +6107,68 @@
                 renderSchedule(); renderStrength(); renderFeedback();
             }
         }
+
+        // ===== BACK: one step back from anywhere =====
+        // The same steps serve the back buttons and the phone's back gesture: close what is open on top first
+        // (a confirm box, a window, the menu, the login/register page), then go back to the previous section.
+        var panelStack = [];   /* var: switchPanel may run before this line is reached */
+        var navFromBack = false;
+        function currentPanel() {
+            const p = document.querySelector('.dash-panel.active');
+            return p ? p.id.replace('panel-', '') : 'overview';
+        }
+        const isShown = id => { const e = document.getElementById(id); return !!(e && (e.classList.contains('active') || e.classList.contains('open'))); };
+        const dashShown = () => { const d = document.getElementById('dashboard'); return !!(d && d.classList.contains('active')); };
+        const BACK_STEPS = [
+            [() => isShown('confirmModal'), () => { const c = document.getElementById('confirmCancel'); if (c) c.click(); }],
+            [() => isShown('competitorDetailModal'), () => closeCompetitorDetail()],
+            [() => isShown('contactModal'), () => closeContactModal()],
+            [() => !!document.querySelector('.modal-overlay.active'), () => closeModal(document.querySelector('.modal-overlay.active').id)],
+            [() => { const d = document.getElementById('dashboard'); return !!(d && d.classList.contains('sidebar-open')); }, () => closeSidebar()],
+            [() => isShown('registerPage'), () => hideRegisterPage()],
+            [() => isShown('loginPage'), () => hideLoginPage()],
+            [() => dashShown() && currentPanel() !== 'overview', () => { navFromBack = true; try { switchPanel(panelStack.pop() || 'overview'); } finally { navFromBack = false; } }]
+        ];
+        function navBack() {
+            const step = BACK_STEPS.find(x => x[0]());
+            if (!step) return false;
+            step[1]();
+            navSync();
+            return true;
+        }
+        // The phone's back gesture: while there is a step back inside the site, one extra history entry
+        // stands in front of it, so going back runs navBack instead of leaving the site.
+        let navGuard = false, navSkip = false;
+        function navSync() {
+            if (!dashShown()) panelStack.length = 0;
+            const need = BACK_STEPS.some(x => x[0]());
+            if (need && !navGuard) { try { history.pushState({ rockyBack: 1 }, ''); navGuard = true; } catch (e) {} }
+            else if (!need && navGuard) { navGuard = false; navSkip = true; history.back(); }
+        }
+        window.addEventListener('popstate', () => {
+            if (navSkip) { navSkip = false; return; }
+            if (!navGuard) return;   /* not ours (e.g. a #section link on the public page): the browser handles it */
+            navGuard = false;
+            navBack();
+        });
+        // anything opening or closing (a click, a save that closes a window, logging in or out) keeps the guard right
+        {
+            let queued = false;
+            const later = () => { if (queued) return; queued = true; setTimeout(() => { queued = false; navSync(); }, 0); };
+            const mo = new MutationObserver(later);
+            ['confirmModal', 'competitorDetailModal', 'contactModal', 'loginPage', 'registerPage', 'dashboard'].forEach(id => { const e = document.getElementById(id); if (e) mo.observe(e, { attributes: true, attributeFilter: ['class'] }); });
+            document.querySelectorAll('.dash-panel, .modal-overlay').forEach(e => mo.observe(e, { attributes: true, attributeFilter: ['class'] }));
+        }
+        // a back button at the top of every section except the home screen
+        document.querySelectorAll('.dash-panel').forEach(p => {
+            if (p.id === 'panel-overview') return;
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'panel-back';
+            b.innerHTML = '<i class="fas fa-arrow-right"></i> <span data-i18n="login_back"></span>';
+            b.querySelector('span').textContent = T('login_back');
+            b.addEventListener('click', () => navBack());
+            p.prepend(b);
+        });
 
         // Apply saved language on load
         // Always init lang switcher buttons; apply translation if not Hebrew
