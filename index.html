@@ -1636,6 +1636,23 @@
         .btn-pdf:hover { border-color: var(--gold); color: var(--gold); }
         .btn-pdf:disabled { opacity: 0.6; cursor: wait; }
         .btn-pdf i { color: var(--gold); }
+        .panel-tools { display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px; }
+        .planner-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(165px,1fr)); gap:12px; }
+        .planner-filters .form-group { margin-bottom:0; min-width:0; }
+        .planner-actions { display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:16px; }
+        .planner-actions label { display:flex; align-items:center; gap:8px; cursor:pointer; }
+        .planner-summary { margin:18px 0 10px; color:var(--text-secondary); }
+        .planner-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+        .planner-table { min-width:900px; }
+        .planner-table td { vertical-align:top; overflow-wrap:anywhere; max-width:260px; }
+        .planner-table th, .planner-table td { text-align:start; }
+        .planner-table td:first-child { white-space:nowrap; }
+        .planner-table small { display:block; margin-top:5px; color:var(--text-secondary); }
+        .planner-table .planner-overlap td { background:var(--accent-tint); }
+        .planner-warning { display:block; color:var(--accent); font-weight:700; }
+        .planner-athlete { border:0; background:none; color:var(--accent); font:inherit; text-decoration:underline; cursor:pointer; text-align:start; }
+        .planner-note { font-size:0.88rem; color:var(--text-secondary); margin-top:12px; }
+        @media (max-width:600px) { .planner-filters { grid-template-columns:1fr; } .panel-tools .btn-pdf { width:100%; justify-content:center; } }
         /* ===== Weekly schedule board (columns per day) ===== */
         .sched-board-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
         .sched-board {
@@ -2161,6 +2178,7 @@
                 <button onclick="switchPanel('feedback', this)"><i class="fas fa-comments"></i> <span class="sidebar-label">משוב מאמן</span> <span id="feedbackBadge" class="fb-badge" style="display:none;">0</span></button>
                 <button onclick="switchPanel('competitions', this)"><i class="fas fa-medal"></i> <span class="sidebar-label">תחרויות</span></button>
                 <button id="coachPanelBtn" onclick="switchPanel('coach', this)" style="display:none;"><i class="fas fa-users-cog"></i> <span class="sidebar-label">ניהול מתחרים</span></button>
+                <button id="competitionBoardBtn" onclick="switchPanel('competition-board', this)" style="display:none;"><i class="fas fa-calendar-days"></i> <span class="sidebar-label" data-i18n="board_title">לוח תחרויות למאמנים</span></button>
                 <button id="notifPanelBtn" onclick="switchPanel('notifications', this)" style="display:none;"><i class="fas fa-bell"></i> <span class="sidebar-label">התראות</span> <span id="coachNotifBadge" class="fb-badge" style="display:none;">0</span></button>
             </div>
             <button class="sidebar-collapse-btn" onclick="toggleSidebar()" aria-label="כווץ תפריט">
@@ -2537,6 +2555,29 @@
                 <div id="coachNotifList"></div>
             </div>
 
+            <!-- Shared competition dates (staff only) -->
+            <div class="dash-panel" id="panel-competition-board">
+                <h3 style="margin-bottom:8px;"><i class="fas fa-calendar-days" style="color:var(--accent);"></i> <span data-i18n="board_title">לוח תחרויות למאמנים</span></h3>
+                <p data-i18n="board_desc" style="color:var(--text-secondary); margin-bottom:20px;">כל הרשמות המתחרים בטבלה אחת, לפי תאריך. מתעדכן אוטומטית.</p>
+                <div class="profile-card">
+                    <div class="planner-filters">
+                        <div class="form-group"><label for="boardPeriod" data-i18n="board_period">תקופה</label><select id="boardPeriod" onchange="renderCompetitionBoard()"><option value="upcoming" data-i18n="board_upcoming">מהיום והלאה</option><option value="all" data-i18n="board_all">כל התאריכים</option><option value="past" data-i18n="board_past">תאריכים שעברו</option></select></div>
+                        <div class="form-group"><label for="boardAthlete" data-i18n="cn_athlete">מתחרה</label><select id="boardAthlete" onchange="renderCompetitionBoard()"><option value="" data-i18n="board_everyone">כל המתחרים</option></select></div>
+                        <div class="form-group"><label for="boardFrom" data-i18n="board_from">מתאריך</label><input type="date" id="boardFrom" onchange="renderCompetitionBoard()"></div>
+                        <div class="form-group"><label for="boardTo" data-i18n="board_to">עד תאריך</label><input type="date" id="boardTo" onchange="renderCompetitionBoard()"></div>
+                        <div class="form-group"><label for="boardSearch" data-i18n="board_search">חיפוש שם, תחרות או מיקום</label><input type="search" id="boardSearch" oninput="renderCompetitionBoard()"></div>
+                    </div>
+                    <div class="planner-actions">
+                        <label><input type="checkbox" id="boardOverlaps" onchange="renderCompetitionBoard()"><span data-i18n="board_overlaps_only">רק חפיפות</span></label>
+                        <button class="btn-pdf" onclick="resetCompetitionBoardFilters()"><i class="fas fa-filter-circle-xmark"></i> <span data-i18n="board_reset">איפוס סינון</span></button>
+                        <button class="btn-pdf" onclick="startCompetitionBoard(true)"><i class="fas fa-rotate"></i> <span data-i18n="board_refresh">רענון</span></button>
+                    </div>
+                    <p class="planner-note" data-i18n="board_legend">חפיפה = תחרויות שונות באותו יום. כמה מתחרים באותה תחרות מוצגים כמשתתפים משותפים. הזיהוי מבוסס על שם ומיקום; לא נשמרות שעות תחרות.</p>
+                    <p id="boardSummary" class="planner-summary" role="status" aria-live="polite"></p>
+                    <div id="boardResults"></div>
+                </div>
+            </div>
+
             <!-- Coach Panel -->
             <div class="dash-panel" id="panel-coach">
                 <h3 style="margin-bottom: 20px; color: var(--white);"><i class="fas fa-users-cog" style="color: var(--accent);"></i> ניהול מתחרים</h3>
@@ -2685,6 +2726,8 @@
         <p>&copy; 2026 Rocky - קבוצת מתחרים | כל הזכויות שמורות</p>
     </footer>
 
+    <script src="competition-planner.js"></script>
+    <script src="coach-tools.js"></script>
     <script>
         // ===== STATE =====
         // Admin identity is by email only. Must match isAdmin() in firestore.rules.
@@ -3279,6 +3322,7 @@
             // Coach/Admin panel
             if (isCoach || isAdmin) {
                 document.getElementById('coachPanelBtn').style.display = '';
+                document.getElementById('competitionBoardBtn').style.display = '';
                 document.getElementById('coachPanelBtn').innerHTML = isAdmin
                     ? `<i class="fas fa-crown"></i> <span class="sidebar-label">${T('dash_manage_admin')}</span>`
                     : `<i class="fas fa-users-cog"></i> <span class="sidebar-label">${T('dash_manage')}</span>`;
@@ -3286,6 +3330,7 @@
                 loadCompetitors();
             } else {
                 document.getElementById('coachPanelBtn').style.display = 'none';
+                document.getElementById('competitionBoardBtn').style.display = 'none';
                 document.getElementById('notifPanelBtn').style.display = 'none';
             }
 
@@ -3324,6 +3369,7 @@
         }
 
         function exitDashboard() {
+            stopCompetitionBoard(true);
             document.getElementById('publicContent').classList.remove('hidden');
             document.getElementById('dashboard').classList.remove('active');
             document.querySelectorAll('.nav-public').forEach(el => el.style.display = '');
@@ -3371,6 +3417,8 @@
 
         // ===== DASHBOARD PANELS =====
         function switchPanel(panel, btn) {
+            if (['coach', 'notifications', 'competition-board'].includes(panel) && !isCoach && !isAdmin) return;
+            if (panel !== 'competition-board') stopCompetitionBoard();
             if (typeof panelStack !== 'undefined' && panelStack) { const from = currentPanel(); if (!navFromBack && panel !== from) { if (panel === 'overview') panelStack.length = 0; else { panelStack.push(from); if (panelStack.length > 30) panelStack.shift(); } } }
             document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-' + panel).classList.add('active');
@@ -3383,6 +3431,7 @@
             if (window.innerWidth <= 768) closeSidebar();
             if (panel === 'overview') renderHome();
             if (panel === 'coach' && (isCoach || isAdmin)) loadCompetitors();
+            if (panel === 'competition-board') startCompetitionBoard();
             if (panel === 'schedule') renderSchedule();
             if (panel === 'strength') renderStrength();
             if (panel === 'competitions') renderCompetitions();
@@ -3446,7 +3495,8 @@
 
             // 3. Upcoming competitions
             const comps = (userData && userData.competitions) ? userData.competitions : [];
-            const nextComp = comps.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''))[0];
+            const nextComp = comps.filter(c => c.status !== 'done' && (!RockyCompetitions.dateKey(c.dateISO || c.date) || RockyCompetitions.dateKey(c.dateISO || c.date) >= RockyCompetitions.todayKey()))
+                .sort((a, b) => (RockyCompetitions.dateKey(a.dateISO || a.date) || '9999').localeCompare(RockyCompetitions.dateKey(b.dateISO || b.date) || '9999'))[0];
             cards.push(`<div class="home-card" onclick="switchPanel('competitions')">
                 <div class="home-card-head"><i class="fas fa-medal"></i> ${T('dash_competitions')}
                     ${comps.length ? `<span class="count-pill">${comps.length}</span>` : ''}</div>
@@ -3751,7 +3801,8 @@
             const dateParts = date.split('-');
             const formatted = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
 
-            const compEntry = { name, date: formatted, location: location || '--', weight, status: 'pending' };
+            if (!RockyCompetitions.dateKey(date)) { showToast(T('board_unknown')); return; }
+            const compEntry = { name, date: formatted, dateISO: date, location: location || '--', weight, status: 'pending' };
 
             if (currentUser) {
                 await db.collection('users').doc(currentUser.uid).update({
@@ -3895,8 +3946,9 @@
             const up = document.getElementById('upcomingCompBody');
             if (!up) return;
             const comps = (userData && userData.competitions) ? userData.competitions : [];
-            const upcoming = comps.filter(c => c.status !== 'done');
-            const history = comps.filter(c => c.status === 'done');
+            const dateSort = (a, b) => (RockyCompetitions.dateKey(a.dateISO) || RockyCompetitions.dateKey(a.date) || '9999').localeCompare(RockyCompetitions.dateKey(b.dateISO) || RockyCompetitions.dateKey(b.date) || '9999');
+            const upcoming = comps.filter(c => c.status !== 'done').sort(dateSort);
+            const history = comps.filter(c => c.status === 'done').sort((a, b) => dateSort(b, a));
             up.innerHTML = upcoming.length === 0
                 ? `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:16px;">${T('home_no_comp')}</td></tr>`
                 : upcoming.map(c => `<tr>
@@ -4262,6 +4314,11 @@
                 if (!snap.exists) return;
                 userData = snap.data();
                 isCoach = userData.role === 'coach';
+                document.getElementById('competitionBoardBtn').style.display = isCoach || isAdmin ? '' : 'none';
+                if (!isCoach && !isAdmin) {
+                    stopCompetitionBoard(true);
+                    if (['coach', 'notifications', 'competition-board'].includes(currentPanel())) switchPanel('overview');
+                }
                 const unread = unreadFeedbackCount();
                 if (unread > lastUnreadCount) {
                     showToast(T('fb_new_toast'));
@@ -4896,7 +4953,7 @@
             }
         }
 
-        // ===== PDF EXPORT (coach / admin only) =====
+        // ===== PDF EXPORT (own data, or staff reports) =====
         const JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         let pdfFontsB64 = null;
 
@@ -4920,11 +4977,11 @@
             return pdfFontsB64;
         }
 
-        async function createPdfDoc() {
+        async function createPdfDoc(orientation = 'portrait') {
             await loadScript(JSPDF_URL);
             const fonts = await loadPdfFonts();
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+            const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation, compress: true });
             doc.addFileToVFS('Heebo-Regular.ttf', fonts.regular);
             doc.addFont('Heebo-Regular.ttf', 'Heebo', 'normal');
             doc.addFileToVFS('Heebo-Bold.ttf', fonts.bold);
@@ -4967,8 +5024,10 @@
                     if (opts.color) doc.setTextColor(opts.color[0], opts.color[1], opts.color[2]); else doc.setTextColor(7, 11, 42);
                     const lines = doc.splitTextToSize(String(str == null ? '' : str), opts.maxW || maxW);
                     const lh = size * 0.5;
-                    ensure(lines.length * lh);
                     lines.forEach(line => {
+                        ensure(lh);
+                        doc.setFont('Heebo', style); doc.setFontSize(size);
+                        if (opts.color) doc.setTextColor(...opts.color); else doc.setTextColor(7, 11, 42);
                         doc.text(line, opts.x != null ? opts.x : xEdge, y, Object.assign({ align: opts.align || (rtl ? 'right' : 'left') }, bidi));
                         y += lh;
                     });
@@ -4989,36 +5048,52 @@
                 },
                 bullet: (str) => { w.text(`• ${str}`, { size: 10 }); },
                 muted: (str) => { w.text(str, { size: 9.5, color: [110, 118, 160] }); },
-                // Simple table: header row + rows, columns share the width equally.
+                // Wrapped cells, repeated headers and row continuation across pages.
                 table: (headers, rows) => {
                     const cols = headers.length;
                     const colW = maxW / cols;
-                    const rowH = 7;
-                    const cellText = (txt, cx, cy) => {
-                        const s = doc.splitTextToSize(String(txt == null ? '' : txt), colW - 4)[0] || '';
-                        doc.text(s, rtl ? cx + colW - 2 : cx + 2, cy, Object.assign({ align: rtl ? 'right' : 'left' }, bidi));
+                    const lineH = 4.3, pad = 2;
+                    const colX = i => rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
+                    const split = value => doc.splitTextToSize(String(value && typeof value === 'object' ? value.text : value == null ? '' : value), colW - 4);
+                    const paintCells = (cells, offset, count, values = []) => {
+                        cells.forEach((lines, i) => lines.slice(offset, offset + count).forEach((line, j) => {
+                            doc.text(line, rtl ? colX(i) + colW - 2 : colX(i) + 2, y + pad + 3 + j * lineH,
+                                Object.assign({ align: rtl ? 'right' : 'left' }, bidi));
+                            if (values[i] && typeof values[i] === 'object' && safeHttpUrl(values[i].link)) {
+                                doc.link(colX(i), y + j * lineH, colW, lineH + pad, { url: values[i].link });
+                            }
+                        }));
                     };
+                    doc.setFont('Heebo', 'bold'); doc.setFontSize(9);
+                    const heading = headers.map(split);
+                    const headerLines = Math.max(1, ...heading.map(cell => cell.length));
+                    const headerH = headerLines * lineH + pad * 2;
                     const drawHeader = () => {
-                        ensure(rowH);
-                        doc.setFillColor(42, 49, 219); doc.rect(margin, y, maxW, rowH, 'F');
-                        doc.setFont('Heebo', 'bold'); doc.setFontSize(9.5); doc.setTextColor(255);
-                        headers.forEach((h, i) => {
-                            const cx = rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
-                            cellText(h, cx, y + 4.8);
-                        });
-                        y += rowH; doc.setTextColor(0);
+                        doc.setFillColor(42, 49, 219); doc.rect(margin, y, maxW, headerH, 'F');
+                        doc.setFont('Heebo', 'bold'); doc.setFontSize(9); doc.setTextColor(255);
+                        paintCells(heading, 0, headerLines);
+                        y += headerH;
                     };
+                    ensure(headerH + lineH + pad * 2);
                     drawHeader();
-                    doc.setFont('Heebo', 'normal'); doc.setFontSize(9.5);
                     rows.forEach((r, ri) => {
-                        if (y + rowH > pageH - margin - 6) { newPage(); drawHeader(); doc.setFont('Heebo', 'normal'); doc.setFontSize(9.5); }
-                        if (ri % 2 === 0) { doc.setFillColor(242, 244, 253); doc.rect(margin, y, maxW, rowH, 'F'); }
-                        doc.setTextColor(7, 11, 42);
-                        r.forEach((c, i) => {
-                            const cx = rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
-                            cellText(c, cx, y + 4.8);
-                        });
-                        y += rowH;
+                        doc.setFont('Heebo', 'normal'); doc.setFontSize(9);
+                        const cells = r.map(split);
+                        const total = Math.max(1, ...cells.map(cell => cell.length));
+                        const fullH = total * lineH + pad * 2;
+                        if (y + fullH > pageH - margin - 6 && fullH <= pageH - 2 * margin - 6 - headerH) { newPage(); drawHeader(); }
+                        let offset = 0;
+                        while (offset < total) {
+                            let fits = Math.floor((pageH - margin - 6 - y - pad * 2) / lineH);
+                            if (fits < 1) { newPage(); drawHeader(); fits = Math.floor((pageH - margin - 6 - y - pad * 2) / lineH); }
+                            const count = Math.min(total - offset, fits);
+                            const height = count * lineH + pad * 2;
+                            if (ri % 2 === 0) { doc.setFillColor(242, 244, 253); doc.rect(margin, y, maxW, height, 'F'); }
+                            doc.setFont('Heebo', 'normal'); doc.setFontSize(9); doc.setTextColor(7, 11, 42);
+                            paintCells(cells, offset, count, r);
+                            y += height;
+                            offset += count;
+                        }
                     });
                     doc.setTextColor(0);
                     w.gap(2);
@@ -5042,10 +5117,14 @@
                         if (lines.length && lines[lines.length - 1].t === '') lines.pop();
                         return lines;
                     });
-                    const bodyH = Math.max(8, Math.max(...cells.map(c => c.length)) * lineH + padY * 2);
-                    ensure(headH + bodyH);
+                    const totalLines = Math.max(1, ...cells.map(c => c.length));
+                    ensure(headH + Math.min(totalLines, 4) * lineH + padY * 2 + 2);
                     const colX = (i) => rtl ? pageW - margin - colW * (i + 1) : margin + colW * i;
-                    // header
+                    let offset = 0;
+                    while (offset < totalLines) {
+                    if (y + headH + lineH + padY * 2 + 2 > pageH - margin - 6) newPage();
+                    const count = Math.min(totalLines - offset, Math.max(1, Math.floor((pageH - margin - 6 - y - headH - padY * 2 - 2) / lineH)));
+                    const bodyH = count * lineH + padY * 2 + 2;
                     doc.setFillColor(42, 49, 219); doc.rect(margin, y, maxW, headH, 'F');
                     doc.setFont('Heebo', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255);
                     days.forEach((day, i) => doc.text(names[day], colX(i) + colW / 2, y + 4.8, Object.assign({ align: 'center' }, bidi)));
@@ -5057,8 +5136,8 @@
                         const x = colX(i);
                         doc.rect(x, y, colW, bodyH, 'S');
                         let ly = y + padY + 3;
-                        cells[i].forEach(line => {
-                            if (!line.t) { ly += lineH * 0.6; return; }
+                        cells[i].slice(offset, offset + count).forEach(line => {
+                            if (!line.t) { ly += lineH; return; }
                             doc.setFont('Heebo', line.bold ? 'bold' : 'normal'); doc.setFontSize(7.5);
                             doc.setTextColor(line.bold ? 42 : 30, line.bold ? 49 : 30, line.bold ? 219 : 30);
                             // Time ranges are digits only: skip bidi reordering so "09:00–12:00" keeps its order.
@@ -5069,6 +5148,9 @@
                     });
                     doc.setTextColor(0);
                     y += bodyH;
+                    offset += count;
+                    if (offset < totalLines) newPage();
+                    }
                     w.gap(3);
                 },
                 finish: () => { footer(); }
@@ -5080,11 +5162,14 @@
             return String(s || 'athlete').replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '_').slice(0, 60) || 'athlete';
         }
 
-        function athleteSections(w, d) {
+        function athleteSections(w, d, section = null) {
+            const includes = name => !section || section === name;
             const s = (v) => (v == null || v === '') ? '--' : String(v);
             w.h1(displayName(d) || T('cn_athlete'));
             w.muted(`${T('pdf_generated')}: ${new Date().toLocaleString(langLocale())}`);
 
+            w.muted(T('pdf_full_history'));
+            if (includes('profile')) {
             w.h2(T('pdf_personal'));
             w.kv(T('cn_f_nameHe'), s(d.nameHe || d.name));
             w.kv(T('cn_f_nameEn'), s(d.nameEn));
@@ -5098,35 +5183,45 @@
             const wh = Array.isArray(d.weightHistory) ? d.weightHistory : [];
             if (wh.length) {
                 w.h2(T('dash_weight_history'));
-                w.table([T('dash_th_date'), T('dash_weight_kg')], wh.slice(-24).map(h => [s(h.month), s(h.value)]));
+                w.table([T('dash_th_date'), T('dash_weight_kg')], wh.map(h => [s(h.month), s(h.value)]));
+            }
             }
 
+            if (includes('competitions')) {
             const comps = Array.isArray(d.competitions) ? d.competitions : [];
             w.h2(`${T('dash_competitions')} (${comps.length})`);
             if (comps.length) {
                 w.table([T('dash_th_comp'), T('dash_th_date'), T('dash_th_location'), T('dash_comp_weight_cat'), T('dash_th_status')],
-                    comps.map(c => [s(c.name), s(c.date), s(c.location), s(c.weight), c.status === 'done' ? s(c.result) : T('dash_registered')]));
+                    comps.slice().sort((a, b) => (RockyCompetitions.dateKey(a.dateISO) || RockyCompetitions.dateKey(a.date) || '9999').localeCompare(RockyCompetitions.dateKey(b.dateISO) || RockyCompetitions.dateKey(b.date) || '9999')).map(c => [s(c.name), s(c.date), s(c.location), s(c.weight), c.status === 'done' ? s(c.result) : T('dash_registered')]));
             } else w.muted(T('home_no_comp'));
+            }
 
+            if (includes('documents')) {
             const docs = Array.isArray(d.documents) ? d.documents : [];
             w.h2(`${T('cd_documents')} (${docs.length})`);
             if (docs.length) {
                 w.table([T('dash_doc_type'), T('pdf_file'), T('dash_th_date'), T('pdf_link'), T('dash_th_status')],
-                    docs.map(x => [s(x.typeName), s(x.name), s(x.date), safeHttpUrl(x.link) ? urlHost(x.link) : '--', x.status === 'approved' ? T('cd_approved') : T('cd_pending')]));
+                    docs.map(x => [s(x.typeName), s(x.name), s(x.date), safeHttpUrl(x.link) ? { text: urlHost(x.link), link: x.link } : '--', x.status === 'approved' ? T('cd_approved') : T('cd_pending')]));
             } else w.muted(T('cd_no_docs'));
+            }
 
+            if (includes('videos')) {
             const vids = Array.isArray(d.videos) ? d.videos : [];
             w.h2(`${T('dash_videos')} (${vids.length})`);
             if (vids.length) {
                 w.table([T('dash_video_name'), T('dash_th_date'), T('pdf_link')],
-                    vids.map(v => [s(v.title), s(v.date), safeHttpUrl(v.link) ? urlHost(v.link) : '--']));
+                    vids.map(v => [s(v.title), s(v.date), safeHttpUrl(v.link) ? { text: urlHost(v.link), link: v.link } : '--']));
             } else w.muted(T('vid_empty_title'));
+            }
 
+            if (includes('schedule')) {
             const blocks = Array.isArray(d.weeklySchedule) ? d.weeklySchedule : [];
             w.h2(T('cd_schedule'));
             if (blocks.length) w.weekGrid(blocks);
             else w.muted(T('cd_no_schedule'));
+            }
 
+            if (includes('strength')) {
             const ex = Array.isArray(d.strengthProgram) ? d.strengthProgram : [];
             w.h2(T('cd_strength'));
             if (ex.length) {
@@ -5134,11 +5229,13 @@
                     ex.map(e => [s(e.name), s(e.weight), s(e.reps), s(e.sets), s(e.days)]));
                 ex.filter(e => e.includes).forEach(e => w.bullet(`${s(e.name)}: ${s(e.includes)}`));
             } else w.muted(T('cd_no_strength'));
+            }
 
+            if (includes('training')) {
             const log = Array.isArray(d.trainingLog) ? d.trainingLog.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))) : [];
             w.h2(`${T('cd_training')} (${log.length})`);
             if (log.length) {
-                log.slice(0, 30).forEach(e => {
+                log.forEach(e => {
                     w.text(s(e.date), { bold: true, size: 11 });
                     if (e.workedOn) w.kv(T('tl_worked_on'), e.workedOn);
                     if (e.worked) w.kv(T('tl_worked'), e.worked);
@@ -5147,7 +5244,6 @@
                     if (e.coachComment) w.text(`${T('tl_coach_reply')}: ${e.coachComment}`, { color: [42, 49, 219], size: 10 });
                     w.gap(2.5);
                 });
-                if (log.length > 30) w.muted(T('pdf_truncated').replace('{n}', log.length - 30));
             } else w.muted(T('cd_no_training'));
 
             const goals = Array.isArray(d.weeklyGoals) ? d.weeklyGoals : [];
@@ -5158,16 +5254,19 @@
                     w.bullet(`${names[g.day] || ''} — ${g.done ? '✓ ' : ''}${s(g.text)}${g.coachComment ? ` (${T('tl_coach_reply')}: ${g.coachComment})` : ''}`);
                 });
             } else w.muted(T('cd_no_goals'));
+            }
 
+            if (includes('feedback')) {
             const fb = Array.isArray(d.coachFeedback) ? d.coachFeedback : [];
             w.h2(`${T('cd_feedback')} (${fb.length})`);
             if (fb.length) {
-                fb.slice().reverse().slice(0, 30).forEach(f => {
+                fb.slice().reverse().forEach(f => {
                     w.text(`${s(f.coach || T('fb_coach'))} · ${s(f.date)} · ${f.ack ? T('cd_fb_seen') : T('cd_fb_unseen')}`, { bold: true, size: 10 });
                     w.text(s(f.text), { size: 10 });
                     w.gap(2.5);
                 });
             } else w.muted(T('cd_no_fb'));
+            }
         }
 
         async function withPdfButton(btnId, fn) {
@@ -5215,13 +5314,8 @@
                 w.table([T('reg_name'), T('reg_phone'), T('login_email'), T('dash_prof_gym'), T('dash_prof_category'), T('dash_weight_kg')],
                     list.map(d => [displayName(d), s(d.phone), s(d.email), s(d.gym), s(d.category), s(d.weight)]));
 
-                const upcoming = [];
-                list.forEach(d => (Array.isArray(d.competitions) ? d.competitions : []).forEach(c => {
-                    if (c.status !== 'done') upcoming.push([displayName(d), s(c.name), s(c.date), s(c.location), s(c.weight)]);
-                }));
-                w.h2(`${T('dash_upcoming')} (${upcoming.length})`);
-                if (upcoming.length) w.table([T('reg_name'), T('dash_th_comp'), T('dash_th_date'), T('dash_th_location'), T('dash_comp_weight_cat')], upcoming);
-                else w.muted(T('home_no_comp'));
+                w.newPage();
+                writeCompetitionBoardPdf(w, RockyCompetitions.buildRows(list));
 
                 list.forEach(d => { w.newPage(); athleteSections(w, d); });
                 w.finish();
@@ -6106,6 +6200,7 @@
                 if (dayVal != null && document.getElementById('schedDay')) document.getElementById('schedDay').value = dayVal;
                 renderSchedule(); renderStrength(); renderFeedback();
             }
+            updateCoachToolsLanguage();
         }
 
         // ===== BACK: one step back from anywhere =====
@@ -6169,6 +6264,8 @@
             b.addEventListener('click', () => navBack());
             p.prepend(b);
         });
+
+        installCoachTools();
 
         // Apply saved language on load
         // Always init lang switcher buttons; apply translation if not Hebrew
